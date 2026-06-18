@@ -14,6 +14,22 @@ import { liveOrderRecords } from '@/admin/views/live-order/utils/liveOrderRecord
 
 const toast = useToast()
 
+/** 起訖 → 顯示字串；只有結單時間就只顯示「~ 結束時間」，兩者皆空為「未設」 */
+function formatPeriod(startAt: Date | null, endAt: Date | null): string {
+  const fmt = (d: Date): string => {
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const hh = String(d.getHours()).padStart(2, '0')
+    const mm = String(d.getMinutes()).padStart(2, '0')
+    return `${y}/${m}/${day} ${hh}:${mm}`
+  }
+  if (!startAt && !endAt) return '未設'
+  if (startAt && endAt) return `${fmt(startAt)} ~ ${fmt(endAt)}`
+  if (endAt) return `~ ${fmt(endAt)}`
+  return `${fmt(startAt as Date)} ~`
+}
+
 const baseMockPosts = ref<OrderPost[]>([
   {
     id: 9001,
@@ -21,7 +37,9 @@ const baseMockPosts = ref<OrderPost[]>([
     orderCount: 120,
     salesAmount: 405,
     createdAt: '2026-02-01 22:00',
-    orderingPeriod: '2026-03-02 23:59',
+    startAt: new Date('2026-02-10T20:00:00'),
+    endAt: new Date('2026-03-02T23:59:00'),
+    orderingPeriod: '2026/02/10 20:00 ~ 2026/03/02 23:59',
     createdBy: '酒伍二漆',
     status: 'ended',
     products: [
@@ -35,7 +53,9 @@ const baseMockPosts = ref<OrderPost[]>([
     orderCount: 58,
     salesAmount: 16240,
     createdAt: '2026-06-12 09:30',
-    orderingPeriod: '2026-06-15 23:59',
+    startAt: new Date('2026-06-12T10:00:00'),
+    endAt: new Date('2026-06-15T23:59:00'),
+    orderingPeriod: '2026/06/12 10:00 ~ 2026/06/15 23:59',
     createdBy: '管理員 A',
     status: 'ongoing',
     products: [
@@ -55,12 +75,28 @@ const baseMockPosts = ref<OrderPost[]>([
     orderCount: 0,
     salesAmount: 0,
     createdAt: '2026-06-14 18:00',
-    orderingPeriod: '2026-06-20 23:59',
+    startAt: null,
+    endAt: new Date('2026-06-20T23:59:00'),
+    orderingPeriod: '~ 2026/06/20 23:59',
     createdBy: '管理員 B',
     status: 'ready',
     products: [],
   },
 ])
+
+/** 收單期間 cell 內存檔 → 寫回 startAt / endAt 並重算顯示字串 */
+function onUpdatePostPeriod(payload: { id: number; startAt: Date | null; endAt: Date | null }): void {
+  const post = baseMockPosts.value.find(p => p.id === payload.id)
+  if (!post) {
+    toast.add({ severity: 'warn', summary: '此筆紀錄無法編輯收單期間', life: 1500 })
+    return
+  }
+  post.startAt = payload.startAt
+  post.endAt = payload.endAt
+  post.orderingPeriod = formatPeriod(payload.startAt, payload.endAt)
+  toast.removeAllGroups()
+  toast.add({ severity: 'success', summary: '已更新收單期間', detail: post.orderingPeriod, life: 2000 })
+}
 
 // 直播收單結束後寫入的紀錄 → 轉成 OrderPost shape，放在列表最前（status=ended）
 const recordedPosts = computed<OrderPost[]>(() =>
@@ -154,6 +190,7 @@ function onPickPost(): void {
       @view-products="onViewPostProducts"
       @toggle-status="onTogglePostStatus"
       @pick-post="onPickPost"
+      @update-period="onUpdatePostPeriod"
     />
 
     <!-- 得標清單彈窗：來自結束收單紀錄與貼文紀錄共用 -->

@@ -13,7 +13,7 @@ import { useI18n } from 'vue-i18n'
  * 原型階段以本地 model 暫存，按下儲存 emit('save', value)。
  */
 
-export type DuplicateOrderMode = 'keep_latest' | 'keep_highest_bid' | 'reject'
+export type DuplicateOrderMode = 'keep_latest' | 'keep_highest_bid' | 'allow' | 'reject'
 
 export interface PanelSettings {
   duplicateOrderMode: DuplicateOrderMode
@@ -95,6 +95,10 @@ function onCancel(): void { onVisibleChange(false) }
           <label class="flex items-center gap-2 cursor-pointer">
             <RadioButton v-model="form.duplicateOrderMode" value="keep_highest_bid" input-id="dup-highest" />
             <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_keep_highest') }}</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <RadioButton v-model="form.duplicateOrderMode" value="allow" input-id="dup-allow" />
+            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_allow') }}</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <RadioButton v-model="form.duplicateOrderMode" value="reject" input-id="dup-reject" />

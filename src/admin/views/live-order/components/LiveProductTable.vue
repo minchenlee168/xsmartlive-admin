@@ -172,7 +172,8 @@ const startBtnDisabled = computed(() => !props.orderingEnabled)
 </script>
 
 <template>
-  <div class="bg-[var(--p-content-background)] border border-[var(--p-content-border-color)] rounded-[8px] overflow-hidden">
+  <!-- min-w-0 讓本容器在 flex 父層內可以縮到 0；overflow-x-auto 讓內部 DataTable 過寬時水平捲動，不再撐爆右側 panel -->
+  <div class="bg-[var(--p-content-background)] border border-[var(--p-content-border-color)] rounded-[8px] overflow-x-auto overflow-y-hidden min-w-0">
     <DataTable
       :value="products"
       :striped-rows="true"

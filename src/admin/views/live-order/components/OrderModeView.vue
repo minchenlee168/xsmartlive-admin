@@ -10,7 +10,8 @@
       <!-- 頂部 slot：給 LiveOrderPage 放 QuickAddProductForm，與右側 panel 頂部對齊 -->
       <slot name="products-header" />
 
-      <div class="flex-1 min-h-0 overflow-y-auto">
+      <!-- min-w-0 讓內部 LiveProductTable 在 flex 縮放鏈中可以縮到 0，避免表格內容寬度撐爆右側 panel -->
+      <div class="flex-1 min-w-0 min-h-0 overflow-y-auto">
         <div v-if="products.length === 0" class="flex flex-col items-center gap-2 text-[var(--p-text-muted-color)] pt-12">
           <i class="pi pi-inbox" style="font-size:40px"></i>
           <span class="text-[13px]">{{ t('live_order.empty.no_product_added_hint') }}</span>

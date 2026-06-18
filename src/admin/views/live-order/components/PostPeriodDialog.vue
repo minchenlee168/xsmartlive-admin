@@ -25,17 +25,32 @@ const emit = defineEmits<{
   save: [payload: PostPeriodPayload]
 }>()
 
-const dateRange = ref<Array<Date | null>>([null, null])
+/**
+ * PrimeVue DatePicker 的 range + show-time 模式在 v-model 為 [null, null] 時，
+ * 內部 viewDate 會直接讀 null.getFullYear() 噴錯；
+ * 沒設定時改傳 null（DatePicker 視為「未選擇」），有設一邊就用同一天填補另一端，避免不合法區間。
+ */
+const dateRange = ref<Array<Date> | null>(null)
 
 watch(() => props.visible, (v) => {
-  if (v) dateRange.value = [props.startAt ?? null, props.endAt ?? null]
+  if (!v) return
+  const s = props.startAt ?? null
+  const e = props.endAt ?? null
+  if (!s && !e) {
+    dateRange.value = null
+  } else if (s && e) {
+    dateRange.value = [s, e]
+  } else {
+    const only = (s ?? e) as Date
+    dateRange.value = [only, only]
+  }
 })
 
 function close(): void { emit('update:visible', false) }
 function onSave(): void {
   emit('save', {
-    startAt: dateRange.value[0] ?? null,
-    endAt: dateRange.value[1] ?? null,
+    startAt: dateRange.value?.[0] ?? null,
+    endAt: dateRange.value?.[1] ?? null,
   })
   close()
 }

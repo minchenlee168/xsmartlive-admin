@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import type { MenuItem } from 'primevue/menuitem'
+import PostPeriodDialog, { type PostPeriodPayload } from './PostPeriodDialog.vue'
 
 /**
  * 貼文收單頁的「貼文清單」table。
@@ -36,6 +37,10 @@ export interface OrderPost {
   createdAt: string
   /** 收單期間（顯示用字串，可為單一截止時間或區間） */
   orderingPeriod: string
+  /** 收單期間起點（含時間）；用於開啟期間設定彈窗時帶入預設值 */
+  startAt?: Date | null
+  /** 收單期間終點（含時間）；用於開啟期間設定彈窗時帶入預設值 */
+  endAt?: Date | null
   /** 建立人 */
   createdBy: string
   /** 收單狀態：進行中（ongoing）/ 準備中（ready）/ 已結束（ended） */
@@ -92,7 +97,25 @@ const emit = defineEmits<{
   'batch-delete': [ids: number[]]
   /** 點按整列（非按鈕區）→ 進入該筆貼文的收單畫面 */
   'select-post': [id: number]
+  /** 收單期間 cell 內存檔 → 父層寫回 startAt / endAt 並更新顯示字串 */
+  'update-period': [payload: { id: number; startAt: Date | null; endAt: Date | null }]
 }>()
+
+const periodDialogVisible = ref(false)
+const editingPost = ref<OrderPost | null>(null)
+
+function openPeriodDialog(post: OrderPost): void {
+  editingPost.value = post
+  periodDialogVisible.value = true
+}
+function onPeriodSave(payload: PostPeriodPayload): void {
+  if (!editingPost.value) return
+  emit('update-period', {
+    id: editingPost.value.id,
+    startAt: payload.startAt,
+    endAt: payload.endAt,
+  })
+}
 
 function onSearch(): void {
   // 已在 computed filteredPosts 即時過濾；此處保留 hook 供日後串 API
@@ -303,7 +326,14 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
 
         <Column field="orderingPeriod" header="收單期間" sortable>
           <template #body="{ data }">
-            <span class="text-[13px] text-[var(--p-text-color)]">{{ data.orderingPeriod }}</span>
+            <button
+              v-tooltip.top="'點按設定收單期間'"
+              class="inline-flex items-center gap-1.5 text-[13px] text-[var(--p-text-color)] px-2 py-1 -mx-2 -my-1 rounded-[6px] hover:bg-[var(--p-content-hover-background)] hover:text-[var(--p-primary-color)] transition-colors"
+              @click.stop="openPeriodDialog(data)"
+            >
+              <i class="pi pi-calendar" style="font-size: 12px"></i>
+              {{ data.orderingPeriod }}
+            </button>
           </template>
         </Column>
 
@@ -383,6 +413,13 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
       </DataTable>
 
       <Menu id="post-more-menu" ref="moreMenuRef" :model="moreMenuItems" :popup="true" />
+
+      <PostPeriodDialog
+        v-model:visible="periodDialogVisible"
+        :start-at="editingPost?.startAt ?? null"
+        :end-at="editingPost?.endAt ?? null"
+        @save="onPeriodSave"
+      />
     </template>
   </Card>
 </template>

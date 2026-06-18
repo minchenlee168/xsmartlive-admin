@@ -11,7 +11,6 @@
       <PostCollectionOverview
         :posts="postCollections"
         @select="onSelectPostEntry"
-        @close="onClosePostCollection"
         @create="onCreatePostCollection"
         @view-winners="onViewPostWinners"
       />
@@ -70,6 +69,16 @@
               :disabled="!currentEnteredPost"
               @click="openPostPeriodDialog"
             />
+
+            <!-- 卡片 / 列表 檢視切換（所有收單模式皆可用） -->
+            <SelectButton
+              v-model="viewMode"
+              :options="viewModeOptions"
+              option-label="label"
+              option-value="value"
+              :allow-empty="false"
+              size="small"
+            />
           </div>
 
           <!-- 快速新增（與右側 panel 同高度起點） -->
@@ -80,10 +89,10 @@
             <p class="font-bold text-[18px] leading-normal text-[var(--p-text-color)]">{{ t('live_order.empty.no_product_content') }}</p>
             <p class="text-[14px] leading-normal text-[var(--p-text-muted-color)]">{{ t('live_order.empty.no_product_hint') }}</p>
           </div>
-          <div v-else class="flex-1 overflow-y-auto">
-            <!-- 列表式貼文收單：用 LiveProductTable，其他模式維持商品卡 grid -->
+          <div v-else class="flex-1 min-w-0 overflow-y-auto">
+            <!-- 列表式貼文收單：用 LiveProductTable，其他模式維持商品卡 grid（由 viewMode 切換）-->
             <LiveProductTable
-              v-if="isPostListMode"
+              v-if="isListView"
               :products="selectedProducts"
               :sources="sources"
               :ordering-enabled="hasAnySource"
@@ -153,7 +162,7 @@
         :sources="sources"
         :products="selectedProducts"
         :show-comments="showComments"
-        :use-table="isPostListMode"
+        :use-table="isListView"
         :is-post-mode="isPostMode"
         :bidding-live-id="biddingLiveId"
         @pick-source="onPickSource"
@@ -210,6 +219,16 @@
               :disabled="!currentEnteredPost"
               @click="openPostPeriodDialog"
             />
+
+            <!-- 卡片 / 列表 檢視切換（所有收單模式皆可用） -->
+            <SelectButton
+              v-model="viewMode"
+              :options="viewModeOptions"
+              option-label="label"
+              option-value="value"
+              :allow-empty="false"
+              size="small"
+            />
           </div>
         </template>
 
@@ -221,16 +240,31 @@
               <span class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.label.show_comments') }}</span>
               <ToggleSwitch v-model="showComments" />
             </div>
-            <!-- 結束收單 SplitButton：主動作 = 結束所有收單中商品（先跳確認）；下拉 = 移除無收單商品卡 -->
+            <!-- 一鍵收單 SplitButton：主動作 = 結束所有收單中商品並開啟彙總（先跳確認）；下拉 = 移除無收單商品卡 -->
+            <!-- label 用 end_all_live = 「一鍵收單」，跟商品卡 / 列表的「結束收單」區分：master 才走彙總彈窗 -->
             <SplitButton
-              :label="t('live_order.button.end_ordering')"
+              :label="t('live_order.button.end_all_live')"
               :model="quickActionMenuItems"
               icon="pi pi-power-off"
               severity="danger"
               outlined
               size="small"
               @click="askEndAllProducts"
-            />
+            >
+              <template #item="{ item, props: itemProps }">
+                <a v-bind="itemProps.action" class="flex items-center gap-2 w-full">
+                  <i v-if="item.icon" :class="item.icon" style="font-size: 13px" />
+                  <span class="flex-1">{{ item.label }}</span>
+                  <i
+                    v-if="item.tooltip"
+                    class="pi pi-info-circle text-[var(--p-text-muted-color)]"
+                    style="font-size: 13px"
+                    v-tooltip.top="item.tooltip"
+                    @click.stop
+                  />
+                </a>
+              </template>
+            </SplitButton>
           </div>
         </template>
 
@@ -248,9 +282,8 @@
     <CreatePostCollectionDialog v-model:visible="createPostDialogVisible" @create="onCreatePostSubmit" />
     <WinnerListDialog v-model:visible="winnerDialogVisible" :product="winnerDialogProduct as never" />
     <AddProductDialog v-model:visible="addProductDialogVisible"
-      :existing-products="selectedProducts" @add-products="onAddProducts" />
-    <AddBundleDialog v-model:visible="addBundleDialogVisible"
-      :existing-names="existingBundleNames" @add="onAddBundles" />
+      :existing-products="selectedProducts"
+      @add-products="onAddProducts" />
     <BatchEditDialog v-model:visible="batchEditDialogVisible"
       :products="selectedProducts" @apply="onBatchApply" @delete="onBatchDelete" />
     <PanelSettingsDialog v-model:visible="panelSettingsDialogVisible"
@@ -277,6 +310,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useLayoutStore } from '@/admin/stores/layout'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import LiveOrderSourceDialog from './components/LiveOrderSourceDialog.vue'
@@ -287,7 +321,6 @@ import LiveProductCard from './components/LiveProductCard.vue'
 import AddProductDialog from './components/AddProductDialog.vue'
 import BatchEditDialog from './components/BatchEditDialog.vue'
 import PanelSettingsDialog, { type PanelSettings } from './components/PanelSettingsDialog.vue'
-import AddBundleDialog, { type BundlePickPayload } from './components/AddBundleDialog.vue'
 import EndOrderingSummaryDialog, { type EndOrderingPayload } from './components/EndOrderingSummaryDialog.vue'
 import QuickAddProductForm from './components/QuickAddProductForm.vue'
 import LiveProductTable from './components/LiveProductTable.vue'
@@ -374,17 +407,26 @@ const isPostMode = computed(() =>
 /** 列表式貼文收單：body 改用 LiveProductTable 而非商品卡 grid。 */
 const isPostListMode = computed(() => route.name === 'live.order.post.list')
 
+/**
+ * 貼文收單頁可在卡片/列表式之間切換的本地 UI 狀態。
+ * 初始值依路由決定（保留 .post.list 直接進列表式的舊行為），之後完全由使用者按鈕主導。
+ */
+type ViewMode = 'card' | 'list'
+const viewMode = ref<ViewMode>(isPostListMode.value ? 'list' : 'card')
+watch(isPostMode, (post) => {
+  if (post) viewMode.value = isPostListMode.value ? 'list' : 'card'
+})
+const isListView = computed(() => viewMode.value === 'list')
+const viewModeOptions: Array<{ value: ViewMode; icon: string; label: string }> = [
+  { value: 'card', icon: 'pi pi-th-large', label: '卡片式' },
+  { value: 'list', icon: 'pi pi-list',     label: '列表式' },
+]
+
 const addProductDialogVisible = ref(false)
-const addBundleDialogVisible = ref(false)
 const giftDialogVisible = ref(false)
 
-// SplitButton：主按鈕開選擇商品；下拉開組合商品 / 禮物
+// SplitButton：主按鈕開選擇商品（dialog 內 Tabs 可切到組合商品）；下拉只剩送禮物
 const addProductMenuItems = computed<MenuItem[]>(() => [
-  {
-    label: t('live_order.button.add_bundle'),
-    icon: 'pi pi-box',
-    command: () => { addBundleDialogVisible.value = true },
-  },
   {
     label: t('live_order.button.send_gift'),
     icon: 'pi pi-gift',
@@ -428,12 +470,13 @@ const currentEnteredPost = computed<PostCollection | undefined>(() => {
 })
 
 // 結束收單 SplitButton 下拉：移除沒有收單過（sold === 0）的商品卡
-const quickActionMenuItems = computed<MenuItem[]>(() => [
+const quickActionMenuItems = computed<Array<MenuItem & { tooltip?: string }>>(() => [
   {
     label: t('live_order.button.remove_done'),
     icon: 'pi pi-trash',
     disabled: !hasNoSaleProduct.value,
     command: () => { removeNoSaleProducts() },
+    tooltip: '移除尚未開始收單過的商品',
   },
 ])
 
@@ -556,7 +599,7 @@ const postCollections = ref<PostCollection[]>([
     commentCount: 210,
     deadlineText: '未設結單',
     deadlineSeverity: 'warning',
-    status: 'waiting_close',
+    status: 'ongoing',
     deadlineMinutes: null,
     lastCommentMinutes: 3,
     products: [
@@ -628,7 +671,7 @@ const postCollections = ref<PostCollection[]>([
     commentCount: 33,
     deadlineText: '待結單',
     deadlineSeverity: 'warning',
-    status: 'waiting_close',
+    status: 'ongoing',
     deadlineMinutes: 0,
     lastCommentMinutes: 8,
     products: [
@@ -687,52 +730,6 @@ function onViewPostWinners(id: number): void {
   winnerDialogVisible.value = true
 }
 
-/** 「結單」按鈕：把該檔狀態改為已結單、跳 toast，並把彙總寫進收單紀錄頁。
- *  優先採用 postSessionCache 的資料（包含使用者進入後的編輯與 ticker 累加），
- *  沒有 cache 才回退到 overview 上的 mock products。 */
-function onClosePostCollection(id: number): void {
-  const post = postCollections.value.find((p) => p.id === id)
-  if (!post) return
-  const cached = postSessionCache.get(id)
-  const sourceProducts: Array<{
-    id: number; name?: string; keyword?: string; price?: number; stock?: number; sold?: number;
-    specs?: Array<{ name?: string; stock?: number; sold?: number; price?: number }>;
-  }> = cached ?? (post.products ?? [])
-  const recordedProducts = sourceProducts.map((p) => {
-    const sold = p.sold ?? 0
-    const price = p.price ?? 0
-    const specs = (p.specs ?? []).map((s) => ({
-      name: s.name ?? '',
-      stock: s.stock ?? 0,
-      winnerCount: s.sold ?? 0,
-      sold: s.sold ?? 0,
-      total: (s.price ?? price) * (s.sold ?? 0),
-    }))
-    return {
-      id: p.id,
-      name: p.name ?? '',
-      keyword: p.keyword,
-      price,
-      winnerCount: sold,
-      sold,
-      total: price * sold,
-      freeShipping: false,
-      specs,
-    }
-  })
-  const totalAmount = recordedProducts.reduce((s, p) => s + p.total, 0)
-  const orderCount = recordedProducts.reduce((s, p) => s + p.winnerCount, 0)
-  addLiveOrderRecord({
-    sessionName: post.name,
-    endedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
-    totalAmount,
-    productCount: recordedProducts.length,
-    orderCount,
-    products: recordedProducts,
-  })
-  post.status = 'closed_today'
-  toast.add({ severity: 'success', summary: `已結單「${post.name}」`, detail: '已寫入收單紀錄', life: 2000 })
-}
 
 /** 「新增貼文收單」按鈕：開啟命名 + 渠道對話框。 */
 const createPostDialogVisible = ref(false)
@@ -944,82 +941,47 @@ function onDeleteProduct(id: number): void {
 }
 
 /**
- * 從「組合商品」picker 把選好的 bundle 加進當前場次。
- * 每個 bundle 映射成一張 isBundle 卡：本身有獨立 keyword/price/stock；
- * 子商品 (bundleItems) 從 catalog 補上 name + spec 文字（顯示用）。
+ * Merge newly added products into the current session, skipping duplicates.
+ *
+ * 貼文模式下若該貼文的收單期間已開始（startAt 已過 / 未設），新加入的商品直接 status=live，
+ * 並用 confirm dialog 告知使用者「收單期間已開始，會直接開始收單」。
  */
-function onAddBundles(payload: BundlePickPayload): void {
-  if (!currentSession.value) return
-  const target = currentSession.value.products
-  const existingNames = new Set(target.map((p) => p.name).filter((n): n is string => !!n))
-  let added = 0
-  const setting = payload.orderSetting
-  payload.bundles.forEach((b) => {
-    if (existingNames.has(b.name)) return
-    target.push({
-      id: b.id,
-      name: b.name,
-      keyword: b.keyword,
-      sku: b.sku,
-      price: b.price,
-      stock: b.stock,
-      sold: 0,
-      status: 'ready',
-      specs: [],
-      isBundle: true,
-      bundleItems: b.bundleItems.map((it) => ({
-        catalogProductId: it.catalogProductId,
-        qty: it.qty,
-      })),
-      // 套用一次性的得標設定（與「選擇商品」流程一致）
-      ...(setting
-        ? {
-            checkoutType: setting.checkoutType,
-            multiCart: setting.multiCart,
-            bidding: setting.bidding,
-            flatPrice: setting.flatPrice,
-            startingBid: setting.startingBid,
-            allowMixColor: setting.allowMixColor,
-            allowOversell: setting.allowOversell,
-            pickSpecAfterWinning: setting.pickSpecAfterWinning,
-            plusLimit: setting.plusLimit,
-            starFilter: setting.starFilter,
-            newCustomerAnyStar: setting.newCustomerAnyStar,
-            memberOnly: setting.memberOnly,
-            quantityDiscounts: setting.quantityDiscounts,
-          }
-        : {}),
-    } as LiveProduct)
-    added++
-  })
-  toast.removeAllGroups()
-  toast.add({
-    severity: added > 0 ? 'success' : 'warn',
-    summary: added > 0 ? t('live_order.toast.bundles_added') : t('live_order.toast.bundles_not_added'),
-    detail: t('live_order.toast.bundles_added_detail', { count: added }),
-    life: 2500,
-  })
-}
-
-/** 當前場次內已加入的商品名稱（供 bundle picker 標「已加入」用） */
-const existingBundleNames = computed(() => new Set(
-  selectedProducts.value.map((p) => p.name).filter((n): n is string => !!n),
-))
-
-/** Merge newly added products into the current session, skipping duplicates. */
 function onAddProducts(products: LiveProduct[]): void {
   if (!currentSession.value) return
   const target = currentSession.value.products
   const ids = new Set(target.map(p => p.id))
+
+  const enteredPost = currentEnteredPost.value
+  const periodStarted = isPostMode.value
+    && !!enteredPost
+    && enteredPost.status !== 'closed_today'
+    && (!enteredPost.startAt || enteredPost.startAt.getTime() <= Date.now())
+  const initialStatus = periodStarted ? 'live' : 'ready'
+
   let added = 0
   products.forEach(p => {
     if (!ids.has(p.id)) {
-      target.push({ ...p, status: p.status || 'ready', sold: p.sold ?? 0 })
+      target.push({ ...p, status: p.status || initialStatus, sold: p.sold ?? 0 })
       added++
     }
   })
   const skipped = products.length - added
-  toast.removeAllGroups();   toast.add({
+
+  if (added > 0 && periodStarted) {
+    confirm.require({
+      header: '收單期間已開始',
+      message: `目前已在收單期間內，新加入的 ${added} 件商品會直接開始收單。`,
+      icon: 'pi pi-info-circle',
+      modal: true,
+      rejectProps: { style: 'display: none' },
+      acceptProps: { label: '我知道了' },
+      accept: () => {},
+    })
+    return
+  }
+
+  toast.removeAllGroups()
+  toast.add({
     severity: added > 0 ? 'success' : 'warn',
     summary: added > 0 ? t('live_order.toast.products_added') : t('live_order.toast.products_not_added'),
     detail: skipped > 0
@@ -1392,4 +1354,11 @@ onMounted(() => {
   scheduleTimerId = setInterval(checkScheduledStart, 30_000)
 })
 onUnmounted(() => { if (scheduleTimerId) clearInterval(scheduleTimerId) })
+
+// 直播 / 貼文 / 社群 收單頁進入時自動收合 sidebar，把畫面寬度留給商品 + 留言面板。
+// 離開頁面（unmount）後不自動展開，使用者若要展開靠 TopBar 摺疊鈕。
+const layoutStore = useLayoutStore()
+onMounted(() => {
+  layoutStore.isSidebarCollapsed = true
+})
 </script>

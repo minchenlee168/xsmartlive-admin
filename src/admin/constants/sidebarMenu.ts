@@ -41,11 +41,6 @@ export const sidebarMenu: MenuItem[] = [
         to: RouteName.LiveOrderPost,
       },
       {
-        labelKey: 'nav.live_order_post_list',
-        icon: ['far', 'list-radio'],
-        to: RouteName.LiveOrderPostList,
-      },
-      {
         labelKey: 'nav.live_order_community',
         icon: ['far', 'users'],
         planning: true,

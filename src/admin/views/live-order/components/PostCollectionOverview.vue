@@ -5,12 +5,12 @@
  * 欄位：貼文名稱 / 收單期間 / 留言數 / 已成單 / 結單時間 / 狀態 / 操作
  * 操作含「得標清單」開 WinnerListDialog 與「進入 / 結單」。
  * 點 row（非按鈕區）= 進入該檔；
- * 篩選 Tabs：收單中 / 待結單 / 已結束 / 全部；
+ * 篩選 Tabs：收單中 / 已結束 / 全部；
  * 排序：待處理最多 / 結單時間最近 / 最新留言。
  */
 import { ref, computed } from 'vue'
 
-export type PostCollectionStatus = 'ongoing' | 'waiting_close' | 'closed_today'
+export type PostCollectionStatus = 'ongoing' | 'closed_today'
 
 export interface PostCollectionProduct {
   id: number
@@ -54,7 +54,6 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
   select: [id: number]
-  close: [id: number]
   create: []
   'view-winners': [id: number]
 }>()
@@ -69,15 +68,13 @@ const sortOptions = [
 const sortBy = ref<SortKey>('pending_desc')
 
 // 篩選 tab：label 內含對應狀態的筆數
-type FilterKey = 'ongoing' | 'waiting_close' | 'closed_today' | 'all'
+type FilterKey = 'ongoing' | 'closed_today' | 'all'
 const ongoingCount = computed(() => props.posts.filter(p => p.status === 'ongoing').length)
-const waitingCloseCount = computed(() => props.posts.filter(p => p.status === 'waiting_close').length)
 const closedTodayCount = computed(() => props.posts.filter(p => p.status === 'closed_today').length)
 const filterOptions = computed(() => [
-  { label: `收單中 (${ongoingCount.value})`,      value: 'ongoing' as FilterKey },
-  { label: `待結單 (${waitingCloseCount.value})`, value: 'waiting_close' as FilterKey },
-  { label: `已結束 (${closedTodayCount.value})`,  value: 'closed_today' as FilterKey },
-  { label: '全部',                                value: 'all' as FilterKey },
+  { label: `收單中 (${ongoingCount.value})`,     value: 'ongoing' as FilterKey },
+  { label: `已結束 (${closedTodayCount.value})`, value: 'closed_today' as FilterKey },
+  { label: '全部',                               value: 'all' as FilterKey },
 ])
 const activeFilter = ref<FilterKey>('ongoing')
 
@@ -119,9 +116,8 @@ function formatPeriod(p: PostCollection): string {
 }
 
 /** 狀態 Tag 顯示資訊 */
-function statusBadge(s: PostCollectionStatus): { label: string; severity: 'success' | 'warn' | 'secondary' } {
-  if (s === 'ongoing')       return { label: '收單中', severity: 'success' }
-  if (s === 'waiting_close') return { label: '待結單', severity: 'warn' }
+function statusBadge(s: PostCollectionStatus): { label: string; severity: 'success' | 'secondary' } {
+  if (s === 'ongoing') return { label: '收單中', severity: 'success' }
   return { label: '已結束', severity: 'secondary' }
 }
 </script>
@@ -231,16 +227,6 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
                   @click="emit('view-winners', data.id)"
                 />
                 <Button
-                  v-if="data.status === 'waiting_close'"
-                  label="結單"
-                  icon="pi pi-flag"
-                  severity="danger"
-                  outlined
-                  size="small"
-                  @click="emit('close', data.id)"
-                />
-                <Button
-                  v-else
                   label="進入"
                   icon="pi pi-arrow-up-right"
                   icon-pos="right"
