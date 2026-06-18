@@ -1,0 +1,43 @@
+{
+  "live_records": {
+    "title": "收單紀錄",
+    "label": {
+      "session_date": "場次日期",
+      "session_name": "場次名稱",
+      "total_orders": "訂單總數",
+      "total_amount": "總金額",
+      "checkout_completed": "已結帳",
+      "checkout_pending": "未結帳",
+      "sources_count": "收單來源 {count} 個"
+    },
+    "button": {
+      "view_detail": "查看明細",
+      "export": "匯出"
+    },
+    "table": {
+      "column": {
+        "session": "場次",
+        "date": "日期",
+        "products": "商品數",
+        "orders": "訂單數",
+        "amount": "金額",
+        "status": "狀態",
+        "actions": "操作"
+      }
+    },
+    "status": {
+      "ongoing": "進行中",
+      "ended": "已結束"
+    },
+    "empty": {
+      "no_records": "目前無收單紀錄",
+      "no_records_hint": "完成的場次會在這裡顯示"
+    },
+    "filter": {
+      "all": "全部",
+      "this_week": "本週",
+      "this_month": "本月",
+      "last_month": "上個月"
+    }
+  }
+}

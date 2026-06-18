@@ -1,0 +1,71 @@
+{
+  "bid_gift_lottery": {
+    "title": "Bid Gift Lottery",
+    "button": {
+      "create": "Add Bid Gift Lottery",
+      "draw": "Start Draw",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "form": {
+      "placeholder": {
+        "search": "Search session name or prize content",
+        "status": "All statuses"
+      }
+    },
+    "table": {
+      "created_at": "Created At",
+      "session_name": "Session Name",
+      "search_date": "Search Date",
+      "prize_type": "Prize Type",
+      "prize_content": "Prize Content",
+      "required_amount": "Min. Amount",
+      "star_filter": "Star Filter",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "prize_type": {
+      "product": "Product",
+      "points": "Points"
+    },
+    "status": {
+      "all": "All statuses",
+      "in_progress": "In Progress",
+      "ended": "Ended"
+    },
+    "value": {
+      "unlimited": "Unlimited",
+      "amount": "{value}",
+      "stars": "{value}"
+    }
+  },
+  "bid_gift_lottery_draw": {
+    "status": {
+      "idle": "Ready to draw",
+      "drawing": "Drawing…",
+      "result": "Winner"
+    },
+    "button": {
+      "start": "Start",
+      "draw_again": "Draw Another",
+      "stop": "Stop!",
+      "submit": "Submit Result",
+      "copy": "Copy Winner Info",
+      "back_to_list": "Back to list",
+      "winner_list": "Winners",
+      "candidate_list": "Candidates"
+    },
+    "hint": {
+      "spacebar": "Press Space to start/stop the draw"
+    },
+    "dialog": {
+      "no_winner": "No winner drawn yet"
+    },
+    "toast": {
+      "submit_summary": "Notice",
+      "submit_detail": "Will call the backend API, then deliver the message to winners via FB",
+      "copied": "Copied",
+      "copy_failed": "Copy failed, please select manually"
+    }
+  }
+}

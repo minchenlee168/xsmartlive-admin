@@ -1,0 +1,42 @@
+{
+  "keyword_lottery": {
+    "title": "關鍵字抽獎",
+    "button": {
+      "create": "新增抽獎活動",
+      "draw": "開始抽獎",
+      "edit": "編輯",
+      "delete": "刪除"
+    },
+    "form": {
+      "placeholder": {
+        "search": "搜尋場次名稱或關鍵字",
+        "status": "全部狀態"
+      }
+    },
+    "table": {
+      "index": "#",
+      "session_name": "場次名稱",
+      "keyword": "關鍵字",
+      "period": "活動期間",
+      "prize_content": "贈送內容",
+      "winner_count": "中獎人數",
+      "status": "狀態",
+      "created_at": "建立時間",
+      "actions": "操作"
+    },
+    "prize_type": {
+      "product": "商品",
+      "points": "點數"
+    },
+    "status": {
+      "all": "全部狀態",
+      "not_started": "尚未開始",
+      "in_progress": "進行中",
+      "ended": "已結束"
+    },
+    "prize_format": {
+      "product": "商品：{content}",
+      "points": "點數：{content}"
+    }
+  }
+}

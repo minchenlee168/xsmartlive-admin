@@ -1,0 +1,71 @@
+{
+  "bid_gift_lottery": {
+    "title": "得標禮抽獎",
+    "button": {
+      "create": "新增得標禮抽獎",
+      "draw": "開始抽獎",
+      "edit": "編輯",
+      "delete": "刪除"
+    },
+    "form": {
+      "placeholder": {
+        "search": "搜尋場次名稱或獎項內容",
+        "status": "全部狀態"
+      }
+    },
+    "table": {
+      "created_at": "建立時間",
+      "session_name": "場次名稱",
+      "search_date": "搜尋日期",
+      "prize_type": "獎項類型",
+      "prize_content": "獎項內容",
+      "required_amount": "金額須滿足",
+      "star_filter": "星等過濾",
+      "status": "狀態",
+      "actions": "操作"
+    },
+    "prize_type": {
+      "product": "商品",
+      "points": "點數"
+    },
+    "status": {
+      "all": "全部狀態",
+      "in_progress": "進行中",
+      "ended": "已結束"
+    },
+    "value": {
+      "unlimited": "不限",
+      "amount": "{value} 元",
+      "stars": "{value}"
+    }
+  },
+  "bid_gift_lottery_draw": {
+    "status": {
+      "idle": "準備開始抽獎",
+      "drawing": "抽獎中…",
+      "result": "得獎者"
+    },
+    "button": {
+      "start": "開始",
+      "draw_again": "再抽一位",
+      "stop": "停止！",
+      "submit": "送出抽獎結果",
+      "copy": "複製得獎訊息",
+      "back_to_list": "返回列表",
+      "winner_list": "得獎名單",
+      "candidate_list": "抽獎名單"
+    },
+    "hint": {
+      "spacebar": "可使用空白鍵控制抽獎開始與停止"
+    },
+    "dialog": {
+      "no_winner": "目前尚未抽出得獎者"
+    },
+    "toast": {
+      "submit_summary": "提示",
+      "submit_detail": "會打後端 API，再用 FB 訊息傳給得獎人",
+      "copied": "已複製成功",
+      "copy_failed": "複製失敗，請手動選取"
+    }
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "portal_product": {
+    "form": {
+      "section": {
+        "basic": "商品資料",
+        "images": "商品圖片",
+        "sales_options": "銷售設定",
+        "details": "商品詳情"
+      },
+      "field": {
+        "name": "商品名稱",
+        "category": "商品類別",
+        "live_keyword": "直播關鍵字",
+        "tags": "標籤",
+        "weight": "商品重量（{unit}）",
+        "intro": "商品介紹",
+        "cost_price": "成本價",
+        "original_price": "原價",
+        "sale_price": "售價",
+        "stock": "庫存",
+        "note": "商品備註",
+        "coupon_enabled": "啟用優惠券",
+        "spec_image": "規格圖片"
+      },
+      "placeholder": {
+        "name": "請輸入商品名稱",
+        "category": "請選擇商品類別",
+        "live_keyword": "可設定直播使用關鍵字加單",
+        "tags": "請選擇商品標籤",
+        "note": "請輸入商品備註"
+      },
+      "hint": {
+        "spec_setup": "此商品尚未設定規格，您可以設定商品規格（例如：顏色、尺寸）",
+        "images": {
+          "empty": "尚未上傳圖片",
+          "suggest_category_default": "「{category}」分類預設圖"
+        },
+        "images_uploaded": "已上傳 {current} / {max} 張"
+      },
+      "validation": {
+        "name_required": "請輸入商品名稱",
+        "name_max": "商品名稱最多 200 字",
+        "sale_price_required": "請設定商品售價",
+        "spec_variant_required": "請設定商品規格"
+      }
+    },
+    "spec_table": {
+      "section": {
+        "specs": "規格",
+        "variant_details": "規格表"
+      },
+      "field": {
+        "name": "規格名稱"
+      },
+      "label": {
+        "spec_group": "規格群組"
+      },
+      "placeholder": {
+        "spec_name": "請輸入規格名稱，例如：顏色、尺寸",
+        "spec_option": "請輸入選項"
+      },
+      "hint": {
+        "image_upload": "上傳規格圖片"
+      }
+    },
+    "text": {
+      "unit_gram": "公克"
+    },
+    "button": {
+      "create_spec": "建立規格",
+      "use_category_default_image": "使用此圖",
+      "select_images": "選擇圖片",
+      "cancel": "取消",
+      "save": "儲存",
+      "add": "新增",
+      "delete": "刪除",
+      "apply": "套用",
+      "remove_spec": "移除規格"
+    },
+    "toast": {
+      "category_default_image_applied": "已套用分類預設圖為商品主圖",
+      "category_default_image_failed": "套用分類預設圖失敗，請稍後再試",
+      "image_limit_reached": "商品圖片最多 {max} 張"
+    },
+    "dialog": {
+      "edit_product_header": "編輯商品"
+    }
+  }
+}

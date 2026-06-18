@@ -1,0 +1,40 @@
+import { LotteryStatus, PrizeType, type BidGiftLotteryRow } from './types';
+
+export const mockLotteryList: BidGiftLotteryRow[] = [
+  {
+    id: '1',
+    createdAt: '2026-05-16 01:30:36',
+    sessionName: 'CODEX_LOTTERY_SESSION_20260430_143034',
+    searchStartAt: '2026-05-15 00:00:00',
+    searchEndAt: '2026-05-16 00:00:00',
+    prizeType: PrizeType.Product,
+    prizeContent: 'test',
+    requiredAmount: null,
+    starFilter: 4,
+    status: LotteryStatus.Ended,
+  },
+  {
+    id: '2',
+    createdAt: '2026-05-12 09:01:11',
+    sessionName: 'CODEX_LOTTERY_SESSION_20260512_090000',
+    searchStartAt: '2026-05-01 00:00:00',
+    searchEndAt: '2026-05-12 23:59:59',
+    prizeType: PrizeType.Points,
+    prizeContent: '200 點',
+    requiredAmount: 500,
+    starFilter: 3,
+    status: LotteryStatus.InProgress,
+  },
+  {
+    id: '3',
+    createdAt: '2026-04-20 09:45:00',
+    sessionName: '週六回饋場',
+    searchStartAt: '2026-04-26 14:00:00',
+    searchEndAt: '2026-04-26 17:00:00',
+    prizeType: PrizeType.Product,
+    prizeContent: '小幫手限定徽章組',
+    requiredAmount: 1000,
+    starFilter: null,
+    status: LotteryStatus.Ended,
+  },
+];

@@ -1,0 +1,44 @@
+{
+  "merchant_management": {
+    "store_management": {
+      "title": "Store List",
+      "empty": "No stores yet",
+      "button": {
+        "create": "Create Store",
+        "view_shop": "View Shop"
+      },
+      "table": {
+        "column": {
+          "id": "ID",
+          "name": "Store Name",
+          "status": "Status",
+          "created_at": "Created At",
+          "actions": "Actions"
+        }
+      },
+      "status": {
+        "active": "Active",
+        "paused": "Inactive"
+      },
+      "form": {
+        "field": {
+          "name": "Store Name",
+          "status": "Status"
+        },
+        "placeholder": {
+          "name": "Enter store name"
+        }
+      },
+      "dialog": {
+        "create": "Create Store",
+        "edit": "Edit Store",
+        "delete_confirm": "Delete '{name}'? This action cannot be undone."
+      },
+      "toast": {
+        "created": "Created '{name}'",
+        "updated": "Updated '{name}'",
+        "deleted": "Deleted '{name}'"
+      }
+    }
+  }
+}

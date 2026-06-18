@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* 全域字型 */
+:root {
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+/* Dialog 關閉鈕：移除預設外框 / focus ring */
+.p-dialog-close-button,
+.p-dialog-close-button:hover,
+.p-dialog-close-button:focus,
+.p-dialog-close-button:focus-visible,
+.p-dialog-close-button:active {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.p-dialog-close-button:hover {
+  background: #f1f5f9 !important;
+}

@@ -1,0 +1,89 @@
+{
+  "system": {
+    "app_name": "直播管家"
+  },
+  "nav": {
+    "live": "直播收單區",
+    "live_order": "直播收單",
+    "live_order_post": "貼文收單",
+    "live_order_post_list": "貼文收單(列表式)",
+    "live_order_community": "社團收單",
+    "live_records": "收單紀錄",
+    "order": "訂單管理",
+    "order_list": "訂單列表",
+    "marketing": "行銷活動",
+    "bid_gift_lottery": "得標禮抽獎",
+    "keyword_lottery": "關鍵字抽獎",
+    "merchant_management": {
+      "merchant_management": "商家管理",
+      "store_management": "商店管理"
+    }
+  },
+  "route": {
+    "live_order": "直播收單",
+    "live_order_post": "貼文收單",
+    "live_order_post_list": "貼文收單(列表式)",
+    "live_order_community": "社團收單",
+    "live_records": "收單紀錄",
+    "order_list": "訂單列表",
+    "bid_gift_lottery_list": "得標禮抽獎",
+    "bid_gift_lottery_draw": "得標禮抽獎開獎",
+    "keyword_lottery_list": "關鍵字抽獎",
+    "merchant_management": {
+      "store_management": "商店管理"
+    }
+  },
+  "layout": {
+    "current_merchant": "目前店家：{name}",
+    "current_at": "目前在",
+    "button": {
+      "front_view": "前台檢視",
+      "switch_merchant": "切換店家",
+      "back_to_main": "返回主選單"
+    },
+    "theme": {
+      "switch_to_light": "切換為亮色模式",
+      "switch_to_dark": "切換為暗色模式"
+    },
+    "language": {
+      "zh_tw": "繁體中文"
+    },
+    "user": {
+      "admin": "管理員"
+    }
+  },
+  "common": {
+    "button": {
+      "retry": "重試",
+      "cancel": "取消",
+      "save": "儲存",
+      "edit": "編輯",
+      "delete": "刪除",
+      "confirm": "確認",
+      "close": "關閉",
+      "confirm_save": "確定",
+      "ok": "確定"
+    },
+    "loading": "載入中...",
+    "no_data": "目前無資料",
+    "logout": "登出",
+    "theme": {
+      "light": "亮色模式",
+      "dark": "暗色模式"
+    },
+    "pagination": {
+      "total_records": "共 {count} 筆"
+    }
+  },
+  "topbar": {
+    "current_at": "目前在",
+    "switchable_shops": "可切換店家",
+    "front_view": "前台檢視",
+    "front_view_shop": "前往「{name}」前台",
+    "front_view_merchant": "前往商城前台",
+    "logout_mock": "Demo 版未接登入流程"
+  },
+  "api_error_message": {
+    "unknown": "發生未知錯誤"
+  }
+}

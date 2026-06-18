@@ -1,0 +1,42 @@
+{
+  "keyword_lottery": {
+    "title": "Keyword Lottery",
+    "button": {
+      "create": "Add Lottery",
+      "draw": "Start Draw",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "form": {
+      "placeholder": {
+        "search": "Search session name or keyword",
+        "status": "All statuses"
+      }
+    },
+    "table": {
+      "index": "#",
+      "session_name": "Session Name",
+      "keyword": "Keyword",
+      "period": "Period",
+      "prize_content": "Prize",
+      "winner_count": "Winners",
+      "status": "Status",
+      "created_at": "Created At",
+      "actions": "Actions"
+    },
+    "prize_type": {
+      "product": "Product",
+      "points": "Points"
+    },
+    "status": {
+      "all": "All statuses",
+      "not_started": "Not started",
+      "in_progress": "In Progress",
+      "ended": "Ended"
+    },
+    "prize_format": {
+      "product": "Product: {content}",
+      "points": "Points: {content}"
+    }
+  }
+}

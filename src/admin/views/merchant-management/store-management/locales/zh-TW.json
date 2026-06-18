@@ -1,0 +1,44 @@
+{
+  "merchant_management": {
+    "store_management": {
+      "title": "商店列表",
+      "empty": "目前無商店",
+      "button": {
+        "create": "新增商店",
+        "view_shop": "查看商店"
+      },
+      "table": {
+        "column": {
+          "id": "編號",
+          "name": "商店名稱",
+          "status": "狀態",
+          "created_at": "建立時間",
+          "actions": "操作"
+        }
+      },
+      "status": {
+        "active": "啟用",
+        "paused": "停用"
+      },
+      "form": {
+        "field": {
+          "name": "商店名稱",
+          "status": "狀態"
+        },
+        "placeholder": {
+          "name": "請輸入商店名稱"
+        }
+      },
+      "dialog": {
+        "create": "新增商店",
+        "edit": "編輯商店",
+        "delete_confirm": "確定要刪除「{name}」嗎？此動作無法復原。"
+      },
+      "toast": {
+        "created": "已新增「{name}」",
+        "updated": "已更新「{name}」",
+        "deleted": "已刪除「{name}」"
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "live_records": {
+    "title": "Order records",
+    "label": {
+      "session_date": "Session date",
+      "session_name": "Session name",
+      "total_orders": "Total orders",
+      "total_amount": "Total amount",
+      "checkout_completed": "Checked out",
+      "checkout_pending": "Pending",
+      "sources_count": "{count} sources"
+    },
+    "button": {
+      "view_detail": "View detail",
+      "export": "Export"
+    },
+    "table": {
+      "column": {
+        "session": "Session",
+        "date": "Date",
+        "products": "Products",
+        "orders": "Orders",
+        "amount": "Amount",
+        "status": "Status",
+        "actions": "Actions"
+      }
+    },
+    "status": {
+      "ongoing": "Ongoing",
+      "ended": "Ended"
+    },
+    "empty": {
+      "no_records": "No order records yet",
+      "no_records_hint": "Completed sessions will appear here"
+    },
+    "filter": {
+      "all": "All",
+      "this_week": "This week",
+      "this_month": "This month",
+      "last_month": "Last month"
+    }
+  }
+}

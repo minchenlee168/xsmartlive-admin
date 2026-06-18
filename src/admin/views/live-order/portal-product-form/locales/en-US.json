@@ -1,0 +1,89 @@
+{
+  "portal_product": {
+    "form": {
+      "section": {
+        "basic": "Product information",
+        "images": "Product pictures",
+        "sales_options": "Sales options",
+        "details": "Product details"
+      },
+      "field": {
+        "name": "Product name",
+        "category": "Product category",
+        "live_keyword": "Live keywords",
+        "tags": "Tags",
+        "weight": "Product weight ({unit})",
+        "intro": "Product introduction",
+        "cost_price": "Cost price",
+        "original_price": "Original price",
+        "sale_price": "Sale price",
+        "stock": "Stock",
+        "note": "Product note",
+        "coupon_enabled": "Enable coupons",
+        "spec_image": "Spec image"
+      },
+      "placeholder": {
+        "name": "Please enter product name",
+        "category": "Please select product category",
+        "live_keyword": "Can set keywords for live stream to add orders",
+        "tags": "Please select product tag",
+        "note": "Please enter product notes"
+      },
+      "hint": {
+        "spec_setup": "This product has not yet set specifications. You can set product specifications (for example: color, size)",
+        "images": {
+          "empty": "No pictures uploaded yet",
+          "suggest_category_default": "\"{category}\" default image"
+        },
+        "images_uploaded": "{current} / {max} uploaded"
+      },
+      "validation": {
+        "name_required": "Product name is required",
+        "name_max": "Product name cannot exceed 200 characters",
+        "sale_price_required": "Please set the product sale price",
+        "spec_variant_required": "Please set up product specifications"
+      }
+    },
+    "spec_table": {
+      "section": {
+        "specs": "Specifications",
+        "variant_details": "Variant table"
+      },
+      "field": {
+        "name": "Spec"
+      },
+      "label": {
+        "spec_group": "Specification group"
+      },
+      "placeholder": {
+        "spec_name": "Please enter the specification name, for example: color, size",
+        "spec_option": "Please enter options"
+      },
+      "hint": {
+        "image_upload": "Upload spec image"
+      }
+    },
+    "text": {
+      "unit_gram": "gram"
+    },
+    "button": {
+      "create_spec": "Create spec",
+      "use_category_default_image": "Use this image",
+      "select_images": "Select image",
+      "cancel": "Cancel",
+      "save": "Save",
+      "add": "Add",
+      "delete": "Delete",
+      "apply": "Apply",
+      "remove_spec": "Remove spec"
+    },
+    "toast": {
+      "category_default_image_applied": "Category default image applied",
+      "category_default_image_failed": "Failed to apply category default image, please retry later",
+      "image_limit_reached": "Product images limit reached: {max}"
+    },
+    "dialog": {
+      "edit_product_header": "Edit product"
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "system": {
+    "app_name": "Live Commerce Console"
+  },
+  "nav": {
+    "live": "Live Commerce",
+    "live_order": "Live ordering",
+    "live_order_post": "Post ordering",
+    "live_order_community": "Community ordering",
+    "live_records": "Order records",
+    "marketing": "Marketing",
+    "bid_gift_lottery": "Bid Gift Lottery",
+    "keyword_lottery": "Keyword Lottery",
+    "merchant_management": {
+      "merchant_management": "Merchant Management",
+      "store_management": "Store Management"
+    }
+  },
+  "route": {
+    "live_order": "Live ordering",
+    "live_order_post": "Post ordering",
+    "live_order_community": "Community ordering",
+    "live_records": "Order records",
+    "bid_gift_lottery_list": "Bid Gift Lottery",
+    "bid_gift_lottery_draw": "Bid Gift Lottery Draw",
+    "keyword_lottery_list": "Keyword Lottery",
+    "merchant_management": {
+      "store_management": "Store Management"
+    }
+  },
+  "layout": {
+    "current_merchant": "Current merchant: {name}",
+    "current_at": "Currently at",
+    "button": {
+      "front_view": "Front view",
+      "switch_merchant": "Switch merchant",
+      "back_to_main": "Back to main menu"
+    },
+    "theme": {
+      "switch_to_light": "Switch to light mode",
+      "switch_to_dark": "Switch to dark mode"
+    },
+    "language": {
+      "zh_tw": "Traditional Chinese"
+    },
+    "user": {
+      "admin": "Admin"
+    }
+  },
+  "common": {
+    "button": {
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "save": "Save",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirm": "Confirm",
+      "close": "Close",
+      "confirm_save": "OK",
+      "ok": "OK"
+    },
+    "loading": "Loading...",
+    "no_data": "No data",
+    "logout": "Log out",
+    "theme": {
+      "light": "Light mode",
+      "dark": "Dark mode"
+    },
+    "pagination": {
+      "total_records": "{count} records"
+    }
+  },
+  "topbar": {
+    "current_at": "Currently at",
+    "switchable_shops": "Switchable shops",
+    "front_view": "Front view",
+    "front_view_shop": "Go to '{name}' storefront",
+    "front_view_merchant": "Go to storefront",
+    "logout_mock": "Demo: login flow not wired"
+  },
+  "api_error_message": {
+    "unknown": "An unknown error occurred"
+  }
+}

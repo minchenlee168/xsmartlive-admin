@@ -1,0 +1,350 @@
+<script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
+import EditProductDialog from './EditProductDialog.vue'
+import WinnerListDialog from './WinnerListDialog.vue'
+import GiftFormDialog, { type GiftSubmitPayload } from './GiftFormDialog.vue'
+
+/**
+ * 貼文收單頁的商品 table；與 LiveProductCard 顯示同一份資料但走表格。
+ * 主操作集中在「操作」欄：得標清單 / 編輯 / 推播 / 開始or結束收單 / 刪除。
+ */
+
+interface ProductSpec {
+  id?: number
+  name?: string
+  stock?: number
+  sold?: number
+  price?: number
+  [key: string]: unknown
+}
+
+interface LiveProduct {
+  id: number
+  name?: string
+  keyword?: string
+  sku?: string
+  price?: number
+  stock?: number
+  sold?: number
+  status?: string
+  isGift?: boolean
+  specs?: ProductSpec[]
+  selectedSpecs?: ProductSpec[]
+  [key: string]: unknown
+}
+
+interface SourceMeta {
+  id: number | string
+  type: string
+  label: string
+}
+
+interface Props {
+  products: LiveProduct[]
+  orderingEnabled?: boolean
+  /** 該場次的所有收單來源；每列「收單來源」欄都顯示這份（場次共用）。 */
+  sources?: SourceMeta[]
+}
+const props = withDefaults(defineProps<Props>(), {
+  orderingEnabled: false,
+  sources: () => [],
+})
+
+const emit = defineEmits<{
+  delete: [id: number]
+  'end-ordering': [id: number]
+}>()
+
+const { t } = useI18n()
+const confirm = useConfirm()
+const toast = useToast()
+
+// 共用 dialog state
+const editDialogVisible = ref(false)
+const giftDialogVisible = ref(false)
+const winnerDialogVisible = ref(false)
+const activeProduct = ref<LiveProduct | null>(null)
+const pushedSet = ref<Set<number>>(new Set())
+
+function sourcePlatformMeta(type: string): { icon: [string, string]; color: string; bg: string } {
+  const map: Record<string, { icon: [string, string]; color: string; bg: string }> = {
+    fb:      { icon: ['fab', 'facebook'],  color: '#1877f2', bg: '#dbeafe' },
+    ig:      { icon: ['fab', 'instagram'], color: '#db2777', bg: '#fce7f3' },
+    tiktok:  { icon: ['fab', 'tiktok'],    color: '#000000', bg: '#f1f5f9' },
+    livebuy: { icon: ['far', 'video'],     color: 'var(--p-primary-color)', bg: 'var(--p-primary-50)' },
+    group:   { icon: ['far', 'users'],     color: '#16a34a', bg: '#dcfce7' },
+  }
+  return map[type] ?? { icon: ['far', 'circle-question'], color: 'var(--p-text-muted-color)', bg: 'var(--p-content-hover-background)' }
+}
+
+function statusMeta(p: LiveProduct): { label: string; bg: string; color: string; icon?: string } {
+  const map: Record<string, { label: string; bg: string; color: string; icon?: string }> = {
+    ready: { label: t('live_order.label.ready'), bg: 'bg-[var(--p-content-hover-background)]', color: 'var(--p-text-muted-color)', icon: 'pi pi-history' },
+    live:  { label: t('live_order.label.live'),  bg: 'bg-[#fee2e2]', color: '#dc2626' },
+  }
+  return map[p.status ?? 'ready'] ?? map.ready
+}
+
+function priceRange(p: LiveProduct): string {
+  const specs = (p.selectedSpecs?.length ? p.selectedSpecs : p.specs) ?? []
+  if (specs.length > 1) {
+    const prices = specs.map(s => s.price ?? p.price ?? 0)
+    const min = Math.min(...prices), max = Math.max(...prices)
+    if (min !== max) return `$${min.toLocaleString()} ~ ${max.toLocaleString()}`
+  }
+  return `$${(p.price ?? 0).toLocaleString()}`
+}
+
+function specSummary(p: LiveProduct): string {
+  const specs = (p.selectedSpecs?.length ? p.selectedSpecs : p.specs) ?? []
+  if (specs.length === 0) return t('live_order.label.no_spec')
+  if (specs.length <= 3) return specs.map(s => s.name).filter(Boolean).join(' / ')
+  return `${specs.slice(0, 3).map(s => s.name).filter(Boolean).join(' / ')} +${specs.length - 3}`
+}
+
+function salesAmount(p: LiveProduct): number {
+  return (p.price ?? 0) * (p.sold ?? 0)
+}
+
+function openEdit(p: LiveProduct): void {
+  activeProduct.value = p
+  if (p.isGift) giftDialogVisible.value = true
+  else editDialogVisible.value = true
+}
+
+function openWinnerList(p: LiveProduct): void {
+  activeProduct.value = p
+  winnerDialogVisible.value = true
+}
+
+function onPushClick(p: LiveProduct): void {
+  pushedSet.value = new Set([...pushedSet.value, p.id])
+  toast.removeAllGroups()
+  toast.add({
+    severity: 'success',
+    summary: t('live_order.toast.push_sent'),
+    life: 2000,
+  })
+}
+
+function toggleStatus(p: LiveProduct): void {
+  if (p.status === 'live') {
+    // 結束收單 → 走父層彙總彈窗，不直接改 status
+    emit('end-ordering', p.id)
+    return
+  }
+  if (!props.orderingEnabled) return
+  p.status = 'live'
+}
+
+function onDeleteClick(p: LiveProduct, event: Event): void {
+  confirm.require({
+    target: event.currentTarget as HTMLElement,
+    header: t('live_order.dialog.confirm_delete_product_header'),
+    message: t('live_order.dialog.confirm_delete_product_message', { name: p.name ?? '' }),
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: t('live_order.dialog.remove'),
+    rejectLabel: t('live_order.button.cancel'),
+    acceptClass: 'p-button-danger',
+    accept: () => emit('delete', p.id),
+  })
+}
+
+function onSettingSave(data: Record<string, unknown> | null | undefined): void {
+  if (!data || !activeProduct.value) return
+  Object.assign(activeProduct.value as Record<string, unknown>, data)
+}
+
+function onGiftEdit(payload: GiftSubmitPayload): void {
+  if (!activeProduct.value) return
+  const p = activeProduct.value as Record<string, unknown>
+  p.name = payload.name
+  p.keyword = payload.keyword
+  p.stock = payload.quantity
+  p.note = payload.message
+  if (payload.imageUrl !== undefined) p.imageUrl = payload.imageUrl
+}
+
+const startBtnDisabled = computed(() => !props.orderingEnabled)
+</script>
+
+<template>
+  <div class="bg-[var(--p-content-background)] border border-[var(--p-content-border-color)] rounded-[8px] overflow-hidden">
+    <DataTable
+      :value="products"
+      :striped-rows="true"
+      class="w-full"
+      :pt="{
+        column: { headerCell: { style: 'white-space: nowrap;' } },
+      }"
+    >
+      <Column field="name" :header="t('live_order.table.column.product')">
+        <template #body="{ data }">
+          <div class="flex items-center gap-3">
+            <div class="w-[40px] h-[40px] rounded-[6px] bg-[var(--p-primary-50)] flex items-center justify-center shrink-0">
+              <FontAwesomeIcon
+                :icon="['far', data.isGift ? 'gift' : 'bag-shopping']"
+                :style="{ fontSize: '16px', color: 'var(--p-primary-color)' }"
+              />
+            </div>
+            <div class="flex flex-col min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="font-medium text-[14px] text-[var(--p-text-color)] truncate max-w-[280px]">{{ data.name }}</span>
+                <span
+                  v-if="data.keyword"
+                  class="text-[11px] font-bold text-[#0369a1] bg-[#e0f2fe] px-1.5 py-0.5 rounded-full leading-none shrink-0"
+                >
+                  {{ data.keyword }}
+                </span>
+              </div>
+              <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ data.sku || `#${data.id}` }}</span>
+            </div>
+          </div>
+        </template>
+      </Column>
+
+      <Column field="spec" :header="t('live_order.label.spec_name')">
+        <template #body="{ data }">
+          <span class="text-[13px] text-[var(--p-text-color)]">{{ specSummary(data) }}</span>
+        </template>
+      </Column>
+
+      <Column field="price" :header="t('live_order.label.price')">
+        <template #body="{ data }">
+          <span class="text-[13px] font-bold text-[var(--p-primary-color)]">{{ priceRange(data) }}</span>
+        </template>
+      </Column>
+
+      <Column field="stock" :header="t('live_order.label.stock')">
+        <template #body="{ data }">
+          <span class="text-[13px]" :class="(data.stock ?? 0) <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">
+            {{ data.stock ?? 0 }}
+          </span>
+        </template>
+      </Column>
+
+      <Column field="sold" :header="t('live_order.label.sold')">
+        <template #body="{ data }">
+          <span class="text-[13px] font-bold text-[#f97316]">{{ data.sold ?? 0 }}</span>
+        </template>
+      </Column>
+
+      <Column field="amount" :header="t('live_order.label.sales_total')">
+        <template #body="{ data }">
+          <span class="text-[13px] text-[var(--p-text-color)]">${{ salesAmount(data).toLocaleString() }}</span>
+        </template>
+      </Column>
+
+      <Column :header="t('live_order.tab.sources')">
+        <template #body>
+          <div class="flex flex-wrap items-center gap-1">
+            <template v-if="sources.length > 0">
+              <span
+                v-for="s in sources"
+                :key="s.id"
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-[10px] text-[11.5px] font-medium leading-none"
+                :style="{ background: sourcePlatformMeta(s.type).bg, color: sourcePlatformMeta(s.type).color }"
+              >
+                <FontAwesomeIcon :icon="sourcePlatformMeta(s.type).icon" :style="{ fontSize: '10px' }" />
+                {{ s.label }}
+              </span>
+            </template>
+            <span v-else class="text-[12px] text-[var(--p-text-muted-color)]">—</span>
+          </div>
+        </template>
+      </Column>
+
+      <Column field="status" :header="t('live_order.table.column.checkout_status')">
+        <template #body="{ data }">
+          <span
+            :class="['inline-flex items-center gap-1.5 px-[7px] py-[3.5px] rounded-[12px] font-bold text-[12.25px] leading-none', statusMeta(data).bg]"
+            :style="{ color: statusMeta(data).color }"
+          >
+            <span v-if="data.status === 'live'" class="w-1.5 h-1.5 rounded-full bg-[#dc2626] animate-pulse"></span>
+            <i v-else-if="statusMeta(data).icon" :class="statusMeta(data).icon" :style="{ fontSize: '11px', color: statusMeta(data).color }"></i>
+            {{ statusMeta(data).label }}
+          </span>
+        </template>
+      </Column>
+
+      <Column :header="t('live_order.table.column.actions')">
+        <template #body="{ data }">
+          <div class="flex items-center gap-1">
+            <button
+              v-tooltip.top="t('live_order.tooltip.winner_list')"
+              class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+              @click="openWinnerList(data)"
+            >
+              <i class="pi pi-list" style="font-size:13px"></i>
+            </button>
+            <button
+              v-tooltip.top="t('live_order.tab.order_setting')"
+              class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+              @click="openEdit(data)"
+            >
+              <FontAwesomeIcon :icon="['far', 'gear']" class="text-[13px]" />
+            </button>
+            <button
+              v-if="data.status === 'live'"
+              v-tooltip.top="t('live_order.tooltip.push')"
+              :class="['w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[#ef4444] hover:bg-[#fee2e2]',
+                pushedSet.has(data.id) ? 'border-2 border-[#ef4444]' : 'border border-[#ef4444]']"
+              @click="onPushClick(data)"
+            >
+              <FontAwesomeIcon :icon="['far', 'bullhorn']" class="text-[12px]" />
+            </button>
+            <button
+              :disabled="startBtnDisabled && data.status !== 'live'"
+              v-tooltip.top="data.status === 'live'
+                ? (data.isGift ? t('live_order.tooltip.end_sending') : t('live_order.tooltip.end_ordering'))
+                : (data.isGift ? t('live_order.tooltip.start_sending') : t('live_order.tooltip.start_ordering'))"
+              :class="['w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-white',
+                data.status === 'live' ? 'bg-[#ef4444] hover:bg-[#dc2626]' : 'bg-[var(--p-primary-color)] hover:bg-[var(--p-primary-hover-color)]',
+                startBtnDisabled && data.status !== 'live' ? 'opacity-50 cursor-not-allowed' : '']"
+              @click="toggleStatus(data)"
+            >
+              <i :class="data.status === 'live' ? 'pi pi-check' : 'pi pi-play'" style="font-size:12px"></i>
+            </button>
+            <button
+              v-tooltip.top="t('live_order.tooltip.delete')"
+              class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[#ef4444] hover:bg-[#fee2e2]"
+              @click="onDeleteClick(data, $event)"
+            >
+              <FontAwesomeIcon :icon="['far', 'trash']" class="text-[13px]" />
+            </button>
+          </div>
+        </template>
+      </Column>
+
+      <template #empty>
+        <div class="py-8 text-center text-[14px] text-[var(--p-text-muted-color)]">
+          {{ t('live_order.empty.no_product_content') }}
+        </div>
+      </template>
+    </DataTable>
+
+    <!-- 共用 dialog -->
+    <EditProductDialog
+      v-if="activeProduct"
+      v-model:visible="editDialogVisible"
+      :product="activeProduct"
+      initial-tab="order"
+      order-only
+      @save="onSettingSave"
+    />
+    <GiftFormDialog
+      v-if="activeProduct"
+      v-model:visible="giftDialogVisible"
+      :product="activeProduct"
+      @submit="onGiftEdit"
+    />
+    <WinnerListDialog
+      v-if="activeProduct"
+      v-model:visible="winnerDialogVisible"
+      :product="activeProduct"
+    />
+  </div>
+</template>
