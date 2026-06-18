@@ -6,7 +6,7 @@ import { PrimeVueResolver } from '@primevue/auto-import-resolver'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
-  base: '/xsmartlive-portal-vue-prototype/',
+  base: '/xsmartlive-admin/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
