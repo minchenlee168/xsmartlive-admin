@@ -104,6 +104,28 @@ function toggle(productId: number, specId?: number): void {
   selected.value = next
 }
 
+/** 主商品 checkbox 狀態：全部規格被勾才視為「主商品已勾」 */
+function isAllSpecsChecked(p: LiveProductLike): boolean {
+  const list = specsOf(p)
+  if (list.length === 0) return false
+  return list.every((s) => selected.value.has(keyOf(p.id, s.id)))
+}
+/** 主商品 checkbox 點下：未全勾 → 一次全勾起（保留現有數量），全勾 → 一次全取消 */
+function toggleAllSpecs(p: LiveProductLike): void {
+  const list = specsOf(p)
+  if (list.length === 0) return
+  const next = new Map(selected.value)
+  if (isAllSpecsChecked(p)) {
+    list.forEach((s) => next.delete(keyOf(p.id, s.id)))
+  } else {
+    list.forEach((s) => {
+      const key = keyOf(p.id, s.id)
+      if (!next.has(key)) next.set(key, { productId: p.id, specId: s.id, qty: 1 })
+    })
+  }
+  selected.value = next
+}
+
 function setQty(productId: number, specId: number | undefined, qty: number): void {
   const key = keyOf(productId, specId)
   const entry = selected.value.get(key)
@@ -229,9 +251,22 @@ function onSubmit(): void {
 
       <div v-else class="flex flex-col max-h-[360px] overflow-y-auto pr-1 divide-y divide-[var(--p-content-border-color)]">
         <template v-for="p in filteredProducts" :key="p.id">
-          <!-- 有規格 → 商品標題 + 每個規格獨立可勾選列 -->
+          <!-- 有規格 → 商品標題（可點按整批勾選 / 取消所有規格）+ 每個規格獨立可勾選列 -->
           <template v-if="specsOf(p).length > 0">
-            <div class="flex items-center gap-3 px-2 pt-2.5 pb-1">
+            <button
+              type="button"
+              class="flex items-center gap-3 px-2 pt-2.5 pb-1 w-full text-left hover:bg-[var(--p-content-hover-background)]"
+              @click="toggleAllSpecs(p)"
+            >
+              <!-- 主商品 checkbox：全勾為已勾，全空為未勾（不顯示 indeterminate，避免狀態混淆） -->
+              <span
+                class="shrink-0 w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center"
+                :class="isAllSpecsChecked(p)
+                  ? 'bg-[var(--p-primary-color)] border-[var(--p-primary-color)]'
+                  : 'border-[var(--p-content-border-color)] bg-[var(--p-content-background)]'"
+              >
+                <i v-if="isAllSpecsChecked(p)" class="pi pi-check text-white" style="font-size: 11px"></i>
+              </span>
               <!-- 縮圖 -->
               <img
                 v-if="p.imageUrl"
@@ -258,7 +293,7 @@ function onSubmit(): void {
               >
                 {{ statusBadge(p)!.label }}
               </span>
-            </div>
+            </button>
 
             <button
               v-for="spec in specsOf(p)"
