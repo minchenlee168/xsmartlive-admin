@@ -8,8 +8,11 @@ import { ref, computed, watch } from 'vue'
 
 interface Props {
   visible?: boolean
+  /** 'post' = 貼文收單；'community' = 社團收單，影響標題與 placeholder */
+  kind?: 'post' | 'community'
 }
-const props = withDefaults(defineProps<Props>(), { visible: false })
+const props = withDefaults(defineProps<Props>(), { visible: false, kind: 'post' })
+const collectionNoun = computed(() => props.kind === 'community' ? '社團' : '貼文')
 
 export interface CreatePostCollectionPayload {
   name: string
@@ -74,13 +77,13 @@ function onCreate(): void {
     @update:visible="(v) => emit('update:visible', v)"
   >
     <template #header>
-      <span class="font-semibold text-[var(--p-text-color)]" style="font-size: 17px">新增貼文收單</span>
+      <span class="font-semibold text-[var(--p-text-color)]" style="font-size: 17px">新增{{ collectionNoun }}收單</span>
     </template>
 
     <div class="flex flex-col gap-4 pt-1">
       <div class="flex flex-col gap-2">
         <label class="text-[14px] font-medium text-[var(--p-text-color)]">
-          <span class="text-[#dc2626] mr-1">*</span>貼文收單名稱
+          <span class="text-[#dc2626] mr-1">*</span>{{ collectionNoun }}收單名稱
         </label>
         <InputText
           v-model="name"

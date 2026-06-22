@@ -114,10 +114,20 @@ const emit = defineEmits<{
 .session-select :deep(.p-select) {
   border-color: var(--p-content-border-color);
   min-width: 220px;
+  /* 對齊旁邊 size="small" 的 Button / SplitButton 高度（PrimeVue v4 ≈ 32px）*/
+  height: 32px;
 }
 .session-select.is-live :deep(.p-select) {
   border-color: var(--p-primary-400);
   min-width: 300px;
+}
+.session-select :deep(.p-select-label) {
+  padding-block: 0;
+  display: flex;
+  align-items: center;
+}
+.session-select :deep(.p-select-dropdown) {
+  width: 28px;
 }
 .session-select.is-lg :deep(.p-select-label) {
   padding-inline: 11.5px;

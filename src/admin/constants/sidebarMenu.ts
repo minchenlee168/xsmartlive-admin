@@ -43,7 +43,7 @@ export const sidebarMenu: MenuItem[] = [
       {
         labelKey: 'nav.live_order_community',
         icon: ['far', 'users'],
-        planning: true,
+        to: RouteName.LiveOrderCommunity,
       },
       {
         labelKey: 'nav.live_records',

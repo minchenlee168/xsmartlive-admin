@@ -6,16 +6,42 @@
 
 
     <!-- ── Body：空狀態 OR 收單操作頁 ───────────────── -->
-    <!-- 貼文模式 + 尚未挑選來源 → 顯示貼文收單列表 -->
-    <template v-if="isPostMode && !hasAnySource">
+    <!-- 貼文 / 社團模式進入某筆 collection 後一律顯示麵包屑（不論有沒有選來源）-->
+    <Breadcrumb
+      v-if="isPostMode && enteredPostId"
+      :model="postBreadcrumbItems"
+      :home="{ icon: 'pi pi-list', label: `${collectionNoun}收單列表`, command: backToPostList }"
+      class="!p-0 !bg-transparent"
+      :pt="{ root: { class: '!border-0' } }"
+    >
+      <template #item="{ item }">
+        <button
+          v-if="item.command"
+          class="flex items-center gap-1.5 text-[13px] text-[var(--p-primary-color)] hover:underline"
+          @click="item.command"
+        >
+          <i v-if="item.icon" :class="item.icon" style="font-size: 12px" />
+          {{ item.label }}
+        </button>
+        <span v-else class="flex items-center gap-1.5 text-[13px] text-[var(--p-text-color)]">
+          <i v-if="item.icon" :class="item.icon" style="font-size: 12px" />
+          {{ item.label }}
+        </span>
+      </template>
+    </Breadcrumb>
+
+    <!-- 貼文 / 社團模式 + 尚未進入任何 collection → 顯示總覽 -->
+    <template v-if="isPostMode && !enteredPostId">
       <PostCollectionOverview
         :posts="postCollections"
+        :kind="collectionKind"
         @select="onSelectPostEntry"
         @create="onCreatePostCollection"
         @view-winners="onViewPostWinners"
       />
     </template>
 
+    <!-- 已進入 collection 但還沒選擇收單來源（或直播模式尚未選來源）→ 空狀態 + 「選擇收單來源」按鈕 -->
     <template v-else-if="!hasAnySource">
       <div class="flex flex-1 min-h-0 gap-2">
         <div class="flex-1 flex flex-col self-stretch min-w-0 gap-2">
@@ -96,8 +122,10 @@
               :products="selectedProducts"
               :sources="sources"
               :ordering-enabled="hasAnySource"
+              :period-start-at="currentEnteredPost?.startAt"
               @delete="onDeleteProduct"
               @end-ordering="onCardEndOrdering"
+              @adjust-period="openPostPeriodDialog"
             />
             <div v-else class="grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(232px, 1fr))">
               <LiveProductCard
@@ -106,10 +134,12 @@
                 :product="p"
                 :ordering-enabled="hasAnySource"
                 :is-post-mode="isPostMode"
+                :period-start-at="currentEnteredPost?.startAt"
                 :locked="biddingLiveId !== null && p.id !== biddingLiveId && p.status === 'live'"
                 v-model:status="p.status"
                 @delete="onDeleteProduct"
                 @end-ordering="onCardEndOrdering"
+                @adjust-period="openPostPeriodDialog"
               />
             </div>
           </div>
@@ -126,7 +156,7 @@
                 canPickSource
                   ? 'bg-[var(--p-primary-color)] border-[var(--p-primary-color)] text-white hover:bg-[var(--p-primary-hover-color)]'
                   : 'bg-[var(--p-content-border-color)] border-[var(--p-content-border-color)] text-[var(--p-text-muted-color)] cursor-not-allowed']">
-              {{ isPostMode ? t('live_order.button.pick_post') : t('live_order.button.pick_source') }}
+              {{ t('live_order.button.pick_source') }}
             </button>
           </span>
         </div>
@@ -134,29 +164,6 @@
     </template>
 
     <template v-else>
-      <!-- 貼文模式進入後：頂部麵包屑可返回貼文收單列表 -->
-      <Breadcrumb
-        v-if="isPostMode"
-        :model="postBreadcrumbItems"
-        :home="{ icon: 'pi pi-list', label: '貼文收單列表', command: backToPostList }"
-        class="!p-0 !bg-transparent"
-        :pt="{ root: { class: '!border-0' } }"
-      >
-        <template #item="{ item }">
-          <button
-            v-if="item.command"
-            class="flex items-center gap-1.5 text-[13px] text-[var(--p-primary-color)] hover:underline"
-            @click="item.command"
-          >
-            <i v-if="item.icon" :class="item.icon" style="font-size: 12px" />
-            {{ item.label }}
-          </button>
-          <span v-else class="flex items-center gap-1.5 text-[13px] text-[var(--p-text-color)]">
-            <i v-if="item.icon" :class="item.icon" style="font-size: 12px" />
-            {{ item.label }}
-          </span>
-        </template>
-      </Breadcrumb>
 
       <OrderModeView
         :sources="sources"
@@ -165,10 +172,12 @@
         :use-table="isListView"
         :is-post-mode="isPostMode"
         :bidding-live-id="biddingLiveId"
+        :period-start-at="currentEnteredPost?.startAt"
         @pick-source="onPickSource"
         @remove-source="onRemoveSource"
         @delete-product="onDeleteProduct"
-        @end-ordering-product="onCardEndOrdering">
+        @end-ordering-product="onCardEndOrdering"
+        @adjust-period="openPostPeriodDialog">
 
         <!-- 左區 toolbar：SessionSelector + 選擇商品 / 批次設定 SplitButton -->
         <template #left-toolbar>
@@ -276,10 +285,10 @@
 
     <LiveOrderSourceDialog v-model:visible="sourceDialogVisible"
       :used-post-ids="usedPostIds" :used-group-ids="usedGroupIds"
-      :mode="isPostMode ? 'post' : 'live'"
+      :mode="isCommunityMode ? 'community' : (isPostMode ? 'post' : 'live')"
       @confirm="onSourceConfirmed" />
     <CreateSessionDialog v-model:visible="createDialogVisible" @create="onSessionCreate" />
-    <CreatePostCollectionDialog v-model:visible="createPostDialogVisible" @create="onCreatePostSubmit" />
+    <CreatePostCollectionDialog v-model:visible="createPostDialogVisible" :kind="collectionKind" @create="onCreatePostSubmit" />
     <WinnerListDialog v-model:visible="winnerDialogVisible" :product="winnerDialogProduct as never" />
     <AddProductDialog v-model:visible="addProductDialogVisible"
       :existing-products="selectedProducts"
@@ -332,6 +341,7 @@ import { addLiveOrderRecord } from './utils/liveOrderRecords'
 import GiftFormDialog, { type GiftSubmitPayload } from './components/GiftFormDialog.vue'
 import DuplicateProductDialog from './components/DuplicateProductDialog.vue'
 import { addToCatalog, isCatalogDuplicate } from './utils/productCatalog'
+import { pickSourceMockForCollection } from './utils/sourceMockPosts'
 import type { MenuItem } from 'primevue/menuitem'
 
 interface ProductSpec {
@@ -388,6 +398,8 @@ interface BatchApplyPayload {
 interface SourceConfirmExtras {
   postId?: number | string | null
   groupId?: number | string | null
+  /** 使用者在 dialog 內選到的卡片標題（社團 / 貼文 post 名稱），用來覆蓋 source 的 label */
+  title?: string | null
 }
 
 const { t } = useI18n()
@@ -398,12 +410,23 @@ const route = useRoute()
 /**
  * 頁面模式：依 route 名稱判斷。
  * - `live.order` → 直播收單（完整功能）
- * - `live.order.post` → 貼文收單（無場次、無批次設定、無快速新增）
- * - `live.order.community` → 社群收單（保留完整功能）
+ * - `live.order.post` → 貼文收單（清單模式、無場次、無快速新增）
+ * - `live.order.community` → 社團收單（清單模式，與貼文收單同設計，只差資料來源 + 標籤）
+ *
+ * `isPostMode` 為歷史命名，現在代表「清單模式」（貼文 + 社團共用一套 UX）；
+ * 細分時用 `collectionKind`（'post' / 'community'）切換標題、按鈕文案、breadcrumb。
  */
+const isCommunityMode = computed(() => route.name === 'live.order.community')
 const isPostMode = computed(() =>
-  route.name === 'live.order.post' || route.name === 'live.order.post.list',
+  route.name === 'live.order.post'
+  || route.name === 'live.order.post.list'
+  || isCommunityMode.value,
 )
+const collectionKind = computed<'post' | 'community'>(() =>
+  isCommunityMode.value ? 'community' : 'post',
+)
+/** 給 UI 標籤用的中文文案：依 collectionKind 決定要顯示「貼文」還是「社團」 */
+const collectionNoun = computed(() => collectionKind.value === 'community' ? '社團' : '貼文')
 /** 列表式貼文收單：body 改用 LiveProductTable 而非商品卡 grid。 */
 const isPostListMode = computed(() => route.name === 'live.order.post.list')
 
@@ -461,16 +484,34 @@ function onPostPeriodSave(payload: { startAt: Date | null; endAt: Date | null })
   toast.add({ severity: 'success', summary: '收單期間已更新', life: 1800 })
 }
 
-/** 當下從 overview 點進來的那筆 PostCollection（依 postSession.sources[0].postId 找） */
+/**
+ * 在貼文 / 社團模式下「使用者進入哪一筆 collection」用獨立 state 紀錄；
+ * 不再依賴 sources 來判斷，避免「進入貼文 = 自動有來源」的耦合。
+ */
+const enteredPostId = ref<number | null>(null)
+
+/** 當下從 overview 點進來的那筆 PostCollection（依 enteredPostId 找） */
 const currentEnteredPost = computed<PostCollection | undefined>(() => {
-  if (!isPostMode.value) return undefined
-  const enteredSource = postSession.value.sources?.[0] as { postId?: number } | undefined
-  if (enteredSource?.postId == null) return undefined
-  return postCollections.value.find((p) => p.id === enteredSource.postId)
+  if (!isPostMode.value || enteredPostId.value == null) return undefined
+  return postCollections.value.find((p) => p.id === enteredPostId.value)
 })
 
-// 結束收單 SplitButton 下拉：移除沒有收單過（sold === 0）的商品卡
+// 一鍵結束收單 SplitButton 下拉：一鍵開始 / 一鍵停止 / 移除無收單商品
 const quickActionMenuItems = computed<Array<MenuItem & { tooltip?: string }>>(() => [
+  {
+    label: t('live_order.button.start_all_live'),
+    icon: 'pi pi-play',
+    disabled: !hasReadyProduct.value,
+    command: () => { startAllReadyProducts() },
+    tooltip: '把所有「準備中」商品一次切到收單中',
+  },
+  {
+    label: t('live_order.button.stop_all_live'),
+    icon: 'pi pi-pause',
+    disabled: !hasLiveProduct.value,
+    command: () => { stopAllLiveProducts() },
+    tooltip: '把所有「收單中」商品停住回準備中（不寫入紀錄）',
+  },
   {
     label: t('live_order.button.remove_done'),
     icon: 'pi pi-trash',
@@ -479,6 +520,49 @@ const quickActionMenuItems = computed<Array<MenuItem & { tooltip?: string }>>(()
     tooltip: '移除尚未開始收單過的商品',
   },
 ])
+
+/** 是否有「準備中」商品（給「一鍵開始收單」decide disabled） */
+const hasReadyProduct = computed(() =>
+  selectedProducts.value.some(p => (p.status ?? 'ready') === 'ready'),
+)
+
+/** 一鍵把全部 ready 商品切到 live。 */
+function startAllReadyProducts(): void {
+  if (!currentSession.value || !hasReadyProduct.value) return
+  let changed = 0
+  selectedProducts.value.forEach((p) => {
+    if ((p.status ?? 'ready') === 'ready') {
+      p.status = 'live'
+      changed++
+    }
+  })
+  toast.removeAllGroups()
+  toast.add({
+    severity: 'success',
+    summary: t('live_order.button.start_all_live'),
+    detail: `${changed} 件商品已開始收單`,
+    life: 2000,
+  })
+}
+
+/** 一鍵把全部 live 商品停住（status 回 ready，不寫紀錄）。 */
+function stopAllLiveProducts(): void {
+  if (!currentSession.value || !hasLiveProduct.value) return
+  let changed = 0
+  selectedProducts.value.forEach((p) => {
+    if (p.status === 'live') {
+      p.status = 'ready'
+      changed++
+    }
+  })
+  toast.removeAllGroups()
+  toast.add({
+    severity: 'info',
+    summary: t('live_order.button.stop_all_live'),
+    detail: `${changed} 件商品已停止收單（未寫入紀錄）`,
+    life: 2000,
+  })
+}
 
 // 綜合收單頁設定：原型階段以本地 state 保存，存擋僅 toast
 const panelSettings = ref<PanelSettings>({
@@ -679,11 +763,38 @@ const postCollections = ref<PostCollection[]>([
       { id: 80502, name: '高腰寬褲', keyword: 'K2', price: 650, stock: 60, sold: 12 },
     ],
   },
+  // 給「準備中」tab 測試用：startAt 設在 24 小時後，進入後按「開始收單」會跳「收單期間還沒到」提示
+  {
+    id: 8006,
+    name: '夏季美妝預購團',
+
+    pendingCount: 0,
+    updateNote: '剛建立',
+    soldCount: 0,
+    commentCount: 0,
+    deadlineText: '24 小時後開單',
+    deadlineSeverity: 'secondary',
+    status: 'ready',
+    deadlineMinutes: 60 * 24,
+    lastCommentMinutes: 0,
+    startAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    endAt:   new Date(Date.now() + 48 * 60 * 60 * 1000),
+    products: [
+      { id: 80601, name: '日韓夏日防曬乳', keyword: 'S1', price: 590, stock: 100, sold: 0 },
+      { id: 80602, name: '輕透氣墊粉餅', keyword: 'S2', price: 880, stock: 80, sold: 0 },
+    ],
+  },
 ])
 
 /** 各貼文上一次離開時的商品 / 設定快照；以 post.id 為 key。
  *  從 overview 進入時優先吃 cache，沒有的話再用 post.products mock。 */
 const postSessionCache = new Map<number, LiveProduct[]>()
+/**
+ * 各 PostCollection 已挑過的 sources 快照；離開時 sync、進入時還原。
+ * 用來判斷「這個社團 / 貼文（依 sourceMockPosts.id）有沒有被某筆 collection 用過」
+ * → 在 LiveOrderSourceDialog 內 disable 對應卡片，避免重複選同一篇貼文當來源。
+ */
+const postSourcesCache = ref<Map<number, LiveSource[]>>(new Map())
 
 /** 從總覽點按一筆 → 視為已挑選來源 + 把該貼文商品塞進 postSession，直接進入收單畫面 */
 function onSelectPostEntry(id: number): void {
@@ -707,12 +818,32 @@ function onSelectPostEntry(id: number): void {
     status: initialStatus,
     specs: [],
   }))
-  postSession.value.sources = [{
-    id: post.id,
-    type: 'fb',
-    label: post.name,
-    postId: post.id,
-  } as unknown as never]
+  // 「進入哪一筆 collection」用 enteredPostId 紀錄；source 還原順序：
+  // 1) 有 cache（之前選過 / 自動補過）→ 用 cache
+  // 2) 沒 cache 但是 ongoing → 自動補一筆，label 用 sourceMockPosts 代表貼文 / 社團貼文
+  //    （不能直接套 collection name — 跟列表上的「貼文／社團團名」會重複）
+  // 3) 其他狀態（ready / closed_today）→ 空 sources，使用者進去再按「選擇收單來源」
+  enteredPostId.value = post.id
+  const cachedSources = postSourcesCache.value.get(post.id)
+  if (cachedSources && cachedSources.length > 0) {
+    postSession.value.sources = cachedSources.map((s) => ({ ...s })) as unknown as never[]
+  } else if (post.status === 'ongoing') {
+    const isCommunity = isCommunityMode.value
+    const mockSrc = pickSourceMockForCollection(post.id)
+    const autoSource = {
+      id: post.id,
+      type: isCommunity ? 'group' : 'fb',
+      label: mockSrc.title,
+      addedAt: new Date(),
+      postId: isCommunity ? null : mockSrc.id,
+      groupId: isCommunity ? mockSrc.id : null,
+    } as unknown as never
+    postSession.value.sources = [autoSource]
+    // 立刻寫進 cache，這樣下面 usedPostIds / usedGroupIds 立即包含此筆
+    postSourcesCache.value.set(post.id, [autoSource as unknown as LiveSource])
+  } else {
+    postSession.value.sources = []
+  }
   currentSession.value = postSession.value
 }
 
@@ -781,6 +912,10 @@ function deadlineFieldsFor(startAt: Date | null, endAt: Date | null): {
 function onCreatePostSubmit(payload: CreatePostCollectionPayload): void {
   const newId = Date.now()
   const dl = deadlineFieldsFor(payload.startAt, payload.endAt)
+  // startAt 還沒到 → 準備中（ready）；已到 / 未設 → 收單中（ongoing）
+  const initialStatus: PostCollection['status'] = payload.startAt && payload.startAt.getTime() > Date.now()
+    ? 'ready'
+    : 'ongoing'
   const newPost: PostCollection = {
     id: newId,
     name: payload.name,
@@ -791,7 +926,7 @@ function onCreatePostSubmit(payload: CreatePostCollectionPayload): void {
     commentCount: 0,
     deadlineText: dl.deadlineText,
     deadlineSeverity: dl.deadlineSeverity,
-    status: 'ongoing',
+    status: initialStatus,
     deadlineMinutes: dl.deadlineMinutes,
     lastCommentMinutes: 0,
     products: [],
@@ -807,9 +942,20 @@ const postBreadcrumbItems = computed<MenuItem[]>(() => [
   { label: currentSession.value?.name ?? '貼文收單', icon: 'pi pi-file' },
 ])
 /** 返回貼文收單列表：把當下商品快照寫進 cache、同步「已成單」回 overview，
- *  再清掉 postSession 的 source / products → 觸發 !hasAnySource → 回 overview */
+ *  再清掉 enteredPostId / sources / products → 觸發回 overview 的條件
+ *  sources 寫進 postSourcesCache，下次重新進入這筆 collection 時還原 + 影響 used 判斷 */
 function backToPostList(): void {
   syncPostStatsBack()
+  const pid = enteredPostId.value
+  if (pid != null) {
+    const currentSources = postSession.value.sources as unknown as LiveSource[]
+    if (currentSources && currentSources.length > 0) {
+      postSourcesCache.value.set(pid, currentSources.map((s) => ({ ...s })))
+    } else {
+      postSourcesCache.value.delete(pid)
+    }
+  }
+  enteredPostId.value = null
   postSession.value.sources = []
   postSession.value.products = []
   currentSession.value = postSession.value
@@ -822,8 +968,7 @@ function backToPostList(): void {
  *  進度條 = soldCount / commentCount，會跟著一起刷新。
  *  同步順便把商品快照寫進 cache，下次進來能還原。 */
 function syncPostStatsBack(): void {
-  const enteredSource = postSession.value.sources?.[0] as { postId?: number } | undefined
-  const postId = enteredSource?.postId
+  const postId = enteredPostId.value
   if (postId == null) return
   const products = postSession.value.products as LiveProduct[]
   postSessionCache.set(postId, products)
@@ -840,8 +985,8 @@ function syncPostStatsBack(): void {
 }
 
 /**
- * 切換模式時恢復對應容器，避免直播 ↔ 貼文之間殘留 currentSession：
- * - 進貼文模式：先保存目前直播選擇的場次，再切到 postSession
+ * 切換模式時恢復對應容器，避免直播 / 貼文 / 社團之間殘留 currentSession 或 enteredPostId：
+ * - 進貼文 / 社團模式：先保存目前直播選擇的場次，再切到 postSession
  * - 回直播模式：恢復先前的直播場次（null 表示尚未選擇）
  */
 let lastLiveSession: LiveSession | null = null
@@ -855,6 +1000,20 @@ watch(isPostMode, (post, oldPost) => {
     currentSession.value = lastLiveSession
   }
 }, { immediate: true })
+
+/**
+ * 側邊欄路由切換（live.order ↔ live.order.post ↔ live.order.community）時：
+ * - 一律把 collection 模式下的進入狀態清掉 → 直接顯示對應的總覽 / 直播空狀態
+ * - postSourcesCache 也要清掉 — 它記錄的 source.type 是進入當下模式產生的（fb / group），
+ *   切到別的模式後 type 對不上對應 icon / 顏色，會看到「貼文模式顯示社團 icon」的問題
+ */
+watch(() => route.name, (next, prev) => {
+  if (next === prev) return
+  enteredPostId.value = null
+  postSession.value.sources = []
+  postSession.value.products = []
+  postSourcesCache.value = new Map()
+})
 
 function onSessionSelect(s: LiveSession): void { currentSession.value = s }
 
@@ -1062,19 +1221,31 @@ function onSourceConfirmed(type: string, extras: SourceConfirmExtras = {}): void
     tiktok: 'live_order.source_type_label.tiktok',
     livebuy: 'live_order.source_type_label.livebuy',
   }
-  const labelKey = labelKeyMap[type]
-  if (!labelKey) return
-  const label = t(labelKey)
+  // 社團模式：dialog 內以 'fb' 觸發，但實際 source 要當 'group' 存（這樣右側面板顯示用社團色 + 社團 icon）
+  const isCommunity = isCommunityMode.value
+  const effectiveType = isCommunity && type === 'fb' ? 'group' : type
+  const fallbackLabel = t(labelKeyMap[effectiveType] ?? labelKey)
+  // label 優先用使用者選到的「貼文名稱」（社團 / 貼文都適用），沒選就 fallback 平台類型字眼
+  const label = extras.title ?? fallbackLabel
   if (!currentSession.value) return
   currentSession.value.sources.push({
     id: Date.now() + Math.random(),
-    type,
+    type: effectiveType,
     label,
     addedAt: new Date(),
-    postId:  extras.postId  ?? null,
-    groupId: extras.groupId ?? null,
+    postId:  isCommunity ? null : (extras.postId ?? null),
+    // 社團模式：dialog 內傳回的 id 視為 groupId，餵到 usedGroupIds 做去重
+    groupId: isCommunity ? (extras.postId ?? null) : (extras.groupId ?? null),
   })
-  toast.removeAllGroups();   toast.add({
+  // 寫進 cache 讓「跨 collection 不可重複選同一篇」的 usedPostIds / usedGroupIds 即時生效
+  if (enteredPostId.value != null) {
+    postSourcesCache.value.set(
+      enteredPostId.value,
+      (currentSession.value.sources as unknown as LiveSource[]).map((s) => ({ ...s })),
+    )
+  }
+  toast.removeAllGroups()
+  toast.add({
     severity: 'success',
     summary: t('live_order.toast.source_added'),
     detail: label,
@@ -1082,17 +1253,34 @@ function onSourceConfirmed(type: string, extras: SourceConfirmExtras = {}): void
   })
 }
 
-// 當前場次已使用的貼文 / 社團 id 清單（傳入 dialog 用於 disable）
-const usedPostIds = computed(() =>
-  (currentSession.value?.sources ?? [])
-    .filter(s => (s.type === 'fb' || s.type === 'ig') && s.postId != null)
-    .map(s => s.postId as number | string)
-)
-const usedGroupIds = computed(() =>
-  (currentSession.value?.sources ?? [])
-    .filter(s => s.type === 'group' && s.groupId != null)
-    .map(s => s.groupId as number | string)
-)
+// 已使用的貼文 / 社團 id 清單（傳入 dialog 用於 disable）
+// 把當前 session 的 sources 與其他 collection 已快取的 sources 合併 → 同一篇貼文 / 社團不可被選兩次
+const usedPostIds = computed(() => {
+  const out = new Set<number | string>()
+  ;(currentSession.value?.sources ?? []).forEach((s) => {
+    if ((s.type === 'fb' || s.type === 'ig') && s.postId != null) out.add(s.postId)
+  })
+  postSourcesCache.value.forEach((sources, pid) => {
+    if (pid === enteredPostId.value) return  // 當前 session 已加入 set，避免重複
+    sources.forEach((s) => {
+      if ((s.type === 'fb' || s.type === 'ig') && s.postId != null) out.add(s.postId)
+    })
+  })
+  return Array.from(out)
+})
+const usedGroupIds = computed(() => {
+  const out = new Set<number | string>()
+  ;(currentSession.value?.sources ?? []).forEach((s) => {
+    if (s.type === 'group' && s.groupId != null) out.add(s.groupId)
+  })
+  postSourcesCache.value.forEach((sources, pid) => {
+    if (pid === enteredPostId.value) return
+    sources.forEach((s) => {
+      if (s.type === 'group' && s.groupId != null) out.add(s.groupId)
+    })
+  })
+  return Array.from(out)
+})
 
 function onRemoveSource(id: number | string): void {
   const target = sources.value.find(s => s.id === id)
@@ -1108,7 +1296,15 @@ function onRemoveSource(id: number | string): void {
       const arr = currentSession.value.sources
       const idx = arr.findIndex(s => s.id === id)
       if (idx !== -1) arr.splice(idx, 1)
-      toast.removeAllGroups();       toast.add({ severity: 'info', summary: t('live_order.toast.source_removed'), detail: target.label, life: 2000 })
+      // 同步 cache → 立即釋放該篇貼文在「選擇收單來源」彈窗的 disabled 鎖定
+      if (enteredPostId.value != null) {
+        postSourcesCache.value.set(
+          enteredPostId.value,
+          (currentSession.value.sources as unknown as LiveSource[]).map((s) => ({ ...s })),
+        )
+      }
+      toast.removeAllGroups()
+      toast.add({ severity: 'info', summary: t('live_order.toast.source_removed'), detail: target.label, life: 2000 })
     },
   })
 }
@@ -1234,12 +1430,14 @@ function onEndSummarySave(payload: EndOrderingPayload): void {
   } else if (isPostMode.value) {
     // 結束收單前先把當下 sold 同步回 overview 上的「已成單」
     syncPostStatsBack()
-    const enteredSource = postSession.value.sources?.[0] as { postId?: number } | undefined
-    const postId = enteredSource?.postId
+    const postId = enteredPostId.value
     if (postId != null) {
       const post = postCollections.value.find((p) => p.id === postId)
       if (post) post.status = 'closed_today'
+      // 該 collection 結單後 → 釋放其所有 source，這些貼文 / 社團可重新被其他 collection 選用
+      postSourcesCache.value.delete(postId)
     }
+    enteredPostId.value = null
     postSession.value.sources = []
     postSession.value.products = []
   }
@@ -1337,20 +1535,32 @@ watch(hasLiveProduct, (yes) => {
 
 onUnmounted(() => { if (timerId) clearInterval(timerId) })
 
-/** 排程自動開始收單：每 30 秒檢查當前進入的貼文 startAt 是否已到，
- *  若到了且還有商品停在 ready，就自動把它們切到 live，免去手動按開始收單。 */
+/** 排程自動切狀態：每 30 秒檢查
+ *  (a) 所有 ready 的 PostCollection，startAt 到了 → status 切 ongoing
+ *  (b) 當前進入的 collection 內，商品 ready → live（免手動按開始收單）
+ */
 let scheduleTimerId: ReturnType<typeof setInterval> | null = null
 function checkScheduledStart(): void {
+  const now = Date.now()
+  // (a) PostCollection 整體：ready → ongoing
+  postCollections.value.forEach((p) => {
+    if (p.status === 'ready' && p.startAt && p.startAt.getTime() <= now) {
+      p.status = 'ongoing'
+    }
+  })
+  // (b) 商品層自動切 live（限定貼文 / 社團模式 + 已進入某筆 collection）
   if (!isPostMode.value) return
   const post = currentEnteredPost.value
   if (!post || post.status === 'closed_today') return
   if (!post.startAt) return
-  if (post.startAt.getTime() > Date.now()) return
+  if (post.startAt.getTime() > now) return
   postSession.value.products.forEach((p) => {
     if (p.status === 'ready') p.status = 'live'
   })
 }
 onMounted(() => {
+  // 元件 mount 時先 run 一次，避免使用者要等 30 秒才看到狀態變化
+  checkScheduledStart()
   scheduleTimerId = setInterval(checkScheduledStart, 30_000)
 })
 onUnmounted(() => { if (scheduleTimerId) clearInterval(scheduleTimerId) })

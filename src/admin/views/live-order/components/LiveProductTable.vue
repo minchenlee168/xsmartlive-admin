@@ -47,15 +47,20 @@ interface Props {
   orderingEnabled?: boolean
   /** 該場次的所有收單來源；每列「收單來源」欄都顯示這份（場次共用）。 */
   sources?: SourceMeta[]
+  /** 貼文/社團模式下該貼文的收單期間起點；按下「開始收單」時若 startAt 尚未到 → 跳提示問是否調整時間 */
+  periodStartAt?: Date | null
 }
 const props = withDefaults(defineProps<Props>(), {
   orderingEnabled: false,
   sources: () => [],
+  periodStartAt: null,
 })
 
 const emit = defineEmits<{
   delete: [id: number]
   'end-ordering': [id: number]
+  /** 使用者選擇「調整時間」→ 父層開 PostPeriodDialog */
+  'adjust-period': []
 }>()
 
 const { t } = useI18n()
@@ -132,11 +137,32 @@ function onPushClick(p: LiveProduct): void {
 
 function toggleStatus(p: LiveProduct): void {
   if (p.status === 'live') {
-    // 結束收單 → 走父層彙總彈窗，不直接改 status
-    emit('end-ordering', p.id)
+    // 比照 LiveProductCard 的「停止收單」：
+    // - 禮物 → 走父層的「結束發送」彙總彈窗
+    // - 一般商品 → 直接 status 回 ready（不寫紀錄，要寫紀錄要用右上「一鍵結束收單」）
+    if (p.isGift) {
+      emit('end-ordering', p.id)
+      return
+    }
+    p.status = 'ready'
     return
   }
   if (!props.orderingEnabled) return
+  // 收單期間還沒到 → 跳提示讓使用者決定調整時間 / 取消
+  if (props.periodStartAt && props.periodStartAt.getTime() > Date.now()) {
+    const d = props.periodStartAt
+    const pad = (n: number): string => String(n).padStart(2, '0')
+    const display = `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+    confirm.require({
+      header: '收單期間還沒到',
+      message: `此貼文設定的收單期間從 ${display} 開始，是否要調整時間？`,
+      icon: 'pi pi-clock',
+      acceptLabel: '調整時間',
+      rejectLabel: '取消',
+      accept: () => emit('adjust-period'),
+    })
+    return
+  }
   p.status = 'live'
 }
 
@@ -300,7 +326,7 @@ const startBtnDisabled = computed(() => !props.orderingEnabled)
             <button
               :disabled="startBtnDisabled && data.status !== 'live'"
               v-tooltip.top="data.status === 'live'
-                ? (data.isGift ? t('live_order.tooltip.end_sending') : t('live_order.tooltip.end_ordering'))
+                ? (data.isGift ? t('live_order.tooltip.end_sending') : t('live_order.tooltip.stop_ordering'))
                 : (data.isGift ? t('live_order.tooltip.start_sending') : t('live_order.tooltip.start_ordering'))"
               :class="['w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-white',
                 data.status === 'live' ? 'bg-[#ef4444] hover:bg-[#dc2626]' : 'bg-[var(--p-primary-color)] hover:bg-[var(--p-primary-hover-color)]',

@@ -21,8 +21,10 @@
           :products="products"
           :sources="sources"
           :ordering-enabled="sources.length > 0"
+          :period-start-at="periodStartAt"
           @delete="(id) => emit('delete-product', id)"
           @end-ordering="(id) => emit('end-ordering-product', id)"
+          @adjust-period="emit('adjust-period')"
         />
         <div v-else class="grid gap-2" style="grid-template-columns: repeat(auto-fill, minmax(232px, 1fr))">
           <LiveProductCard
@@ -31,10 +33,12 @@
             :product="p"
             :ordering-enabled="sources.length > 0"
             :is-post-mode="isPostMode"
+            :period-start-at="periodStartAt"
             :locked="biddingLiveId !== null && p.id !== biddingLiveId && p.status === 'live'"
             v-model:status="p.status"
             @delete="(id) => emit('delete-product', id)"
             @end-ordering="(id) => emit('end-ordering-product', id)"
+            @adjust-period="emit('adjust-period')"
           />
         </div>
       </div>
@@ -247,6 +251,8 @@ interface Props {
   isPostMode?: boolean
   /** 當前正在收單的競價商品 id；非該商品的其他卡片會被鎖住。 */
   biddingLiveId?: number | null
+  /** 該貼文收單期間起點，傳到 LiveProductCard / Table 做 startAt 檢查 */
+  periodStartAt?: Date | null
 }
 const props = withDefaults(defineProps<Props>(), {
   sources: () => [],
@@ -255,6 +261,7 @@ const props = withDefaults(defineProps<Props>(), {
   useTable: false,
   isPostMode: false,
   biddingLiveId: null,
+  periodStartAt: null,
 })
 
 const emit = defineEmits<{
@@ -262,6 +269,8 @@ const emit = defineEmits<{
   'remove-source': [id: number | string]
   'delete-product': [id: number]
   'end-ordering-product': [id: number]
+  /** LiveProductCard / Table emit 的「調整時間」，繼續往上 bubble 給 LiveOrderPage 開 PostPeriodDialog */
+  'adjust-period': []
 }>()
 
 const { t } = useI18n()

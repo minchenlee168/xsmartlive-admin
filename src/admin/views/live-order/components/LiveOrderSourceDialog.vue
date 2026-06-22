@@ -130,6 +130,7 @@
 import { ref, computed, watch, h, type FunctionalComponent } from 'vue'
 import { useI18n } from 'vue-i18n'
 import livePreviewImage from '../live-preview.png'
+import { sourceMockPosts } from '../utils/sourceMockPosts'
 
 interface PostCardProps {
   title: string
@@ -191,14 +192,16 @@ interface PlatformOption {
 interface ConfirmExtras {
   postId?: number | string | null
   groupId?: number | string | null
+  /** 使用者選擇的卡片標題（社團 / 貼文 post 名稱）→ 父層拿來當 source 顯示 label */
+  title?: string | null
 }
 
 interface Props {
   visible?: boolean
   usedPostIds?: Array<number | string>
   usedGroupIds?: Array<number | string>
-  /** 'live'：選擇直播；'post'：選擇貼文。影響 step 2 文案 / 標題。 */
-  mode?: 'live' | 'post'
+  /** 'live'：選擇直播；'post'：選擇貼文；'community'：選擇社團（平台只有 FB，描述顯示「Facebook 社團」）。 */
+  mode?: 'live' | 'post' | 'community'
 }
 const props = withDefaults(defineProps<Props>(), {
   visible: false,
@@ -244,31 +247,64 @@ const dialogWidth = computed(() => {
 
 const headerTitle = computed(() => {
   if (step.value === 'platform') return t('live_order.title.pick_platform')
+  if (props.mode === 'community') return t('live_order.title.pick_group')
   return props.mode === 'post'
     ? t('live_order.title.pick_post')
     : t('live_order.title.pick_session')
 })
 
-/** 依模式切換 step 2 的副標 / hint / 連結 placeholder 文案。 */
-const sessionLabel = computed(() => props.mode === 'post'
-  ? t('live_order.label.pick_post')
-  : t('live_order.label.pick_session'))
-const sessionHint = computed(() => props.mode === 'post'
-  ? t('live_order.label.pick_one_post_hint')
-  : t('live_order.label.pick_one_session_hint'))
-const pasteLinkLabel = computed(() => props.mode === 'post'
-  ? t('live_order.label.paste_post_link')
-  : t('live_order.label.paste_live_link'))
-const pastePlaceholder = computed(() => props.mode === 'post'
-  ? t('live_order.form.placeholder.post_url')
-  : t('live_order.form.placeholder.live_url'))
+/**
+ * 依模式切換 step 2 的副標 / hint / 連結 placeholder 文案：
+ * - community 模式統一用「社團」字眼，不要出現「直播」
+ * - post 模式用「貼文」
+ * - live 模式（直播收單）保留原本「直播」
+ */
+const sessionLabel = computed(() => {
+  if (props.mode === 'community') return t('live_order.label.pick_group')
+  return props.mode === 'post'
+    ? t('live_order.label.pick_post')
+    : t('live_order.label.pick_session')
+})
+const sessionHint = computed(() => {
+  if (props.mode === 'community') return t('live_order.label.pick_one_group_hint')
+  return props.mode === 'post'
+    ? t('live_order.label.pick_one_post_hint')
+    : t('live_order.label.pick_one_session_hint')
+})
+const pasteLinkLabel = computed(() => {
+  if (props.mode === 'community') return t('live_order.label.paste_group_link')
+  return props.mode === 'post'
+    ? t('live_order.label.paste_post_link')
+    : t('live_order.label.paste_live_link')
+})
+const pastePlaceholder = computed(() => {
+  if (props.mode === 'community') return t('live_order.form.placeholder.group_url')
+  return props.mode === 'post'
+    ? t('live_order.form.placeholder.post_url')
+    : t('live_order.form.placeholder.live_url')
+})
 
 const platformOptions = computed<PlatformOption[]>(() => {
+  // 社團模式只給 FB，小字改成「Facebook 社團」
+  if (props.mode === 'community') {
+    return [{
+      key: 'fb',
+      title: t('live_order.platform.fb'),
+      desc: t('live_order.platform.fb_group_desc'),
+      faIcon: ['fab', 'facebook'],
+      bg: '#dbeafe',
+      iconColor: '#1877f2',
+      decorColor: '#e0e7ff',
+      tagBg: '#dbeafe',
+    }]
+  }
+  // 貼文模式底下，FB / IG 的小字不能出現「直播」，改用對應的 _post_desc
+  const isPostOnly = props.mode === 'post'
   const opts: PlatformOption[] = [
     {
       key: 'fb',
       title: t('live_order.platform.fb'),
-      desc: t('live_order.platform.fb_desc'),
+      desc: t(isPostOnly ? 'live_order.platform.fb_post_desc' : 'live_order.platform.fb_desc'),
       faIcon: ['fab', 'facebook'],
       bg: '#dbeafe',
       iconColor: '#1877f2',
@@ -278,7 +314,7 @@ const platformOptions = computed<PlatformOption[]>(() => {
     {
       key: 'ig',
       title: t('live_order.platform.ig'),
-      desc: t('live_order.platform.ig_desc'),
+      desc: t(isPostOnly ? 'live_order.platform.ig_post_desc' : 'live_order.platform.ig_desc'),
       faIcon: ['fab', 'instagram'],
       bg: '#fce7f3',
       iconColor: '#db2777',
@@ -287,7 +323,7 @@ const platformOptions = computed<PlatformOption[]>(() => {
     },
   ]
   // 貼文收單只支援 FB / IG；直播收單再加上 TikTok / 直播購
-  if (props.mode === 'post') return opts
+  if (isPostOnly) return opts
   opts.push(
     {
       key: 'tiktok',
@@ -324,16 +360,22 @@ function onPlatformPick(key: PlatformKey): void {
   step.value = 'session'
 }
 
-// 佔位資料：10 場直播卡（每個平台共用同一份）
-const placeholderPosts = Array.from({ length: 10 }, (_, i) => ({
-  id: i + 1,
-  title: '【限時優惠,要搶】超柔軟精緻冬衣冬季羊毛衫，多色可選！快來選購，現在下單享有 8 折優惠好康活動搶不完，快來留言！',
-  date: '2024-03-12',
-}))
+// Step 2 顯示的 mock 卡：與 LiveOrderPage 共用 utils/sourceMockPosts.ts，
+// 確保「進入收單中時自動補的 source 名稱」跟彈窗清單一致。
+const placeholderPosts = sourceMockPosts
 
 function confirmSession(): void {
   if (!pickedPlatform.value) return
-  emit('confirm', pickedPlatform.value, { postId: selectedSessionId.value })
+  const picked = selectedSessionId.value != null
+    ? placeholderPosts.find((p) => p.id === selectedSessionId.value)
+    : null
+  // 1) 點選清單卡片 → 拿卡片標題當 source label；
+  // 2) 沒選卡片但貼了連結 → 用 URL 當 source label，至少能跟「Facebook」這種泛用字眼區分
+  const title = picked?.title ?? (pasteUrl.value.trim() || null)
+  emit('confirm', pickedPlatform.value, {
+    postId: selectedSessionId.value,
+    title,
+  })
   close()
 }
 </script>

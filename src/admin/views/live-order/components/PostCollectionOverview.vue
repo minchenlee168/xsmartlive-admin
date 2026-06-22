@@ -10,7 +10,7 @@
  */
 import { ref, computed } from 'vue'
 
-export type PostCollectionStatus = 'ongoing' | 'closed_today'
+export type PostCollectionStatus = 'ready' | 'ongoing' | 'closed_today'
 
 export interface PostCollectionProduct {
   id: number
@@ -50,8 +50,11 @@ export interface PostCollection {
 
 interface Props {
   posts: PostCollection[]
+  /** 'post' 顯示「貼文收單列表」「新增貼文收單」；'community' 顯示「社團收單列表」「新增社團收單」 */
+  kind?: 'post' | 'community'
 }
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { kind: 'post' })
+const collectionNoun = computed(() => props.kind === 'community' ? '社團' : '貼文')
 const emit = defineEmits<{
   select: [id: number]
   create: []
@@ -68,10 +71,12 @@ const sortOptions = [
 const sortBy = ref<SortKey>('pending_desc')
 
 // 篩選 tab：label 內含對應狀態的筆數
-type FilterKey = 'ongoing' | 'closed_today' | 'all'
+type FilterKey = 'ready' | 'ongoing' | 'closed_today' | 'all'
+const readyCount = computed(() => props.posts.filter(p => p.status === 'ready').length)
 const ongoingCount = computed(() => props.posts.filter(p => p.status === 'ongoing').length)
 const closedTodayCount = computed(() => props.posts.filter(p => p.status === 'closed_today').length)
 const filterOptions = computed(() => [
+  { label: `準備中 (${readyCount.value})`,       value: 'ready' as FilterKey },
   { label: `收單中 (${ongoingCount.value})`,     value: 'ongoing' as FilterKey },
   { label: `已結束 (${closedTodayCount.value})`, value: 'closed_today' as FilterKey },
   { label: '全部',                               value: 'all' as FilterKey },
@@ -116,8 +121,9 @@ function formatPeriod(p: PostCollection): string {
 }
 
 /** 狀態 Tag 顯示資訊 */
-function statusBadge(s: PostCollectionStatus): { label: string; severity: 'success' | 'secondary' } {
+function statusBadge(s: PostCollectionStatus): { label: string; severity: 'success' | 'info' | 'secondary' } {
   if (s === 'ongoing') return { label: '收單中', severity: 'success' }
+  if (s === 'ready')   return { label: '準備中', severity: 'info' }
   return { label: '已結束', severity: 'secondary' }
 }
 </script>
@@ -134,9 +140,9 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
       <div class="flex flex-col gap-3 px-4 pt-4 pb-2">
         <!-- 標題 + 新增 + 排序 -->
         <div class="flex items-center justify-between gap-3 flex-wrap">
-          <h2 class="font-medium text-[18px] text-[var(--p-text-color)]">貼文收單列表</h2>
+          <h2 class="font-medium text-[18px] text-[var(--p-text-color)]">{{ collectionNoun }}收單列表</h2>
           <div class="flex items-center gap-2">
-            <Button label="新增貼文收單" icon="pi pi-plus" size="small" @click="emit('create')" />
+            <Button :label="`新增${collectionNoun}收單`" icon="pi pi-plus" size="small" @click="emit('create')" />
             <span class="text-[13px] text-[var(--p-text-muted-color)] ml-2">排序</span>
             <Select
               v-model="sortBy"
@@ -170,7 +176,7 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
           }"
           @row-click="(e) => emit('select', (e.data as PostCollection).id)"
         >
-          <Column field="name" header="貼文名稱">
+          <Column field="name" :header="`${collectionNoun}收單名稱`">
             <template #body="{ data }">
               <div class="flex flex-col gap-0.5 min-w-0">
                 <span class="text-[14px] font-medium text-[var(--p-text-color)] truncate">{{ data.name }}</span>

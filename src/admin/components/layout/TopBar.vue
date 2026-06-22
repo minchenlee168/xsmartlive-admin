@@ -57,6 +57,16 @@ function handleLogout() {
   // mock 專案不接登入流程，按下後僅 toast 提示
   showSuccess({ detail: t('topbar.logout_mock') });
 }
+
+/** 把 vite.config 注入的 ISO 字串轉成「YYYY/MM/DD HH:mm」顯示 */
+const prototypeUpdateTime = computed(() => {
+  const iso = typeof __LAST_COMMIT_TIME__ === 'string' ? __LAST_COMMIT_TIME__ : ''
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+})
 </script>
 
 <template>
@@ -143,6 +153,14 @@ function handleLogout() {
           <FontAwesomeIcon :icon="['far', 'eye']" />
         </template>
       </Button>
+
+      <!-- prototype 更新時間提示：用 vite.config 注入的最後一次 commit 時間 -->
+      <span
+        v-if="prototypeUpdateTime"
+        class="text-[11px] text-[#ef4444] font-medium whitespace-nowrap"
+      >
+        此為 prototype 展示，更新時間：{{ prototypeUpdateTime }}
+      </span>
     </div>
 
     <div class="inline-flex items-center h-10 gap-4">

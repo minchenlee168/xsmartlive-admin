@@ -346,6 +346,8 @@ interface Props {
   orderingEnabled?: boolean
   /** 貼文收單模式：不跑動態數字 ticker，按下開始收單直接賣完。 */
   isPostMode?: boolean
+  /** 貼文/社團模式下該貼文的收單期間起點；按下「開始收單」時若 startAt 尚未到 → 跳提示問是否調整時間 */
+  periodStartAt?: Date | null
   /** 整張卡片被鎖定（例如：其他競價商品在收單中時，此卡不可操作）。 */
   locked?: boolean
 }
@@ -353,11 +355,14 @@ const props = withDefaults(defineProps<Props>(), {
   orderingEnabled: false,
   isPostMode: false,
   locked: false,
+  periodStartAt: null,
 })
 const isGift = computed(() => props.product?.isGift === true)
 const emit = defineEmits<{
   delete: [id: number]
   'end-ordering': [id: number]
+  /** 使用者選擇「調整時間」→ 父層開 PostPeriodDialog */
+  'adjust-period': []
 }>()
 const { t } = useI18n()
 const confirm = useConfirm()
@@ -429,8 +434,23 @@ function hasStockIssue(): boolean {
   const specs = (props.product.selectedSpecs?.length ? props.product.selectedSpecs : props.product.specs) ?? []
   return specs.some(s => (s.stock ?? 0) === 0)
 }
-/** 點下開始收單：有庫存問題 → 跳提示；無 → 直接 status=live */
+/** 點下開始收單：先檢查收單期間 → 庫存 → 直接 status=live */
 function onStartOrdering(): void {
+  // 收單期間還沒到 → 跳提示，讓使用者決定要去調整時間還是取消
+  if (props.periodStartAt && props.periodStartAt.getTime() > Date.now()) {
+    const d = props.periodStartAt
+    const pad = (n: number): string => String(n).padStart(2, '0')
+    const display = `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+    confirm.require({
+      header: '收單期間還沒到',
+      message: `此貼文設定的收單期間從 ${display} 開始，是否要調整時間？`,
+      icon: 'pi pi-clock',
+      acceptLabel: '調整時間',
+      rejectLabel: '取消',
+      accept: () => emit('adjust-period'),
+    })
+    return
+  }
   if (hasStockIssue()) {
     stockIssueDialogVisible.value = true
     return

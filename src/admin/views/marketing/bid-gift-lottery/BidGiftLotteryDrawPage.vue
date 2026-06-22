@@ -101,8 +101,9 @@ const remainingCandidates = computed(() => (
 const latestWinner = computed(() => pendingWinner.value ?? winners.value.at(-1) ?? null);
 
 // 候選人格陣採雙層景深：後排（小、模糊）+ 前排（清晰、輪動），多出來摺成右上「+X 人」
-const POOL_FRONT_LIMIT = 22;
-const POOL_BACK_LIMIT = 30;
+// 內容收在 1000px 中央後一排放不下原本 22 / 30 顆頭像 → 收成單排上限，避免換行
+const POOL_FRONT_LIMIT = 14;
+const POOL_BACK_LIMIT = 20;
 const POOL_CYCLE_INTERVAL = 200;
 
 const foregroundCandidates = computed(() => remainingCandidates.value.slice(0, POOL_FRONT_LIMIT));
@@ -287,6 +288,7 @@ onBeforeUnmount(() => {
           class="lottery-draw__stage-frame"
           :src="stageSrc"
           title="lottery-stage"
+          scrolling="no"
         />
         <p class="lottery-draw__stage-label">
           {{ $t(stageLabel) }}
@@ -466,9 +468,15 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  /* 直播主用手機拍攝電腦螢幕 → 內容收在中央約 1040px 寬，左右留背景空間方便 framing；
+     stage iframe 內 wrapper 是 960px，所以 max-width 至少要容得下 960 + 左右 padding。 */
+  justify-content: flex-start;
+  gap: 1.25rem;
   height: 100%;
-  padding: 1.25rem 2rem 2.5rem;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 2rem;
 }
 
 .lottery-draw__topbar {
@@ -560,11 +568,13 @@ onBeforeUnmount(() => {
 }
 
 .lottery-draw__stage-frame {
+  /* iframe 內 wrapper 固定 960×425，這層尺寸要對齊才不會被裁切或冒出內捲軸 */
   width: 960px;
   height: 425px;
-  max-width: 90vw;
+  max-width: 100%;
   border: 0;
   background: transparent;
+  overflow: hidden;
 }
 
 .lottery-draw__stage-label {
