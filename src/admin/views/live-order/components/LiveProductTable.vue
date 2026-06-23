@@ -36,23 +36,14 @@ interface LiveProduct {
   [key: string]: unknown
 }
 
-interface SourceMeta {
-  id: number | string
-  type: string
-  label: string
-}
-
 interface Props {
   products: LiveProduct[]
   orderingEnabled?: boolean
-  /** 該場次的所有收單來源；每列「收單來源」欄都顯示這份（場次共用）。 */
-  sources?: SourceMeta[]
   /** 貼文/社團模式下該貼文的收單期間起點；按下「開始收單」時若 startAt 尚未到 → 跳提示問是否調整時間 */
   periodStartAt?: Date | null
 }
 const props = withDefaults(defineProps<Props>(), {
   orderingEnabled: false,
-  sources: () => [],
   periodStartAt: null,
 })
 
@@ -73,17 +64,6 @@ const giftDialogVisible = ref(false)
 const winnerDialogVisible = ref(false)
 const activeProduct = ref<LiveProduct | null>(null)
 const pushedSet = ref<Set<number>>(new Set())
-
-function sourcePlatformMeta(type: string): { icon: [string, string]; color: string; bg: string } {
-  const map: Record<string, { icon: [string, string]; color: string; bg: string }> = {
-    fb:      { icon: ['fab', 'facebook'],  color: '#1877f2', bg: '#dbeafe' },
-    ig:      { icon: ['fab', 'instagram'], color: '#db2777', bg: '#fce7f3' },
-    tiktok:  { icon: ['fab', 'tiktok'],    color: '#000000', bg: '#f1f5f9' },
-    livebuy: { icon: ['far', 'video'],     color: 'var(--p-primary-color)', bg: 'var(--p-primary-50)' },
-    group:   { icon: ['far', 'users'],     color: '#16a34a', bg: '#dcfce7' },
-  }
-  return map[type] ?? { icon: ['far', 'circle-question'], color: 'var(--p-text-muted-color)', bg: 'var(--p-content-hover-background)' }
-}
 
 function statusMeta(p: LiveProduct): { label: string; bg: string; color: string; icon?: string } {
   const map: Record<string, { label: string; bg: string; color: string; icon?: string }> = {
@@ -167,6 +147,7 @@ function toggleStatus(p: LiveProduct): void {
 }
 
 function onDeleteClick(p: LiveProduct, event: Event): void {
+  if (p.status === 'live') return  // disabled 按鈕被點時的二道防線
   confirm.require({
     target: event.currentTarget as HTMLElement,
     header: t('live_order.dialog.confirm_delete_product_header'),
@@ -265,24 +246,6 @@ const startBtnDisabled = computed(() => !props.orderingEnabled)
         </template>
       </Column>
 
-      <Column :header="t('live_order.tab.sources')">
-        <template #body>
-          <div class="flex flex-wrap items-center gap-1">
-            <template v-if="sources.length > 0">
-              <span
-                v-for="s in sources"
-                :key="s.id"
-                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-[10px] text-[11.5px] font-medium leading-none"
-                :style="{ background: sourcePlatformMeta(s.type).bg, color: sourcePlatformMeta(s.type).color }"
-              >
-                <FontAwesomeIcon :icon="sourcePlatformMeta(s.type).icon" :style="{ fontSize: '10px' }" />
-                {{ s.label }}
-              </span>
-            </template>
-            <span v-else class="text-[12px] text-[var(--p-text-muted-color)]">—</span>
-          </div>
-        </template>
-      </Column>
 
       <Column field="status" :header="t('live_order.table.column.checkout_status')">
         <template #body="{ data }">
@@ -335,9 +298,14 @@ const startBtnDisabled = computed(() => !props.orderingEnabled)
             >
               <i :class="data.status === 'live' ? 'pi pi-check' : 'pi pi-play'" style="font-size:12px"></i>
             </button>
+            <!-- 收單中不可移除 → 必須先按「停止收單」回 ready 才開放 -->
             <button
-              v-tooltip.top="t('live_order.tooltip.delete')"
-              class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[#ef4444] hover:bg-[#fee2e2]"
+              v-tooltip.top="data.status === 'live' ? '請先停止收單再移除' : t('live_order.tooltip.delete')"
+              :disabled="data.status === 'live'"
+              :class="['w-[28px] h-[28px] rounded-[6px] flex items-center justify-center',
+                data.status === 'live'
+                  ? 'text-[var(--p-text-muted-color)] opacity-50 cursor-not-allowed'
+                  : 'text-[#ef4444] hover:bg-[#fee2e2]']"
               @click="onDeleteClick(data, $event)"
             >
               <FontAwesomeIcon :icon="['far', 'trash']" class="text-[13px]" />

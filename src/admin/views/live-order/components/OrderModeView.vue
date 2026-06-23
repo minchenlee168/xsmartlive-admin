@@ -19,7 +19,6 @@
         <LiveProductTable
           v-else-if="useTable"
           :products="products"
-          :sources="sources"
           :ordering-enabled="sources.length > 0"
           :period-start-at="periodStartAt"
           @delete="(id) => emit('delete-product', id)"

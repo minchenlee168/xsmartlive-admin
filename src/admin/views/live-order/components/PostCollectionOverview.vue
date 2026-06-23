@@ -201,7 +201,13 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
           </Column>
           <Column header="結單時間" style="width: 160px">
             <template #body="{ data }">
+              <!-- 已結束的 collection 結單時間欄統一顯示「已結單」（不再帶 deadlineText 殘值）-->
               <span
+                v-if="data.status === 'closed_today'"
+                class="text-[13px] text-[var(--p-text-muted-color)]"
+              >已結單</span>
+              <span
+                v-else
                 class="text-[13px]"
                 :style="{
                   color: data.deadlineSeverity === 'danger' ? '#ef4444'

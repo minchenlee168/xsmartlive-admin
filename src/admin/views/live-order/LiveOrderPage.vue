@@ -120,7 +120,6 @@
             <LiveProductTable
               v-if="isListView"
               :products="selectedProducts"
-              :sources="sources"
               :ordering-enabled="hasAnySource"
               :period-start-at="currentEnteredPost?.startAt"
               @delete="onDeleteProduct"
@@ -481,6 +480,12 @@ function onPostPeriodSave(payload: { startAt: Date | null; endAt: Date | null })
   post.deadlineText = dl.deadlineText
   post.deadlineSeverity = dl.deadlineSeverity
   post.deadlineMinutes = dl.deadlineMinutes
+  // 重新依時間判斷 status（已結單的不動）：startAt 還沒到 → ready；已到 / 未設 → ongoing
+  // 否則使用者把期間改到未來時，外面列表還顯示「收單中」，會跟內頁狀態不同步
+  if (post.status !== 'closed_today') {
+    const futureStart = payload.startAt && payload.startAt.getTime() > Date.now()
+    post.status = futureStart ? 'ready' : 'ongoing'
+  }
   toast.add({ severity: 'success', summary: '收單期間已更新', life: 1800 })
 }
 
