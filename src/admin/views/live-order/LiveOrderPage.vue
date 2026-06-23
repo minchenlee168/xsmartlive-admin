@@ -283,7 +283,7 @@
     </template>
 
     <LiveOrderSourceDialog v-model:visible="sourceDialogVisible"
-      :used-post-ids="usedPostIds" :used-group-ids="usedGroupIds"
+      :used-by-platform="usedByPlatform"
       :mode="isCommunityMode ? 'community' : (isPostMode ? 'post' : 'live')"
       @confirm="onSourceConfirmed" />
     <CreateSessionDialog v-model:visible="createDialogVisible" @create="onSessionCreate" />
@@ -1258,33 +1258,32 @@ function onSourceConfirmed(type: string, extras: SourceConfirmExtras = {}): void
   })
 }
 
-// 已使用的貼文 / 社團 id 清單（傳入 dialog 用於 disable）
-// 把當前 session 的 sources 與其他 collection 已快取的 sources 合併 → 同一篇貼文 / 社團不可被選兩次
-const usedPostIds = computed(() => {
-  const out = new Set<number | string>()
+/**
+ * 已使用的來源 id：依平台類型分桶（傳入 dialog 用於 disable）。
+ * 不同平台之間互不干擾 — 在 IG 選到 id=1 不會讓 FB id=1 變灰。
+ * 來源 = 當前 session 的 sources ∪ 其他 collection 已快取的 sources。
+ */
+const usedByPlatform = computed<Record<string, Array<number | string>>>(() => {
+  const buckets: Record<string, Set<number | string>> = {}
+  const add = (type: string, id: number | string | null | undefined): void => {
+    if (id == null) return
+    if (!buckets[type]) buckets[type] = new Set()
+    buckets[type].add(id)
+  }
   ;(currentSession.value?.sources ?? []).forEach((s) => {
-    if ((s.type === 'fb' || s.type === 'ig') && s.postId != null) out.add(s.postId)
+    add(s.type, s.postId)
+    add(s.type, s.groupId)
   })
   postSourcesCache.value.forEach((sources, pid) => {
-    if (pid === enteredPostId.value) return  // 當前 session 已加入 set，避免重複
+    if (pid === enteredPostId.value) return  // 當前 session 已加入，避免重複
     sources.forEach((s) => {
-      if ((s.type === 'fb' || s.type === 'ig') && s.postId != null) out.add(s.postId)
+      add(s.type, s.postId)
+      add(s.type, s.groupId)
     })
   })
-  return Array.from(out)
-})
-const usedGroupIds = computed(() => {
-  const out = new Set<number | string>()
-  ;(currentSession.value?.sources ?? []).forEach((s) => {
-    if (s.type === 'group' && s.groupId != null) out.add(s.groupId)
-  })
-  postSourcesCache.value.forEach((sources, pid) => {
-    if (pid === enteredPostId.value) return
-    sources.forEach((s) => {
-      if (s.type === 'group' && s.groupId != null) out.add(s.groupId)
-    })
-  })
-  return Array.from(out)
+  const out: Record<string, Array<number | string>> = {}
+  Object.keys(buckets).forEach((k) => { out[k] = Array.from(buckets[k]) })
+  return out
 })
 
 function onRemoveSource(id: number | string): void {

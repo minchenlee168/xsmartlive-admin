@@ -93,7 +93,7 @@
             :image="mode === 'live' ? livePreviewImage : undefined"
             :is-live="mode === 'live' && !!post.isLive"
             :selected="selectedSessionId === post.id"
-            :disabled="usedPostIds.includes(post.id)"
+            :disabled="disabledIdSet.has(post.id)"
             :used-label="t('live_order.label.used')"
             @click="selectedSessionId = post.id"
           />
@@ -208,15 +208,19 @@ interface ConfirmExtras {
 
 interface Props {
   visible?: boolean
-  usedPostIds?: Array<number | string>
-  usedGroupIds?: Array<number | string>
+  /**
+   * 已使用的來源 id：依平台類型分桶。範例：
+   *   { fb: [1, 3], ig: [2], group: [5], tiktok: [], livebuy: [] }
+   * 不同平台之間互不干擾：picked FB 時只 disable fb 桶內的 id，IG 桶不影響。
+   * 社團模式下選 FB 入口但實際存的是 'group' type，dialog 內會自動換算。
+   */
+  usedByPlatform?: Record<string, Array<number | string>>
   /** 'live'：選擇直播；'post'：選擇貼文；'community'：選擇社團（平台只有 FB，描述顯示「Facebook 社團」）。 */
   mode?: 'live' | 'post' | 'community'
 }
 const props = withDefaults(defineProps<Props>(), {
   visible: false,
-  usedPostIds: () => [],
-  usedGroupIds: () => [],
+  usedByPlatform: () => ({}),
   mode: 'live',
 })
 const emit = defineEmits<{
@@ -379,6 +383,15 @@ const displayedPosts = computed(() =>
     ? placeholderPosts.filter((p) => !!p.isLive)
     : placeholderPosts,
 )
+/**
+ * 當前 step 2 要 disable 的 id：取自 usedByPlatform 對應平台的桶。
+ * 社團模式下使用者選 FB 入口，但 source 實際存的是 'group' type → 改抓 group 桶。
+ */
+const disabledIdSet = computed<Set<number | string>>(() => {
+  if (!pickedPlatform.value) return new Set()
+  const effective = props.mode === 'community' ? 'group' : pickedPlatform.value
+  return new Set(props.usedByPlatform[effective] ?? [])
+})
 
 function confirmSession(): void {
   if (!pickedPlatform.value) return
