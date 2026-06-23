@@ -86,11 +86,12 @@
         <!-- 直播卡 grid -->
         <div class="h-[325px] overflow-y-auto overflow-x-hidden grid grid-cols-5 gap-2">
           <PostCard
-            v-for="post in placeholderPosts"
+            v-for="post in displayedPosts"
             :key="post.id"
             :title="post.title"
             :date="post.date"
             :image="mode === 'live' ? livePreviewImage : undefined"
+            :is-live="mode === 'live' && !!post.isLive"
             :selected="selectedSessionId === post.id"
             :disabled="usedPostIds.includes(post.id)"
             :used-label="t('live_order.label.used')"
@@ -140,6 +141,8 @@ interface PostCardProps {
   usedLabel?: string
   /** 縮圖背景圖（直播模式使用真實預覽圖；貼文模式維持漸層佔位）。 */
   image?: string
+  /** 直播中：左上加紅色 LIVE tag + 脈動點 */
+  isLive?: boolean
 }
 
 // 子元件：直播 / 貼文縮圖卡（直播模式吃 image 當背景；貼文模式維持漸層佔位 + icon）
@@ -165,13 +168,20 @@ const PostCard: FunctionalComponent<PostCardProps, { click: [] }> = (props, { em
     ? h('span', {
         class: 'absolute top-2 left-2 bg-[var(--p-text-muted-color)] text-white text-[11px] font-bold px-2 py-0.5 rounded-full leading-none',
       }, props.usedLabel ?? '')
-    : null,
+    : (props.isLive
+        ? h('span', {
+            class: 'absolute top-2 left-2 inline-flex items-center gap-1 bg-[#ef4444] text-white text-[11px] font-bold px-2 py-[3px] rounded-full leading-none shadow-[0_1px_2px_rgba(0,0,0,0.25)]',
+          }, [
+            h('span', { class: 'w-1.5 h-1.5 rounded-full bg-white animate-pulse' }),
+            'LIVE',
+          ])
+        : null),
   h('div', { class: 'relative w-full px-[6px] py-[8px] bg-[var(--p-content-background)]/70 flex flex-col gap-1' }, [
     h('p', { class: 'text-[var(--p-text-color)] text-[16px] leading-6 line-clamp-2 h-[49px] overflow-hidden' }, props.title),
     h('p', { class: 'text-[var(--p-text-muted-color)] text-[14px] leading-5' }, props.date),
   ]),
 ])
-PostCard.props = ['title', 'date', 'selected', 'disabled', 'usedLabel', 'image']
+PostCard.props = ['title', 'date', 'selected', 'disabled', 'usedLabel', 'image', 'isLive']
 PostCard.emits = ['click']
 
 type PlatformKey = 'fb' | 'ig' | 'tiktok' | 'livebuy'
@@ -363,6 +373,12 @@ function onPlatformPick(key: PlatformKey): void {
 // Step 2 顯示的 mock 卡：與 LiveOrderPage 共用 utils/sourceMockPosts.ts，
 // 確保「進入收單中時自動補的 source 名稱」跟彈窗清單一致。
 const placeholderPosts = sourceMockPosts
+// 直播模式只列「直播中」的卡（isLive=true）；其他模式列全部
+const displayedPosts = computed(() =>
+  props.mode === 'live'
+    ? placeholderPosts.filter((p) => !!p.isLive)
+    : placeholderPosts,
+)
 
 function confirmSession(): void {
   if (!pickedPlatform.value) return

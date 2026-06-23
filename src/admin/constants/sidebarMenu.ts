@@ -53,6 +53,32 @@ export const sidebarMenu: MenuItem[] = [
     ],
   },
   {
+    labelKey: 'nav.product.product',
+    icon: ['far', 'box-isometric'],
+    items: [
+      {
+        labelKey: 'nav.product.list',
+        icon: ['far', 'clipboard-list'],
+        to: RouteName.ProductList,
+      },
+      {
+        labelKey: 'nav.product.category',
+        icon: ['far', 'chart-tree-map'],
+        planning: true,
+      },
+      {
+        labelKey: 'nav.product.common_spec',
+        icon: ['far', 'chart-tree-map'],
+        planning: true,
+      },
+      {
+        labelKey: 'nav.product.tag',
+        icon: ['far', 'tags'],
+        planning: true,
+      },
+    ],
+  },
+  {
     labelKey: 'nav.order',
     icon: ['far', 'file-invoice-dollar'],
     items: [

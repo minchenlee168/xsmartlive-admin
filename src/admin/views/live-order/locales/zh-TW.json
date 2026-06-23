@@ -329,11 +329,11 @@
     },
     "platform": {
       "fb": "Facebook",
-      "fb_desc": "Facebook 直播或貼文",
+      "fb_desc": "Facebook 直播",
       "fb_post_desc": "Facebook 貼文",
       "fb_group_desc": "Facebook 社團",
       "ig": "Instagram",
-      "ig_desc": "Instagram 直播或貼文",
+      "ig_desc": "Instagram 直播",
       "ig_post_desc": "Instagram 貼文",
       "tiktok": "TikTok",
       "tiktok_desc": "TikTok 直播",

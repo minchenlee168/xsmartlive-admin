@@ -8,6 +8,13 @@
     "live_order_post": "Post ordering",
     "live_order_community": "Community ordering",
     "live_records": "Order records",
+    "product": {
+      "product": "Products",
+      "list": "Product list",
+      "category": "Storefront tabs",
+      "common_spec": "Saved specs",
+      "tag": "Product tags"
+    },
     "marketing": "Marketing",
     "bid_gift_lottery": "Bid Gift Lottery",
     "keyword_lottery": "Keyword Lottery",
@@ -21,6 +28,7 @@
     "live_order_post": "Post ordering",
     "live_order_community": "Community ordering",
     "live_records": "Order records",
+    "product_list": "Product list",
     "bid_gift_lottery_list": "Bid Gift Lottery",
     "bid_gift_lottery_draw": "Bid Gift Lottery Draw",
     "keyword_lottery_list": "Keyword Lottery",

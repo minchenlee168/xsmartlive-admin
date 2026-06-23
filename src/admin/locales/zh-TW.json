@@ -9,6 +9,13 @@
     "live_order_post_list": "貼文收單(列表式)",
     "live_order_community": "社團收單",
     "live_records": "收單紀錄",
+    "product": {
+      "product": "商品管理",
+      "list": "商品列表",
+      "category": "賣場分頁",
+      "common_spec": "常用規格",
+      "tag": "商品標籤"
+    },
     "order": "訂單管理",
     "order_list": "訂單列表",
     "marketing": "行銷活動",
@@ -26,6 +33,7 @@
     "live_order_community": "社團收單",
     "live_records": "收單紀錄",
     "order_list": "訂單列表",
+    "product_list": "商品列表",
     "bid_gift_lottery_list": "得標禮抽獎",
     "bid_gift_lottery_draw": "得標禮抽獎開獎",
     "keyword_lottery_list": "關鍵字抽獎",
