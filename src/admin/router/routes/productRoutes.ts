@@ -11,6 +11,7 @@ export const ProductRouteName = {
   ProductCreate: 'product.create',
   ProductUpdate: 'product.update',
   ProductBundleCreate: 'product.bundle.create',
+  ProductBundleUpdate: 'product.bundle.update',
 } as const
 
 export const productRoutes: RouteRecordRaw[] = [
@@ -48,6 +49,16 @@ export const productRoutes: RouteRecordRaw[] = [
     component: () => import('@/admin/views/product/ProductBundleCreatePage.vue'),
     meta: {
       i18nKey: 'route.product_bundle_create',
+      layout: 'default',
+    },
+  },
+  {
+    path: 'product/bundle/update/:id?',
+    name: ProductRouteName.ProductBundleUpdate,
+    // 與新增組合商品共用同元件；內部依 route.name 判斷 create / update 模式
+    component: () => import('@/admin/views/product/ProductBundleCreatePage.vue'),
+    meta: {
+      i18nKey: 'route.product_bundle_update',
       layout: 'default',
     },
   },

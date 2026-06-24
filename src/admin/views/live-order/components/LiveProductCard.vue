@@ -74,13 +74,13 @@
               </template>
             </div>
 
-            <!-- 簡碼列 -->
+            <!-- 關鍵字列（與商品管理「直播關鍵字」同源；空值顯示「—」） -->
             <div class="flex gap-1 items-center w-full justify-end">
               <template v-if="isEditingShort">
                 <InputText
                   v-model="editShort"
                   size="small"
-                  :placeholder="t('live_order.form.placeholder.prefix')"
+                  :placeholder="t('live_order.form.placeholder.keyword_short')"
                   class="flex-1 min-w-0"
                   @keyup.enter="saveShort"
                 />
@@ -95,7 +95,14 @@
                 />
               </template>
               <template v-else>
-                <span class="bg-[#e0f2fe] text-[#0369a1] text-[12.25px] font-bold px-[7px] py-[3.5px] rounded-[12px] leading-none">{{ shortCode }}</span>
+                <span
+                  v-if="shortCode"
+                  class="bg-[#e0f2fe] text-[#0369a1] text-[12.25px] font-bold px-[7px] py-[3.5px] rounded-[12px] leading-none"
+                >{{ shortCode }}</span>
+                <span
+                  v-else
+                  class="text-[12.25px] text-[var(--p-text-muted-color)] leading-none"
+                >—</span>
               </template>
             </div>
 
@@ -527,13 +534,8 @@ const productImage = computed<string>(() => {
   return imageForProductName(displayName.value)
 })
 
-// 關鍵字（前綴）— 與「設定商品」Dialog 的「關鍵字」欄位共用 product.keyword
-const keyword = computed(() => {
-  const kw = props.product.keyword
-  if (kw) return kw
-  const sku = props.product.sku || ''
-  return sku.split('-')[0] || `P${props.product.id}`
-})
+// 關鍵字 — 與「設定商品」Dialog 的「關鍵字」欄位、商品管理「直播關鍵字」同源 product.keyword
+const keyword = computed(() => props.product.keyword ?? '')
 const shortCode = computed(() => keyword.value)
 
 /** 競價模式：關鍵字與金額由競價決定，商品卡不可內嵌編輯這兩欄 */

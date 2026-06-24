@@ -6,6 +6,8 @@ import { useConfirm } from 'primevue/useconfirm'
 import { RouteName } from '@/admin/router'
 import {
   managedProducts,
+  addManagedProduct,
+  syncManagedProduct,
   PRODUCT_CATEGORIES,
   PRODUCT_TAGS,
   type ManagedProduct,
@@ -289,8 +291,36 @@ function onSave(): void {
     toast.add({ severity: 'warn', summary: '請輸入商品名稱', life: 1500 })
     return
   }
-  // 新增模式：prototype 不真的 push 到 mock，只跳 toast 後回列表
+  // 新增模式：依 form 建立 ManagedProduct，push 進 managedProducts 並同步到收單 catalog
   if (isCreateMode.value) {
+    const newId = Date.now()
+    const variantSpecs = form.value.variants.length > 0
+      ? form.value.variants.map((v, i) => {
+          const names = form.value.specs.map((g) => g.options.find((o) => o.id === v.optionIds[i])?.name ?? '')
+          return {
+            id: v.id,
+            name: names.filter(Boolean).join(' / ') || `規格 ${i + 1}`,
+            stock: v.stock,
+            price: v.salePrice,
+          }
+        })
+      : [{ id: newId + 1, name: '單一規格', stock: form.value.noSpecVariant.stock, price: form.value.noSpecVariant.salePrice }]
+    addManagedProduct({
+      id: newId,
+      name: form.value.name.trim(),
+      category: form.value.category,
+      status: 'on_shelf',
+      kind: 'normal',
+      totalSold: 0,
+      keyword: form.value.keyword.trim(),
+      tags: [...form.value.tags],
+      enableCoupon: form.value.enableCoupon,
+      weight: form.value.weight,
+      description: form.value.description,
+      remark: form.value.remark,
+      images: form.value.images.map((img) => ({ ...img })),
+      specs: variantSpecs,
+    })
     toast.add({ severity: 'success', summary: '已建立商品', detail: form.value.name.trim(), life: 2000 })
     backToList()
     return
@@ -323,6 +353,8 @@ function onSave(): void {
   } else {
     p.specs = [{ id: Date.now(), name: '單一規格', stock: 0, price: 0 }]
   }
+  // 編輯完成 → 同步收單那邊的 productCatalog 對應條目
+  syncManagedProduct(p.id)
   toast.add({ severity: 'success', summary: '已儲存商品變更', detail: p.name, life: 2000 })
   backToList()
 }

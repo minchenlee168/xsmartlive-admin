@@ -177,6 +177,7 @@
         "general_cart": "Regular cart",
         "no_limit": "No limit",
         "prefix": "(prefix)",
+        "keyword_short": "Enter live keyword",
         "fb_post_url": "https://facebook.com/post/...",
         "ig_post_url": "https://instagram.com/p/...",
         "session_url": "Paste a session / post URL",

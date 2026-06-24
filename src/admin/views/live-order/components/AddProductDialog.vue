@@ -48,9 +48,9 @@
               <i class="pi pi-shopping-bag" style="font-size: 13px" />
               一般商品
               <span
-                v-if="selectedItems.size > 0"
+                v-if="selectedProductCount > 0"
                 class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-semibold leading-none bg-[var(--p-primary-color)] text-[var(--p-primary-contrast-color)]"
-              >{{ selectedItems.size }}</span>
+              >{{ selectedProductCount }}</span>
             </span>
           </Tab>
           <Tab value="bundle">
@@ -189,8 +189,14 @@
                   </span>
                   <div class="flex items-center gap-1.5">
                     <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ p.sku }}</span>
+                    <span
+                      v-if="p.keyword"
+                      class="text-[11px] font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-1.5 py-0.5 rounded"
+                    >
+                      {{ t('live_order.label.keyword_with_value', { value: p.keyword }) }}
+                    </span>
                     <span v-if="isProductExisting(p)"
-                      class="text-[11px] font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-1.5 py-0.5 rounded">
+                      class="text-[11px] font-medium text-white bg-[var(--p-text-muted-color)] px-1.5 py-0.5 rounded">
                       {{ t('live_order.label.already_added') }}
                     </span>
                   </div>
@@ -209,7 +215,7 @@
               <div class="px-2 py-[6px] shrink-0" style="width: 100px">
                 <span
                   class="text-[15px]"
-                  :class="minSpecStock(p) <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'"
+                  :class="totalStockOf(p) <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'"
                 >
                   {{ specStockRange(p) }}
                 </span>
@@ -529,6 +535,7 @@ import { useI18n } from 'vue-i18n'
 import OrderSettingForm, { type OrderSettingFormData } from './OrderSettingForm.vue'
 import StockIssueDialog, { type StockIssueChoice } from './StockIssueDialog.vue'
 import { productCatalog, bundleCatalog, type CatalogBundle } from '../utils/productCatalog'
+import { managedProducts } from '@/admin/views/product/utils/productMock'
 
 interface PickerSpec {
   id: number
@@ -548,6 +555,8 @@ interface PickerProductRaw {
   price: number
   stock: number
   status: string
+  /** 直播關鍵字（從商品管理同步而來），加入場次時直接帶入 */
+  keyword?: string
 }
 
 interface PickerProduct extends PickerProductRaw {
@@ -581,6 +590,8 @@ interface SelectedItem {
   cost: number
   price: number
   stock: number
+  /** 從 parent PickerProduct 繼承的直播關鍵字 */
+  keyword?: string
 }
 
 interface Props {
@@ -620,11 +631,21 @@ function specPriceRange(p: PickerProduct): string {
   return rangeStr(p.specs.length ? p.specs.map((s) => s.price) : [p.price])
 }
 function specStockRange(p: PickerProduct): string {
-  return rangeStr(p.specs.length ? p.specs.map((s) => s.stock) : [p.stock])
+  // 庫存固定顯示總和（規格加總），不走區間，與主商品「總庫存」概念對齊。
+  const total = p.specs.length
+    ? p.specs.reduce((sum, s) => sum + (s.stock ?? 0), 0)
+    : (p.stock ?? 0)
+  return total.toLocaleString()
 }
 function minSpecStock(p: PickerProduct): number {
   if (!p.specs.length) return p.stock
   return Math.min(...p.specs.map((s) => s.stock))
+}
+/** 主商品總庫存（規格加總）；庫存欄與低庫存警示用同一個值。 */
+function totalStockOf(p: PickerProduct): number {
+  return p.specs.length
+    ? p.specs.reduce((sum, s) => sum + (s.stock ?? 0), 0)
+    : (p.stock ?? 0)
 }
 const emit = defineEmits<{
   'update:visible': [value: boolean]
@@ -654,7 +675,13 @@ const pickerTab = ref<PickerTab>('general')
 const selectedItems = ref<Map<string, SelectedItem>>(new Map())
 /** 勾選的組合商品 id（與 selectedItems 分開維護，存檔時各自轉換） */
 const selectedBundleIds = ref<Set<number>>(new Set())
-const selectedCount = computed(() => selectedItems.value.size + selectedBundleIds.value.size)
+/** 一般商品 tab 的徽章數：勾選的「主商品」數，不細計到規格層 */
+const selectedProductCount = computed(() => {
+  const ids = new Set<number>()
+  selectedItems.value.forEach((it) => ids.add(it.productId))
+  return ids.size
+})
+const selectedCount = computed(() => selectedProductCount.value + selectedBundleIds.value.size)
 /**
  * 得標設定步驟顯示用：去除規格、依 productId 摺合成一個「主商品名」清單；
  * 後段附加組合商品名稱（套同一份得標設定）。
@@ -739,6 +766,7 @@ function toggleProduct(p: PickerProduct): void {
           cost: spec.cost,
           price: spec.price,
           stock: spec.stock,
+          keyword: p.keyword,
         })
       })
     } else {
@@ -757,6 +785,7 @@ function toggleProduct(p: PickerProduct): void {
         cost: p.cost,
         price: p.price,
         stock: p.stock,
+        keyword: p.keyword,
       })
     } else {
       map.delete(productKey)
@@ -790,6 +819,7 @@ function toggleSpec(p: PickerProduct, spec: PickerSpec): void {
     cost: spec.cost,
     price: spec.price,
     stock: spec.stock,
+    keyword: p.keyword,
   })
 }
 
@@ -897,6 +927,7 @@ function onSaveForm(): void {
         ...baseFields,
         name: parent?.name ?? productItem?.name ?? '',
         sku: parent?.sku ?? productItem?.sku ?? '',
+        keyword: parent?.keyword ?? productItem?.keyword ?? '',
         cost: Math.round(effectiveSpecs.reduce((sum, s) => sum + s.cost, 0) / effectiveSpecs.length),
         price: Math.min(...prices),
         stock: stocks.reduce((sum, s) => sum + s, 0),
@@ -916,6 +947,7 @@ function onSaveForm(): void {
         ...baseFields,
         name: productItem.name,
         sku: productItem.sku,
+        keyword: parent?.keyword ?? productItem.keyword ?? '',
         cost: productItem.cost,
         price: productItem.price,
         stock: productItem.stock,
@@ -995,14 +1027,44 @@ const pickerSpecsMap: Record<number, PickerSpec[]> = {
     { id: 1112, name: 'XXL / 灰',  sku: 'CLO-TS-001-XXL-GY', cost: 210, originalPrice: 640, price: 530, stock: 2 },
   ],
 }
-// 用 computed 包起來，讓 productCatalog 透過 addToCatalog 新增條目時 picker 自動同步
+/**
+ * 把 ManagedProduct 上的 flat specs 投影成 picker 用的 PickerSpec：
+ * - 「單一規格」或只有 1 筆 → 視為無規格，回空陣列
+ * - 多筆 → 沿用 name/price/stock；cost/originalPrice/sku 比照原本 picker 慣例由 price 估
+ */
+function adaptManagedSpecs(p: { id: number; specs: { id: number; name: string; price: number; stock: number }[]; sku?: string }): PickerSpec[] {
+  if (p.specs.length <= 1) return []
+  if (p.specs.length === 1 && p.specs[0].name === '單一規格') return []
+  return p.specs.map((s) => ({
+    id:            s.id,
+    name:          s.name,
+    sku:           `MP-${p.id}-${s.id}`,
+    cost:          Math.round(s.price * 0.6),
+    originalPrice: Math.round(s.price * 1.2),
+    price:         s.price,
+    stock:         s.stock,
+  }))
+}
+
+/**
+ * 用 computed 包起來，讓 productCatalog 透過 addToCatalog 新增條目時 picker 自動同步。
+ *
+ * specs 來源優先序：
+ * 1. 商品管理裡有對應 ManagedProduct 且帶多規格 → 沿用 MP 的規格（保持商品列表 ↔ picker 一致）
+ * 2. 否則 fallback 到內建 pickerSpecsMap（舊 mock 商品 1~11 走這條）
+ */
 const allPickerProducts = computed<PickerProduct[]>(() =>
-  productCatalog.map((p) => ({
-    ...p,
-    cost:          Math.round(p.price * 0.6),
-    originalPrice: Math.round(p.price * 1.2),
-    specs:         pickerSpecsMap[p.id] ?? [],
-  })),
+  productCatalog.map((p) => {
+    const mp = managedProducts.find((m) => m.id === p.id)
+    const mpSpecs = mp ? adaptManagedSpecs(mp) : []
+    const specs = mpSpecs.length > 0 ? mpSpecs : (pickerSpecsMap[p.id] ?? [])
+    return {
+      ...p,
+      cost:          Math.round(p.price * 0.6),
+      originalPrice: Math.round(p.price * 1.2),
+      specs,
+    }
+  }),
 )
 
 const pickerCategory = ref<string | null>(null)

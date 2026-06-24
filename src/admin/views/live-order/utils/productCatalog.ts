@@ -17,20 +17,22 @@ export interface CatalogProduct {
   price: number
   stock: number
   status: string
+  /** 直播關鍵字（從商品管理那邊的「直播關鍵字」同步過來；空字串代表未設定） */
+  keyword?: string
 }
 
 export const productCatalog: CatalogProduct[] = reactive([
-  { id: 1,  name: 'iPhone 15 Pro 保護殼',    sku: 'ACC-IP15P-001', category: '配件',     price: 490,   stock: 85,  status: '上架中' },
-  { id: 2,  name: 'Sony WH-1000XM5 耳機',    sku: 'AUD-SONY-005',  category: '耳機',     price: 9900,  stock: 12,  status: '上架中' },
-  { id: 3,  name: 'Nintendo Switch 主機',    sku: 'GAM-NSW-001',   category: '電玩周邊', price: 9800,  stock: 6,   status: '上架中' },
-  { id: 4,  name: 'PS5 DualSense 控制器',    sku: 'GAM-PS5-002',   category: '電玩周邊', price: 2190,  stock: 0,   status: '已下架' },
-  { id: 5,  name: 'Samsung 65" QLED 電視',   sku: '3C-SAM-TV65',   category: '3C 電子',  price: 42900, stock: 3,   status: '上架中' },
-  { id: 6,  name: 'Apple Watch S9 錶帶',     sku: 'ACC-AW9-003',   category: '配件',     price: 890,   stock: 120, status: '上架中' },
-  { id: 7,  name: 'Razer 機械鍵盤',          sku: 'GAM-RZR-010',   category: '電玩周邊', price: 3500,  stock: 8,   status: '上架中' },
-  { id: 8,  name: 'JBL Flip 6 藍牙喇叭',     sku: 'AUD-JBL-006',   category: '耳機',     price: 2990,  stock: 25,  status: '已下架' },
-  { id: 9,  name: 'iPad Pro M2 螢幕保護貼',  sku: 'ACC-IPD-007',   category: '配件',     price: 350,   stock: 200, status: '上架中' },
-  { id: 10, name: 'ASUS ROG 電競滑鼠',       sku: 'GAM-ROG-008',   category: '電玩周邊', price: 1890,  stock: 10,  status: '已下架' },
-  { id: 11, name: '經典素色棉質 T 恤',        sku: 'CLO-TS-001',    category: '服飾',     price: 490,   stock: 138, status: '上架中' },
+  { id: 1,  name: 'iPhone 15 Pro 保護殼',    sku: 'ACC-IP15P-001', category: '配件',     price: 490,   stock: 85,  status: '上架中', keyword: 'IP15P' },
+  { id: 2,  name: 'Sony WH-1000XM5 耳機',    sku: 'AUD-SONY-005',  category: '耳機',     price: 9900,  stock: 12,  status: '上架中', keyword: 'SONY5' },
+  { id: 3,  name: 'Nintendo Switch 主機',    sku: 'GAM-NSW-001',   category: '電玩周邊', price: 9800,  stock: 6,   status: '上架中', keyword: 'NSW' },
+  { id: 4,  name: 'PS5 DualSense 控制器',    sku: 'GAM-PS5-002',   category: '電玩周邊', price: 2190,  stock: 0,   status: '已下架', keyword: 'PS5' },
+  { id: 5,  name: 'Samsung 65" QLED 電視',   sku: '3C-SAM-TV65',   category: '3C 電子',  price: 42900, stock: 3,   status: '上架中', keyword: 'TV65' },
+  { id: 6,  name: 'Apple Watch S9 錶帶',     sku: 'ACC-AW9-003',   category: '配件',     price: 890,   stock: 120, status: '上架中', keyword: 'AW9' },
+  { id: 7,  name: 'Razer 機械鍵盤',          sku: 'GAM-RZR-010',   category: '電玩周邊', price: 3500,  stock: 8,   status: '上架中', keyword: 'RZR' },
+  { id: 8,  name: 'JBL Flip 6 藍牙喇叭',     sku: 'AUD-JBL-006',   category: '耳機',     price: 2990,  stock: 25,  status: '已下架', keyword: 'JBL6' },
+  { id: 9,  name: 'iPad Pro M2 螢幕保護貼',  sku: 'ACC-IPD-007',   category: '配件',     price: 350,   stock: 200, status: '上架中', keyword: 'IPAD' },
+  { id: 10, name: 'ASUS ROG 電競滑鼠',       sku: 'GAM-ROG-008',   category: '電玩周邊', price: 1890,  stock: 10,  status: '已下架', keyword: 'ROG' },
+  { id: 11, name: '經典素色棉質 T 恤',        sku: 'CLO-TS-001',    category: '服飾',     price: 490,   stock: 138, status: '上架中', keyword: 'TEE' },
 ])
 
 /** 正規化名稱供比對：去頭尾空白、轉小寫。 */
@@ -116,3 +118,8 @@ export const bundleCatalog: CatalogBundle[] = reactive([
     ],
   },
 ])
+
+/** 把新組合商品 push 進 reactive bundleCatalog（給商品管理同步用）。 */
+export function addToBundleCatalog(b: CatalogBundle): void {
+  bundleCatalog.push(b)
+}

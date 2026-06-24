@@ -1,27 +1,44 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import { useConfirm } from 'primevue/useconfirm'
 import { RouteName } from '@/admin/router'
-import { PRODUCT_CATEGORIES, PRODUCT_TAGS } from './utils/productMock'
+import {
+  managedProducts,
+  PRODUCT_CATEGORIES,
+  PRODUCT_TAGS,
+  addManagedProduct,
+  syncManagedProduct,
+  totalStockOf,
+  type ManagedBundleItem,
+  type ManagedProduct,
+} from './utils/productMock'
 import PromoteTable, { type PromoteData } from './components/PromoteTable.vue'
 import MultiImageUploader, { type UploaderItem } from './components/MultiImageUploader.vue'
 import BundleContentsCard, { type BundleItem } from './components/BundleContentsCard.vue'
 import AISuggestPanel, { type AiApplyPayload } from './components/AISuggestPanel.vue'
 
 /**
- * 新增組合商品頁面（mirror 編輯商品頁版型，但：
+ * 新增 / 編輯組合商品頁面（與 ProductUpdatePage 同樣 dual-mode：route.name 判 create / update）：
  * - 商品名稱 / 商品介紹 → 組合商品名稱 / 組合商品介紹
- * - 規格設定 / 銷售設定 → 組合商品內容 Card（含子商品表 + 備註）
+ * - 規格設定 / 銷售設定 → 組合商品內容 Card（子商品表 + 備註）；
+ *   表內每列「商品名稱」= 子商品的商品名稱（由 productId 反查 managedProducts）
  * - 商品詳情 Card 移除（備註已併入組合商品內容）
- *
- * 走 mock：onSave 只跳 toast，不真的 push 到 productMock。
  */
 
+const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const confirm = useConfirm()
+
+/** route name = bundle.update 視為編輯模式；否則為新增 */
+const isUpdateMode = computed(() => route.name === RouteName.ProductBundleUpdate)
+const productId = computed(() => Number(route.params.id))
+const original = computed<ManagedProduct | undefined>(() =>
+  managedProducts.find((p) => p.id === productId.value),
+)
+const pageTitle = computed(() => isUpdateMode.value ? '編輯組合商品' : '新增組合商品')
 
 interface FormState {
   name: string
@@ -37,22 +54,77 @@ interface FormState {
   promote: PromoteData
 }
 
-const form = ref<FormState>({
-  name: '',
-  category: '',
-  keyword: '',
-  tags: [],
-  enableCoupon: false,
-  weight: 0,
-  description: '',
-  images: [],
-  bundleItems: [
-    { key: 'p-1001', productId: 1001, name: '新款 秋冬慵懶軟糯毛衣 吊帶連衣裙套裝(外套)', stock: 60, quantity: 1, maxPerPurchase: null },
-    { key: 'p-1002', productId: 1002, name: '秋冬加絨加厚雷絲拼接假兩件 連衣裙 遮胖顯瘦長裙', stock: 9, quantity: 1, maxPerPurchase: 3 },
-    { key: 'p-1003', productId: 1003, name: '秋冬加厚寬鬆 連衣裙加絨長款連帽衣', stock: 5, quantity: 2, maxPerPurchase: null },
-  ],
-  bundleRemark: '',
-  promote: { startAt: null, endAt: null, tiers: [] },
+const form = ref<FormState>(emptyForm())
+
+function emptyForm(): FormState {
+  return {
+    name: '',
+    category: '',
+    keyword: '',
+    tags: [],
+    enableCoupon: false,
+    weight: 0,
+    description: '',
+    images: [],
+    bundleItems: [],
+    bundleRemark: '',
+    promote: { startAt: null, endAt: null, tiers: [] },
+  }
+}
+
+/**
+ * 把 MP.bundleItems 投影成 BundleContentsCard 用的 BundleItem：
+ * - 反查 managedProducts / productCatalog 拿到「商品名稱」與庫存
+ * - key 比照 BundleContentsCard 慣例：單一商品 `p-{productId}`、規格 `s-{productId}-{specId}`
+ */
+function adaptBundleItems(p: ManagedProduct): BundleItem[] {
+  return (p.bundleItems ?? []).map((it) => {
+    const child = managedProducts.find((m) => m.id === it.productId)
+    const spec = it.specId && child
+      ? child.specs.find((s) => s.id === it.specId)
+      : undefined
+    const name = spec
+      ? `${child?.name ?? ''} - ${spec.name}`
+      : (child?.name ?? `商品 #${it.productId}`)
+    const stock = spec
+      ? spec.stock
+      : (child ? totalStockOf(child) : 0)
+    const key = it.specId
+      ? `s-${it.productId}-${it.specId}`
+      : `p-${it.productId}`
+    return {
+      key,
+      productId: it.productId,
+      specId:    it.specId,
+      name,
+      stock,
+      quantity: it.qty,
+      maxPerPurchase: it.maxPerPurchase ?? null,
+    }
+  })
+}
+
+onMounted(() => {
+  if (!isUpdateMode.value) return
+  const p = original.value
+  if (!p || p.kind !== 'bundle') {
+    toast.add({ severity: 'warn', summary: '找不到組合商品', life: 1800 })
+    router.replace({ name: RouteName.ProductList })
+    return
+  }
+  form.value = {
+    name: p.name,
+    category: p.category,
+    keyword: p.keyword ?? '',
+    tags: [...(p.tags ?? [])],
+    enableCoupon: p.enableCoupon ?? false,
+    weight: p.weight ?? 0,
+    description: p.description ?? '',
+    images: (p.images ?? []).map((img) => ({ ...img })),
+    bundleItems: adaptBundleItems(p),
+    bundleRemark: p.remark ?? '',
+    promote: { startAt: null, endAt: null, tiers: [] },
+  }
 })
 
 const categoryOptions = PRODUCT_CATEGORIES.map((c) => ({ label: c, value: c }))
@@ -64,7 +136,7 @@ function backToList(): void {
 
 function onCancel(): void {
   confirm.require({
-    header: '取消新增',
+    header: isUpdateMode.value ? '取消編輯' : '取消新增',
     message: '尚未儲存的內容會遺失，確定離開？',
     icon: 'pi pi-exclamation-triangle',
     acceptLabel: '離開',
@@ -79,7 +151,60 @@ function onSave(): void {
     toast.add({ severity: 'warn', summary: '請輸入組合商品名稱', life: 1500 })
     return
   }
-  // prototype: 不真的寫入 managedProducts，跳 toast + 回列表
+  const bundleItems: ManagedBundleItem[] = form.value.bundleItems.map((it) => ({
+    productId: it.productId,
+    specId:    it.specId,
+    qty:       it.quantity,
+    maxPerPurchase: it.maxPerPurchase,
+  }))
+  // 組合商品：庫存以 min(子商品 stock) 預估
+  const bundleStock = form.value.bundleItems.length
+    ? Math.min(...form.value.bundleItems.map((it) => it.stock))
+    : 0
+
+  if (isUpdateMode.value) {
+    const p = original.value
+    if (!p) return
+    p.name = form.value.name.trim()
+    p.category = form.value.category
+    p.keyword = form.value.keyword.trim()
+    p.tags = [...form.value.tags]
+    p.enableCoupon = form.value.enableCoupon
+    p.weight = form.value.weight
+    p.description = form.value.description
+    p.remark = form.value.bundleRemark
+    p.images = form.value.images.map((img) => ({ ...img }))
+    p.bundleItems = bundleItems
+    p.bundleStock = bundleStock
+    // 保留既有 bundlePrice；如未設過則沿用 0
+    p.bundlePrice = p.bundlePrice ?? 0
+    p.specs = [{ id: p.specs[0]?.id ?? Date.now(), name: '單一規格', stock: bundleStock, price: p.bundlePrice ?? 0 }]
+    syncManagedProduct(p.id)
+    toast.add({ severity: 'success', summary: '已儲存組合商品變更', detail: p.name, life: 2000 })
+    backToList()
+    return
+  }
+
+  const newId = Date.now()
+  addManagedProduct({
+    id: newId,
+    name: form.value.name.trim(),
+    category: form.value.category,
+    status: 'on_shelf',
+    kind: 'bundle',
+    totalSold: 0,
+    keyword: form.value.keyword.trim(),
+    tags: [...form.value.tags],
+    enableCoupon: form.value.enableCoupon,
+    weight: form.value.weight,
+    description: form.value.description,
+    remark: form.value.bundleRemark,
+    images: form.value.images.map((img) => ({ ...img })),
+    specs: [{ id: newId + 1, name: '單一規格', stock: bundleStock, price: 0 }],
+    bundleItems,
+    bundlePrice: 0,
+    bundleStock,
+  })
   toast.add({ severity: 'success', summary: '已建立組合商品', detail: form.value.name, life: 2000 })
   backToList()
 }
@@ -156,7 +281,7 @@ function applyAi(payload: AiApplyPayload): void {
         text
         @click="backToList"
       />
-      <h2 class="cursor-default text-2xl font-bold text-neutral-700 dark:text-neutral-100">新增組合商品</h2>
+      <h2 class="cursor-default text-2xl font-bold text-neutral-700 dark:text-neutral-100">{{ pageTitle }}</h2>
 
       <div class="ml-auto flex items-center gap-2 text-sm">
         <button
@@ -164,7 +289,7 @@ function applyAi(payload: AiApplyPayload): void {
           @click="backToList"
         >商品管理</button>
         <i class="pi pi-chevron-right text-color-secondary" style="font-size: 10px"></i>
-        <span class="text-primary cursor-default">新增組合商品</span>
+        <span class="text-primary cursor-default">{{ pageTitle }}</span>
       </div>
     </div>
 
@@ -256,7 +381,7 @@ function applyAi(payload: AiApplyPayload): void {
     <!-- 底部 sticky 操作列 -->
     <div class="flex items-center justify-end gap-2 pt-3 border-t border-[var(--p-content-border-color)] bg-[var(--p-content-background)]">
       <Button label="取消" severity="secondary" outlined @click="onCancel" />
-      <Button label="建立組合商品" icon="pi pi-save" @click="onSave" />
+      <Button :label="isUpdateMode ? '儲存變更' : '建立組合商品'" icon="pi pi-save" @click="onSave" />
     </div>
 
     <AISuggestPanel

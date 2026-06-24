@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
@@ -8,6 +8,7 @@ import type { MenuItem } from 'primevue/menuitem'
 import { RouteName } from '@/admin/router'
 import {
   managedProducts,
+  removeManagedProducts,
   totalStockOf,
   priceRangeOf,
   type ManagedProduct,
@@ -31,17 +32,27 @@ const toast = useToast()
 const router = useRouter()
 
 const keyword = ref('')
-const products = ref<ManagedProduct[]>(managedProducts)
+// 直接讀共用 managedProducts（reactive）；刪除走 removeManagedProducts 同步收單 catalog
+const products = managedProducts
 const selectedIds = ref<Set<number>>(new Set())
 const expandedIds = ref<Set<number>>(new Set(managedProducts.map(p => p.id))) // 預設全展開比照 Figma
 
 const filteredProducts = computed(() => {
   const k = keyword.value.trim().toLowerCase()
-  if (!k) return products.value
-  return products.value.filter((p) =>
+  if (!k) return products
+  return products.filter((p) =>
     p.name.toLowerCase().includes(k) || p.category.toLowerCase().includes(k),
   )
 })
+
+// ── 分頁：一頁 10 筆 ─────────────────────────────
+const PAGE_SIZE = 10
+const pageFirst = ref(0)
+const pagedProducts = computed(() =>
+  filteredProducts.value.slice(pageFirst.value, pageFirst.value + PAGE_SIZE),
+)
+// 篩選改變時回到第 1 頁（避免空頁）
+watch(filteredProducts, () => { pageFirst.value = 0 })
 
 function statusMeta(status: ProductStatus): { label: string; bg: string; color: string } {
   if (status === 'on_shelf') return { label: '上架', bg: '#e0d0fc', color: '#3d0f91' }
@@ -79,7 +90,7 @@ function onBatchDelete(): void {
     acceptClass: 'p-button-danger',
     accept: () => {
       const ids = selectedIds.value
-      products.value = products.value.filter((p) => !ids.has(p.id))
+      removeManagedProducts(ids)
       toast.add({ severity: 'success', summary: `已刪除 ${ids.size} 筆商品`, life: 1500 })
       selectedIds.value = new Set()
     },
@@ -97,7 +108,9 @@ function onView(p: ManagedProduct): void {
   toast.add({ severity: 'info', summary: `檢視「${p.name}」`, life: 1500 })
 }
 function onEdit(p: ManagedProduct): void {
-  router.push({ name: RouteName.ProductUpdate, params: { id: p.id } })
+  // 組合商品走組合商品編輯頁；一般商品走一般商品編輯頁
+  const name = p.kind === 'bundle' ? RouteName.ProductBundleUpdate : RouteName.ProductUpdate
+  router.push({ name, params: { id: p.id } })
 }
 function onDelete(p: ManagedProduct, event: Event): void {
   confirm.require({
@@ -109,7 +122,7 @@ function onDelete(p: ManagedProduct, event: Event): void {
     rejectLabel: '取消',
     acceptClass: 'p-button-danger',
     accept: () => {
-      products.value = products.value.filter((x) => x.id !== p.id)
+      removeManagedProducts([p.id])
       toast.add({ severity: 'success', summary: `已刪除「${p.name}」`, life: 1500 })
     },
   })
@@ -127,6 +140,29 @@ function openMore(p: ManagedProduct, event: Event): void {
   moreMenuRef.value?.toggle(event)
 }
 
+/**
+ * 組合商品展開時要顯示的子商品列：依 MP.bundleItems 反查 managedProducts，
+ * 拿到子商品的「商品名稱」、庫存與單價（有 specId → 走規格層；否則走總庫存 + 規格最小價）。
+ */
+interface BundleRow { id: number | string; name: string; stock: number; price: number }
+function bundleRowsOf(p: ManagedProduct): BundleRow[] {
+  if (p.kind !== 'bundle') return []
+  return (p.bundleItems ?? []).map((it) => {
+    const child = managedProducts.find((m) => m.id === it.productId)
+    const spec = it.specId && child
+      ? child.specs.find((s) => s.id === it.specId)
+      : undefined
+    const name = spec
+      ? `${child?.name ?? `商品 #${it.productId}`} - ${spec.name}`
+      : (child?.name ?? `商品 #${it.productId}`)
+    const stock = spec ? spec.stock : (child ? totalStockOf(child) : 0)
+    const price = spec
+      ? spec.price
+      : (child && child.specs.length ? Math.min(...child.specs.map((s) => s.price)) : 0)
+    return { id: spec?.id ?? it.productId, name, stock, price }
+  })
+}
+
 // 批量調整庫存 dialog（庫存欄旁 pencil icon 開啟）
 const stockDialogVisible = ref(false)
 const stockDialogProduct = ref<ManagedProduct | null>(null)
@@ -135,7 +171,7 @@ function openStockAdjust(p: ManagedProduct): void {
   stockDialogVisible.value = true
 }
 function onStockAdjustSave(payload: StockAdjustmentPayload): void {
-  const target = products.value.find((p) => p.id === payload.productId)
+  const target = products.find((p) => p.id === payload.productId)
   if (!target) return
   let changed = 0
   payload.adjustments.forEach((a) => {
@@ -184,7 +220,7 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
     <!-- 商品卡列表 -->
     <div class="flex flex-col gap-3 flex-1 min-h-0 overflow-y-auto">
       <Card
-        v-for="p in filteredProducts"
+        v-for="p in pagedProducts"
         :key="p.id"
         :pt="{
           root: { class: 'w-full' },
@@ -193,10 +229,15 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
         }"
       >
         <template #content>
-          <!-- Header：checkbox + 名稱 + 狀態 tag + 動作 -->
+          <!-- Header：checkbox + 名稱 (+ 組合 tag) + 狀態 tag + 動作 -->
           <div class="flex items-center gap-3 px-4 py-3">
             <Checkbox :model-value="isSelected(p.id)" binary @change="toggleSelect(p.id)" />
             <span class="font-bold text-[15px] text-[var(--p-text-color)]">{{ p.name }}</span>
+            <span
+              v-if="p.kind === 'bundle'"
+              v-tooltip.top="'組合商品'"
+              class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none bg-[#dcfce7] text-[#15803d]"
+            >組</span>
             <span
               class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none"
               :style="{ background: statusMeta(p.status).bg, color: statusMeta(p.status).color }"
@@ -261,14 +302,18 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
             </div>
           </div>
 
-          <!-- 展開：規格 table -->
+          <!-- 展開：一般商品 → 規格 table；組合商品 → 子商品 table -->
           <div v-if="isExpanded(p.id)" class="px-4 py-3">
+            <!-- 表頭：bundle 走「商品名稱」+ 不顯示批量調整庫存 pencil -->
             <div class="grid items-center gap-4 px-2 pb-2 border-b border-[var(--p-content-border-color)]"
                  style="grid-template-columns: 1fr 100px 100px">
-              <span class="text-[13px] font-semibold text-[var(--p-text-color)]">規格名稱</span>
+              <span class="text-[13px] font-semibold text-[var(--p-text-color)]">
+                {{ p.kind === 'bundle' ? '商品名稱' : '規格名稱' }}
+              </span>
               <span class="text-[13px] font-semibold text-[var(--p-text-color)] text-right inline-flex items-center justify-end gap-1.5">
                 庫存
                 <button
+                  v-if="p.kind !== 'bundle'"
                   v-tooltip.top="'批量調整庫存'"
                   class="inline-flex items-center justify-center text-[var(--p-primary-color)] hover:bg-[var(--p-primary-50)] rounded-[4px] p-1"
                   @click="openStockAdjust(p)"
@@ -278,17 +323,41 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
               </span>
               <span class="text-[13px] font-semibold text-[var(--p-text-color)] text-right">價格</span>
             </div>
-            <div
-              v-for="(s, i) in p.specs"
-              :key="s.id"
-              class="grid items-center gap-4 px-2 py-2.5"
-              :class="i < p.specs.length - 1 ? 'border-b border-[var(--p-content-border-color)]' : ''"
-              style="grid-template-columns: 1fr 100px 100px"
-            >
-              <span class="text-[13px] text-[var(--p-text-color)]">{{ s.name }}</span>
-              <span class="text-[13px] text-[var(--p-text-color)] text-right">{{ s.stock }}</span>
-              <span class="text-[13px] text-[var(--p-text-color)] text-right">${{ s.price.toLocaleString() }}</span>
-            </div>
+
+            <!-- 一般商品：列出規格 -->
+            <template v-if="p.kind !== 'bundle'">
+              <div
+                v-for="(s, i) in p.specs"
+                :key="s.id"
+                class="grid items-center gap-4 px-2 py-2.5"
+                :class="i < p.specs.length - 1 ? 'border-b border-[var(--p-content-border-color)]' : ''"
+                style="grid-template-columns: 1fr 100px 100px"
+              >
+                <span class="text-[13px] text-[var(--p-text-color)]">{{ s.name }}</span>
+                <span class="text-[13px] text-[var(--p-text-color)] text-right">{{ s.stock }}</span>
+                <span class="text-[13px] text-[var(--p-text-color)] text-right">${{ s.price.toLocaleString() }}</span>
+              </div>
+            </template>
+
+            <!-- 組合商品：列出子商品（商品名稱 / 庫存 / 價格） -->
+            <template v-else>
+              <template v-if="bundleRowsOf(p).length">
+                <div
+                  v-for="(r, i) in bundleRowsOf(p)"
+                  :key="r.id"
+                  class="grid items-center gap-4 px-2 py-2.5"
+                  :class="i < bundleRowsOf(p).length - 1 ? 'border-b border-[var(--p-content-border-color)]' : ''"
+                  style="grid-template-columns: 1fr 100px 100px"
+                >
+                  <span class="text-[13px] text-[var(--p-text-color)]">{{ r.name }}</span>
+                  <span class="text-[13px] text-[var(--p-text-color)] text-right">{{ r.stock }}</span>
+                  <span class="text-[13px] text-[var(--p-text-color)] text-right">${{ r.price.toLocaleString() }}</span>
+                </div>
+              </template>
+              <div v-else class="text-center text-[13px] text-[var(--p-text-muted-color)] py-3">
+                尚未設定子商品
+              </div>
+            </template>
           </div>
         </template>
       </Card>
@@ -298,6 +367,17 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
         <span class="text-[14px]">沒有符合條件的商品</span>
       </div>
     </div>
+
+    <!-- 分頁列：一頁 10 筆，少於一頁時不顯示 -->
+    <Paginator
+      v-if="filteredProducts.length > PAGE_SIZE"
+      v-model:first="pageFirst"
+      :rows="PAGE_SIZE"
+      :total-records="filteredProducts.length"
+      template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+      current-page-report-template="{first} - {last} / 共 {totalRecords} 筆"
+      class="!bg-transparent !p-0"
+    />
 
     <Menu id="product-more-menu" ref="moreMenuRef" :model="moreMenuItems" :popup="true" />
 
