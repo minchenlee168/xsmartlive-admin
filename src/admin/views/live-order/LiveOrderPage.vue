@@ -257,6 +257,8 @@
               severity="danger"
               outlined
               size="small"
+              :disabled="isPostOrderNotStarted"
+              v-tooltip.top="isPostOrderNotStarted ? '收單尚未開始，無法結束' : undefined"
               @click="askEndAllProducts"
             >
               <template #item="{ item, props: itemProps }">
@@ -499,6 +501,15 @@ const enteredPostId = ref<number | null>(null)
 const currentEnteredPost = computed<PostCollection | undefined>(() => {
   if (!isPostMode.value || enteredPostId.value == null) return undefined
   return postCollections.value.find((p) => p.id === enteredPostId.value)
+})
+
+/**
+ * 貼文 / 社團模式下，當下進入的這筆收單還沒開始（status = 'ready'）。
+ * 用來讓「結束收單」按鈕在還沒開始前 disable — 直播模式不適用。
+ */
+const isPostOrderNotStarted = computed(() => {
+  if (!isPostMode.value) return false
+  return currentEnteredPost.value?.status === 'ready'
 })
 
 // 一鍵結束收單 SplitButton 下拉：一鍵開始 / 一鍵停止 / 移除無收單商品
