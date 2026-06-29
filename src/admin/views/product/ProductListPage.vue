@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import type { MenuItem } from 'primevue/menuitem'
-import { RouteName } from '@/admin/router'
 import {
   managedProducts,
   removeManagedProducts,
@@ -31,9 +29,11 @@ import ProductBundleCreateDialog from './components/ProductBundleCreateDialog.vu
 
 const confirm = useConfirm()
 const toast = useToast()
-const router = useRouter()
 
 const keyword = ref('')
+// 商品類型篩選：兩個都勾或都不勾 → 顯示全部；只勾一個 → 只顯示那一類
+const filterNormal = ref(false)
+const filterBundle = ref(false)
 // 直接讀共用 managedProducts（reactive）；刪除走 removeManagedProducts 同步收單 catalog
 const products = managedProducts
 const selectedIds = ref<Set<number>>(new Set())
@@ -41,10 +41,15 @@ const expandedIds = ref<Set<number>>(new Set(managedProducts.map(p => p.id))) //
 
 const filteredProducts = computed(() => {
   const k = keyword.value.trim().toLowerCase()
-  if (!k) return products
-  return products.filter((p) =>
-    p.name.toLowerCase().includes(k) || p.category.toLowerCase().includes(k),
-  )
+  const onlyOneKind = filterNormal.value !== filterBundle.value
+  return products.filter((p) => {
+    if (onlyOneKind) {
+      if (filterNormal.value && p.kind !== 'normal') return false
+      if (filterBundle.value && p.kind !== 'bundle') return false
+    }
+    if (!k) return true
+    return p.name.toLowerCase().includes(k) || p.category.toLowerCase().includes(k)
+  })
 })
 
 // ── 分頁：一頁 10 筆 ─────────────────────────────
@@ -99,29 +104,51 @@ function onBatchDelete(): void {
   })
 }
 
-// 新增一般 / 組合商品都改用彈窗（與收單頁 picker footer 的入口共用 ProductCreateDialog / ProductBundleCreateDialog）
-const productCreateDialogVisible = ref(false)
-const bundleCreateDialogVisible = ref(false)
-function onAddBundle(): void {
-  bundleCreateDialogVisible.value = true
-}
+// 新增 / 編輯（一般 + 組合）都用彈窗：未帶 productId = 新增、帶 id = 編輯
+const productDialogVisible = ref(false)
+const productDialogTargetId = ref<number | undefined>(undefined)
+const productDialogReadonly = ref(false)
+const bundleDialogVisible = ref(false)
+const bundleDialogTargetId = ref<number | undefined>(undefined)
+const bundleDialogReadonly = ref(false)
+
 function onAddNormal(): void {
-  productCreateDialogVisible.value = true
+  productDialogTargetId.value = undefined
+  productDialogReadonly.value = false
+  productDialogVisible.value = true
 }
-function onProductCreated(p: ManagedProduct): void {
-  toast.add({ severity: 'success', summary: `已建立商品「${p.name}」`, life: 1800 })
+function onAddBundle(): void {
+  bundleDialogTargetId.value = undefined
+  bundleDialogReadonly.value = false
+  bundleDialogVisible.value = true
 }
-function onBundleCreated(p: ManagedProduct): void {
-  toast.add({ severity: 'success', summary: `已建立組合商品「${p.name}」`, life: 1800 })
-}
+// page 內已 toast，這裡不再重複跳訊息（避免「儲存變更」一次跳兩個 message）
+function onProductSaved(_p: ManagedProduct): void {}
+function onBundleSaved(_p: ManagedProduct): void {}
 
 function onView(p: ManagedProduct): void {
-  toast.add({ severity: 'info', summary: `檢視「${p.name}」`, life: 1500 })
+  // 檢視模式 = 編輯彈窗 + readonly（鎖住所有輸入、footer 只剩關閉）
+  if (p.kind === 'bundle') {
+    bundleDialogTargetId.value = p.id
+    bundleDialogReadonly.value = true
+    bundleDialogVisible.value = true
+  } else {
+    productDialogTargetId.value = p.id
+    productDialogReadonly.value = true
+    productDialogVisible.value = true
+  }
 }
 function onEdit(p: ManagedProduct): void {
-  // 組合商品走組合商品編輯頁；一般商品走一般商品編輯頁
-  const name = p.kind === 'bundle' ? RouteName.ProductBundleUpdate : RouteName.ProductUpdate
-  router.push({ name, params: { id: p.id } })
+  // 一般 / 組合商品都改用彈窗編輯（取代原本的 router.push 跳頁）
+  if (p.kind === 'bundle') {
+    bundleDialogTargetId.value = p.id
+    bundleDialogReadonly.value = false
+    bundleDialogVisible.value = true
+  } else {
+    productDialogTargetId.value = p.id
+    productDialogReadonly.value = false
+    productDialogVisible.value = true
+  }
 }
 function onDelete(p: ManagedProduct, event: Event): void {
   confirm.require({
@@ -204,18 +231,27 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
   <div class="flex flex-col gap-4 flex-1 min-h-0">
     <!-- 頁首：標題 + 搜尋 + 右側動作 -->
     <div class="flex items-center justify-between gap-3 flex-wrap">
-      <div class="flex items-center gap-4 flex-1 min-w-0">
+      <div class="flex items-center gap-4 flex-1 min-w-0 flex-wrap">
         <h2 class="text-[20px] font-medium text-[var(--p-text-color)] shrink-0">商品列表</h2>
         <div class="flex items-center" style="filter: drop-shadow(0px 1px 1px rgba(18,18,23,0.05))">
           <InputGroup>
             <InputText
               v-model="keyword"
-              placeholder="快速搜尋您的組合商品"
+              placeholder="快速搜尋您的商品"
               class="!w-[320px]"
             />
             <Button label="搜尋" />
           </InputGroup>
         </div>
+        <!-- 商品類型篩選：一般商品 / 組合商品（兩個都勾或都不勾 = 顯示全部） -->
+        <label class="flex items-center gap-1.5 text-[14px] cursor-pointer">
+          <Checkbox v-model="filterNormal" binary />
+          <span>一般商品</span>
+        </label>
+        <label class="flex items-center gap-1.5 text-[14px] cursor-pointer">
+          <Checkbox v-model="filterBundle" binary />
+          <span>組合商品</span>
+        </label>
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <Button label="批次刪除" icon="pi pi-trash" severity="danger" variant="outlined" @click="onBatchDelete" />
@@ -319,7 +355,9 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
             <div class="grid items-center gap-4 px-2 pb-2 border-b border-[var(--p-content-border-color)]"
                  style="grid-template-columns: 1fr 100px 100px">
               <span class="text-[13px] font-semibold text-[var(--p-text-color)]">
-                {{ p.kind === 'bundle' ? '商品名稱' : '規格名稱' }}
+                <!-- 一般商品：用 specGroupNames[0] 當欄位名（同編輯頁規格表「圖片」旁邊的欄位名稱）；
+                     沒設過 → 退回「規格名稱」字眼 -->
+                {{ p.kind === 'bundle' ? '商品名稱' : (p.specGroupNames?.[0] || '規格名稱') }}
               </span>
               <span class="text-[13px] font-semibold text-[var(--p-text-color)] text-right inline-flex items-center justify-end gap-1.5">
                 庫存
@@ -398,14 +436,18 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
       @save="onStockAdjustSave"
     />
 
-    <!-- 新增一般 / 組合商品彈窗（與收單頁 picker footer 入口共用） -->
+    <!-- 新增 / 編輯 / 檢視 彈窗：帶 productId = 編輯，沒帶 = 新增，readonly = 純檢視 -->
     <ProductCreateDialog
-      v-model:visible="productCreateDialogVisible"
-      @created="onProductCreated"
+      v-model:visible="productDialogVisible"
+      :product-id="productDialogTargetId"
+      :readonly="productDialogReadonly"
+      @saved="onProductSaved"
     />
     <ProductBundleCreateDialog
-      v-model:visible="bundleCreateDialogVisible"
-      @created="onBundleCreated"
+      v-model:visible="bundleDialogVisible"
+      :product-id="bundleDialogTargetId"
+      :readonly="bundleDialogReadonly"
+      @saved="onBundleSaved"
     />
   </div>
 </template>

@@ -70,12 +70,12 @@ const isPeriodInvalid = computed(() =>
   <Card>
     <template #title>多件優惠</template>
     <template #content>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+      <!-- 優惠開始 / 結束日期 + 新增區間：檢視模式整列隱藏 -->
+      <div v-if="!readonly" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
         <div class="flex flex-col gap-1.5">
           <label class="text-sm font-bold text-color">優惠開始</label>
           <DatePicker
             v-model="promote.startAt"
-            :disabled="readonly"
             show-time
             hour-format="24"
             date-format="yy-mm-dd"
@@ -86,7 +86,6 @@ const isPeriodInvalid = computed(() =>
           <label class="text-sm font-bold text-color">優惠結束</label>
           <DatePicker
             v-model="promote.endAt"
-            :disabled="readonly"
             :min-date="endAtMinDate"
             :invalid="isPeriodInvalid"
             show-time
@@ -95,7 +94,7 @@ const isPeriodInvalid = computed(() =>
             fluid
           />
         </div>
-        <div v-if="!readonly" class="mt-auto">
+        <div class="mt-auto">
           <Button label="新增區間" icon="pi pi-plus" @click="addTier" />
         </div>
       </div>
@@ -113,33 +112,36 @@ const isPeriodInvalid = computed(() =>
           <tr v-for="(tier, i) in promote.tiers" :key="i">
             <td class="border border-surface p-2">
               <InputNumber
+                v-if="!readonly"
                 v-model="tier.min"
                 :min="previousTierMax(i) + 1"
                 :invalid="tier.min <= previousTierMax(i)"
-                :disabled="readonly"
                 class="w-full"
               />
+              <span v-else class="text-sm">{{ tier.min }}</span>
             </td>
             <td class="border border-surface p-2">
               <InputNumber
+                v-if="!readonly"
                 v-model="tier.max"
                 :min="1"
                 :invalid="tier.max <= tier.min || tier.max <= previousTierMax(i)"
-                :disabled="readonly"
                 class="w-full"
               />
+              <span v-else class="text-sm">{{ tier.max }}</span>
             </td>
             <td class="border border-surface p-2">
               <InputNumber
+                v-if="!readonly"
                 v-model="tier.discount"
                 mode="currency"
                 currency="TWD"
                 locale="zh-TW"
                 :min="0"
                 :invalid="tier.discount === 0"
-                :disabled="readonly"
                 class="w-full"
               />
+              <span v-else class="text-sm">NT$ {{ tier.discount.toLocaleString() }}</span>
             </td>
             <td v-if="!readonly" class="border border-surface p-2">
               <button
@@ -154,8 +156,12 @@ const isPeriodInvalid = computed(() =>
             </td>
           </tr>
           <tr v-if="!promote.tiers.length">
-            <td colspan="4" class="border border-surface p-4 text-center text-sm text-color-secondary">
-              尚未設定多件優惠，按右上「新增區間」加入。
+            <!-- 檢視模式無「操作」欄 → colspan = 3；編輯模式 → colspan = 4 -->
+            <td
+              :colspan="readonly ? 3 : 4"
+              class="border border-surface p-4 text-center text-sm text-color-secondary"
+            >
+              {{ readonly ? '未設定多件優惠' : '尚未設定多件優惠，按右上「新增區間」加入。' }}
             </td>
           </tr>
         </tbody>

@@ -12,6 +12,7 @@ export const RouteName = {
   LiveOrderPostList: 'live.order.post.list',
   LiveOrderCommunity: 'live.order.community',
   LiveRecords: 'live.records',
+  MultiCartSettings: 'live.multi_cart_settings',
 } as const
 
 export const liveOrderRoutes: RouteRecordRaw[] = [
@@ -61,6 +62,16 @@ export const liveOrderRoutes: RouteRecordRaw[] = [
     component: () => import('@/admin/views/live-records/LiveRecordsPage.vue'),
     meta: {
       i18nKey: 'route.live_records',
+      permissionKey: PERMISSIONS.LIVE_ORDER_VIEW,
+      layout: 'default',
+    },
+  },
+  {
+    path: 'multi-cart-settings',
+    name: RouteName.MultiCartSettings,
+    component: () => import('@/admin/views/live-order/MultiCartSettingsPage.vue'),
+    meta: {
+      i18nKey: 'route.multi_cart_settings',
       permissionKey: PERMISSIONS.LIVE_ORDER_VIEW,
       layout: 'default',
     },

@@ -38,8 +38,14 @@ import AISuggestPanel, { type AiApplyPayload } from './components/AISuggestPanel
  */
 const props = withDefaults(defineProps<{
   embedded?: boolean
+  /** dialog 嵌入模式時，若帶 id 視為「編輯」該 MP；不帶 = 新增 */
+  initialProductId?: number
+  /** 純檢視模式：所有 input 都鎖住，AI / 儲存 button 由父層隱藏 */
+  readonly?: boolean
 }>(), {
   embedded: false,
+  initialProductId: undefined,
+  readonly: false,
 })
 const emit = defineEmits<{
   saved: [product: ManagedProduct]
@@ -51,15 +57,19 @@ const router = useRouter()
 const toast = useToast()
 const confirm = useConfirm()
 
-const productId = computed(() => Number(route.params.id))
+/** 嵌入模式用 initialProductId；route 模式用 route.params.id */
+const productId = computed(() =>
+  props.embedded ? (props.initialProductId ?? NaN) : Number(route.params.id),
+)
 const original = computed<ManagedProduct | undefined>(() =>
   managedProducts.find((p) => p.id === productId.value),
 )
 
-/** 路由名稱 = product.create，或 id 缺/找不到對應商品，或被 dialog 嵌入 → 視為新增模式 */
-const isCreateMode = computed(() =>
-  props.embedded || route.name === RouteName.ProductCreate || !route.params.id,
-)
+/** 嵌入沒帶 id = 新增；嵌入帶 id = 編輯；route 模式照 route.name / params 判斷 */
+const isCreateMode = computed(() => {
+  if (props.embedded) return !props.initialProductId
+  return route.name === RouteName.ProductCreate || !route.params.id
+})
 const pageTitle = computed(() => isCreateMode.value ? '新增一般商品' : '編輯商品')
 
 /**
@@ -132,8 +142,10 @@ function adaptSpecsFromMock(p: ManagedProduct): { specs: SpecGroup[]; variants: 
     salePrice: s.price,
     stock: s.stock,
   }))
+  // 群組名優先用 MP 持久化的 specGroupNames[0]，沒存過則 fallback '規格'
+  const groupName = p.specGroupNames?.[0] || '規格'
   return {
-    specs: [{ id: groupId, name: '規格', options }],
+    specs: [{ id: groupId, name: groupName, options }],
     variants,
   }
 }
@@ -144,7 +156,9 @@ onMounted(() => {
   const p = original.value
   if (!p) {
     toast.add({ severity: 'warn', summary: '找不到商品', life: 1800 })
-    router.replace({ name: RouteName.ProductList })
+    // 嵌入模式無法 router.replace；emit cancel 讓父層關掉 dialog
+    if (props.embedded) emit('cancel')
+    else router.replace({ name: RouteName.ProductList })
     return
   }
   const adapted = adaptSpecsFromMock(p)
@@ -319,7 +333,9 @@ function onSave(): void {
     const newId = Date.now()
     const variantSpecs = form.value.variants.length > 0
       ? form.value.variants.map((v, i) => {
-          const names = form.value.specs.map((g) => g.options.find((o) => o.id === v.optionIds[i])?.name ?? '')
+          // 用 spec group 的 index（gi）去 optionIds 取對應 option；先前用 variant index `i` 是 bug，
+          // 會讓非首個 variant 都拿不到 option name，fallback 成「規格 N」
+          const names = form.value.specs.map((g, gi) => g.options.find((o) => o.id === v.optionIds[gi])?.name ?? '')
           return {
             id: v.id,
             name: names.filter(Boolean).join(' / ') || `規格 ${i + 1}`,
@@ -343,6 +359,7 @@ function onSave(): void {
       remark: form.value.remark,
       images: form.value.images.map((img) => ({ ...img })),
       specs: variantSpecs,
+      specGroupNames: form.value.specs.map((g) => g.name),
     }
     addManagedProduct(newProduct)
     toast.add({ severity: 'success', summary: '已建立商品', detail: form.value.name.trim(), life: 2000 })
@@ -370,7 +387,8 @@ function onSave(): void {
   p.images = form.value.images.map((img) => ({ ...img }))
   if (form.value.variants.length > 0) {
     p.specs = form.value.variants.map((v, i) => {
-      const names = form.value.specs.map((g) => g.options.find((o) => o.id === v.optionIds[i])?.name ?? '')
+      // 用 spec group 的 index gi 去 optionIds 取 option name；先前用 variant index `i` 是 bug
+      const names = form.value.specs.map((g, gi) => g.options.find((o) => o.id === v.optionIds[gi])?.name ?? '')
       return {
         id: v.id,
         name: names.filter(Boolean).join(' / ') || `規格 ${i + 1}`,
@@ -378,12 +396,18 @@ function onSave(): void {
         price: v.salePrice,
       }
     })
+    p.specGroupNames = form.value.specs.map((g) => g.name)
   } else {
     p.specs = [{ id: Date.now(), name: '單一規格', stock: 0, price: 0 }]
+    p.specGroupNames = undefined
   }
   // 編輯完成 → 同步收單那邊的 productCatalog 對應條目
   syncManagedProduct(p.id)
   toast.add({ severity: 'success', summary: '已儲存商品變更', detail: p.name, life: 2000 })
+  if (props.embedded) {
+    emit('saved', p)
+    return
+  }
   backToList()
 }
 
@@ -426,15 +450,17 @@ defineExpose({ onSave, onCancel })
          內部區塊用 divide-y 間隔線分隔 -->
     <div
       class="flex flex-col px-6 divide-y divide-[var(--p-content-border-color)]"
-      :class="embedded
-        ? '!px-0'
-        : 'flex-1 min-h-0 overflow-y-auto bg-[var(--p-content-background)] rounded-lg'"
+      :class="[
+        embedded ? '!px-0' : 'flex-1 min-h-0 overflow-y-auto bg-[var(--p-content-background)] rounded-lg',
+        readonly ? 'readonly-form' : '',
+      ]"
     >
       <!-- 商品資料 -->
       <section class="relative py-6 first:pt-0">
         <h3 class="text-[18px] font-bold text-[var(--p-text-color)] mb-4">商品資料</h3>
-        <!-- AI 浮動按鈕 -->
+        <!-- AI 浮動按鈕（檢視模式隱藏） -->
         <button
+          v-if="!readonly"
           v-tooltip.left="'AI 建議'"
           class="absolute top-5 right-0 size-[44px] rounded-full bg-primary text-white text-[13px] font-bold flex items-center justify-center shadow-md hover:opacity-90"
           @click="aiPanelVisible = true"
@@ -443,14 +469,16 @@ defineExpose({ onSave, onCancel })
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
           <div class="col-span-2 flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">
-              <span class="text-red-600 mr-1">*</span>商品名稱
+              <span v-if="!readonly" class="text-red-600 mr-1">*</span>商品名稱
             </label>
-            <InputText v-model="form.name" placeholder="請輸入商品名稱" class="w-full" />
+            <InputText v-if="!readonly" v-model="form.name" placeholder="請輸入商品名稱" class="w-full" />
+            <span v-else class="field-value">{{ form.name || '—' }}</span>
           </div>
 
           <div class="col-span-2 flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">商品類別</label>
             <Select
+              v-if="!readonly"
               v-model="form.category"
               :options="categoryOptions"
               option-label="label"
@@ -458,16 +486,19 @@ defineExpose({ onSave, onCancel })
               placeholder="請選擇商品類別"
               class="w-full"
             />
+            <span v-else class="field-value">{{ form.category || '—' }}</span>
           </div>
 
           <div class="col-span-2 flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">直播關鍵字</label>
-            <InputText v-model="form.keyword" placeholder="可設定直播使用關鍵字加單" class="w-full" />
+            <InputText v-if="!readonly" v-model="form.keyword" placeholder="可設定直播使用關鍵字加單" class="w-full" />
+            <span v-else class="field-value">{{ form.keyword || '—' }}</span>
           </div>
 
           <div class="col-span-2 flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">標籤</label>
             <MultiSelect
+              v-if="!readonly"
               v-model="form.tags"
               :options="tagOptions"
               option-label="label"
@@ -476,21 +507,38 @@ defineExpose({ onSave, onCancel })
               class="w-full"
               display="chip"
             />
+            <div v-else class="flex flex-wrap gap-1.5">
+              <span
+                v-for="t in form.tags"
+                :key="t"
+                class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-medium bg-[var(--p-content-hover-background)] text-[var(--p-text-color)]"
+              >{{ t }}</span>
+              <span v-if="form.tags.length === 0" class="text-sm text-[var(--p-text-muted-color)]">—</span>
+            </div>
           </div>
 
           <div class="col-span-2 flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">啟用優惠券</label>
-            <ToggleSwitch v-model="form.enableCoupon" />
+            <ToggleSwitch v-if="!readonly" v-model="form.enableCoupon" />
+            <span v-else class="field-value">{{ form.enableCoupon ? '啟用' : '未啟用' }}</span>
           </div>
 
           <div class="flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">商品重量（公克）</label>
-            <InputNumber v-model="form.weight" :min="0" suffix=" g" class="w-full" />
+            <InputNumber v-if="!readonly" v-model="form.weight" :min="0" suffix=" g" class="w-full" />
+            <span v-else class="field-value">{{ form.weight ?? 0 }} g</span>
           </div>
 
           <div class="col-span-2 flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">商品介紹</label>
-            <Editor v-model="form.description" editor-style="height: 320px" />
+            <Editor v-if="!readonly" v-model="form.description" editor-style="height: 320px" />
+            <!-- 純文字版：Editor 輸出為 HTML，直接 v-html 渲染 -->
+            <div
+              v-else-if="form.description"
+              class="field-value leading-relaxed"
+              v-html="form.description"
+            ></div>
+            <span v-else class="text-sm text-[var(--p-text-muted-color)]">—</span>
           </div>
         </div>
       </section>
@@ -499,10 +547,22 @@ defineExpose({ onSave, onCancel })
       <section class="py-6">
         <h3 class="text-[18px] font-bold text-[var(--p-text-color)] mb-4">商品圖片</h3>
         <MultiImageUploader
+          v-if="!readonly"
           v-model:images="form.images"
           :max-count="8"
           :aspect-ratio="1"
         />
+        <!-- 檢視模式：只顯示縮圖，不能上傳 / 刪除 -->
+        <div v-else-if="form.images.length" class="flex flex-wrap gap-2">
+          <div
+            v-for="img in form.images"
+            :key="img.id"
+            class="w-[96px] h-[96px] rounded-md overflow-hidden border border-[var(--p-content-border-color)]"
+          >
+            <img :src="img.url" :alt="img.filename ?? ''" class="w-full h-full object-cover" />
+          </div>
+        </div>
+        <span v-else class="text-sm text-[var(--p-text-muted-color)]">—</span>
       </section>
 
       <!-- 銷售設定（沒規格時） -->
@@ -511,22 +571,26 @@ defineExpose({ onSave, onCancel })
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div class="flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">成本價</label>
-            <InputNumber v-model="form.noSpecVariant.cost" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
+            <InputNumber v-if="!readonly" v-model="form.noSpecVariant.cost" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
+            <span v-else class="field-value">NT$ {{ form.noSpecVariant.cost.toLocaleString() }}</span>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">原價</label>
-            <InputNumber v-model="form.noSpecVariant.originalPrice" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
+            <InputNumber v-if="!readonly" v-model="form.noSpecVariant.originalPrice" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
+            <span v-else class="field-value">NT$ {{ form.noSpecVariant.originalPrice.toLocaleString() }}</span>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">售價</label>
-            <InputNumber v-model="form.noSpecVariant.salePrice" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
+            <InputNumber v-if="!readonly" v-model="form.noSpecVariant.salePrice" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
+            <span v-else class="field-value">NT$ {{ form.noSpecVariant.salePrice.toLocaleString() }}</span>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">庫存</label>
-            <InputNumber v-model="form.noSpecVariant.stock" :min="0" class="w-full" />
+            <InputNumber v-if="!readonly" v-model="form.noSpecVariant.stock" :min="0" class="w-full" />
+            <span v-else class="field-value">{{ form.noSpecVariant.stock.toLocaleString() }}</span>
           </div>
         </div>
-        <div class="py-8 flex flex-col items-center gap-4">
+        <div v-if="!readonly" class="py-8 flex flex-col items-center gap-4">
           <p class="text-sm text-color-secondary">此商品尚未設定規格，您可以設定商品規格（例如：顏色、尺寸）</p>
           <Button label="建立規格" icon="pi pi-plus" @click="enableSpec" />
         </div>
@@ -537,13 +601,14 @@ defineExpose({ onSave, onCancel })
         <SpecTable
           v-model:specs="form.specs"
           v-model:variants="form.variants"
+          :readonly="readonly"
           @close-spec="form.specs = []; form.variants = []"
         />
       </div>
 
       <!-- 多件優惠：PromoteTable 內部 Card 已改 section -->
       <div class="form-section-wrap py-6">
-        <PromoteTable v-model="form.promote" />
+        <PromoteTable v-model="form.promote" :readonly="readonly" />
       </div>
 
       <!-- 商品詳情：商品備註 -->
@@ -552,7 +617,9 @@ defineExpose({ onSave, onCancel })
         <div class="grid grid-cols-1 gap-4 max-w-2xl">
           <div class="flex flex-col gap-1.5">
             <label class="text-sm font-bold text-color">商品備註</label>
-            <Textarea v-model="form.remark" rows="5" placeholder="僅內部可見的備註，前台不顯示" class="w-full" />
+            <Textarea v-if="!readonly" v-model="form.remark" rows="5" placeholder="僅內部可見的備註，前台不顯示" class="w-full" />
+            <div v-else-if="form.remark" class="field-value whitespace-pre-wrap">{{ form.remark }}</div>
+            <span v-else class="text-sm text-[var(--p-text-muted-color)]">—</span>
           </div>
         </div>
       </section>
@@ -595,5 +662,18 @@ defineExpose({ onSave, onCancel })
 .form-section-wrap :deep(.p-card-body),
 .form-section-wrap :deep(.p-card-content) {
   padding: 0;
+}
+
+/* 檢視模式（Figma 7864-2011）：label 變小變淡、value 變粗變大 */
+.readonly-form label {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--p-text-muted-color);
+}
+.readonly-form .field-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--p-text-color);
+  line-height: 24px;
 }
 </style>

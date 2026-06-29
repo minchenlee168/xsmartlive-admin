@@ -568,12 +568,12 @@
   <!-- 從 picker 直接新建商品 / 組合商品（建好後 reactive productCatalog / bundleCatalog 自動更新） -->
   <ProductCreateDialog
     v-model:visible="productCreateDialogVisible"
-    @created="onProductCreated"
+    @saved="onProductCreated"
   />
   <ProductBundleCreateDialog
     v-model:visible="bundleCreateDialogVisible"
     :initial-bundle-items="bundleInitialItems"
-    @created="onBundleCreated"
+    @saved="onBundleCreated"
   />
 </template>
 
@@ -945,8 +945,8 @@ function openBundleCreateFromSelection(): void {
   bundleCreateDialogVisible.value = true
 }
 
+// page 內已跳 toast，這裡不重複（避免一次跳兩個 message）；只負責 picker 視覺收尾
 function onProductCreated(p: ManagedProduct): void {
-  toast.add({ severity: 'success', summary: `已加進商品庫：${p.name}`, life: 1800 })
   pickerTab.value = 'general'
   pickerKeyword.value = ''
   pickerPageFirst.value = 0
@@ -956,7 +956,6 @@ function onProductCreated(p: ManagedProduct): void {
   })
 }
 function onBundleCreated(p: ManagedProduct): void {
-  toast.add({ severity: 'success', summary: `已加進組合商品庫：${p.name}`, life: 1800 })
   pickerTab.value = 'bundle'
   // 清空當下勾選的「組成組合商品的個別商品」，只留下組合商品本身被勾
   selectedItems.value = new Map()

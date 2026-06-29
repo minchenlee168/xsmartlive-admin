@@ -4,22 +4,29 @@ import ProductUpdatePage from '../ProductUpdatePage.vue'
 import type { ManagedProduct } from '../utils/productMock'
 
 /**
- * 「新增一般商品」彈窗版：直接 reuse ProductUpdatePage（embedded=true）當內容，
- * 由本元件包 Dialog header / footer / dirty 確認。
+ * 一般商品表單彈窗：reuse ProductUpdatePage（embedded=true）當內容。
  *
- * 給收單頁 AddProductDialog 底部「+ 新增一般商品」入口使用：
- * 建好後 emit `created(p)`，picker 透過 reactive productCatalog 自動跟上。
+ * - 不帶 productId → 新增模式（dialog title「新增一般商品」、按鈕「建立商品」）
+ * - 帶 productId   → 編輯該 MP（dialog title「編輯商品」、按鈕「儲存變更」）
+ *
+ * 儲存成功後 emit `saved(p)`，父層自行決定 toast / 關閉等行為。
  */
 
 interface Props {
   visible?: boolean
+  /** 帶 id = 編輯或檢視該商品；不帶 = 新增 */
+  productId?: number
+  /** 純檢視模式（input 全鎖、footer 只剩關閉） */
+  readonly?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
   visible: false,
+  productId: undefined,
+  readonly: false,
 })
 const emit = defineEmits<{
   'update:visible': [value: boolean]
-  created: [product: ManagedProduct]
+  saved: [product: ManagedProduct]
 }>()
 
 const innerVisible = computed<boolean>({
@@ -27,17 +34,23 @@ const innerVisible = computed<boolean>({
   set: (v) => emit('update:visible', v),
 })
 
+const isEditMode = computed(() => !!props.productId)
+const dialogTitle = computed(() => {
+  if (props.readonly) return '檢視商品'
+  return isEditMode.value ? '編輯商品' : '新增一般商品'
+})
+const saveLabel = computed(() => isEditMode.value ? '儲存變更' : '建立商品')
+
 const pageRef = ref<InstanceType<typeof ProductUpdatePage> | null>(null)
 
 function onSavedFromPage(product: ManagedProduct): void {
-  emit('created', product)
+  emit('saved', product)
   innerVisible.value = false
 }
 function onCancelFromPage(): void {
   innerVisible.value = false
 }
 function onFooterCancel(): void {
-  // 直接呼叫 page 的 onCancel；embedded=true 時 page 會 emit('cancel') 走上方流程
   pageRef.value?.onCancel?.()
 }
 function onFooterSave(): void {
@@ -59,7 +72,7 @@ function onFooterSave(): void {
   >
     <template #header>
       <span class="font-semibold text-[var(--p-text-color)]" style="font-size: 17.5px">
-        新增一般商品
+        {{ dialogTitle }}
       </span>
     </template>
 
@@ -69,15 +82,21 @@ function onFooterSave(): void {
         v-if="innerVisible"
         ref="pageRef"
         :embedded="true"
+        :initial-product-id="productId"
+        :readonly="readonly"
         @saved="onSavedFromPage"
         @cancel="onCancelFromPage"
       />
     </div>
 
     <template #footer>
-      <div class="flex items-center justify-end gap-2">
+      <!-- 檢視模式只剩「關閉」；其他模式照常顯示取消 + 儲存 -->
+      <div v-if="readonly" class="flex items-center justify-end">
+        <Button label="關閉" severity="secondary" outlined @click="onFooterCancel" />
+      </div>
+      <div v-else class="flex items-center justify-end gap-2">
         <Button label="取消" severity="secondary" outlined @click="onFooterCancel" />
-        <Button label="建立商品" icon="pi pi-save" @click="onFooterSave" />
+        <Button :label="saveLabel" icon="pi pi-save" @click="onFooterSave" />
       </div>
     </template>
   </Dialog>

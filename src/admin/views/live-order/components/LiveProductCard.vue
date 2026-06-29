@@ -266,14 +266,9 @@
             v-tooltip.top="t('live_order.tab.order_setting')">
             <FontAwesomeIcon :icon="['far', 'gear']" class="text-[var(--p-text-color)] text-[14px]" />
           </button>
-          <!-- 準備中：刪除（紅色，置於編輯右側）；收單中：暫停 -->
-          <button v-if="status === 'live'"
-            @click="status = 'ready'"
-            class="w-[35px] h-[30px] border border-[var(--p-content-border-color)] rounded-[6px] flex items-center justify-center hover:bg-[var(--p-content-hover-background)]" v-tooltip.top="t('live_order.tooltip.pause_push')">
-            <i class="pi pi-pause text-[var(--p-text-color)]" style="font-size:14px"></i>
-          </button>
-          <!-- 刪除為破壞性操作，使用功能色紅（style-class-rule §4.2 例外） -->
-          <button v-else
+          <!-- 刪除：破壞性操作；只有準備中（非收單中）才顯示，避免誤刪正在收單的商品 -->
+          <button
+            v-if="status !== 'live'"
             @click="onDeleteClick"
             class="w-[35px] h-[30px] border border-[#ef4444] rounded-[6px] flex items-center justify-center hover:bg-[#fee2e2]" v-tooltip.top="t('live_order.tooltip.delete')">
             <i class="pi pi-trash text-[#ef4444]" style="font-size:14px"></i>

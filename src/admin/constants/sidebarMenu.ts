@@ -50,6 +50,11 @@ export const sidebarMenu: MenuItem[] = [
         icon: ['far', 'clipboard-list'],
         to: RouteName.LiveRecords,
       },
+      {
+        labelKey: 'nav.multi_cart_settings',
+        icon: ['far', 'bag-shopping'],
+        to: RouteName.MultiCartSettings,
+      },
     ],
   },
   {

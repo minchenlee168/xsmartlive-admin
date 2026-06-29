@@ -83,6 +83,8 @@ export interface ManagedProduct {
   promotes?: ProductPromote[]
   /** 商品圖片，依序，首張為主圖 */
   images?: ProductImage[]
+  /** 規格群組名稱（依設定順序）；商品列表展開規格表頭 / 編輯頁回填用 */
+  specGroupNames?: string[]
   /** kind='bundle' 時的子商品清單 */
   bundleItems?: ManagedBundleItem[]
   /** 組合商品的售價（單一價，不走規格）；給 kind='bundle' 用 */

@@ -9,6 +9,7 @@
     "live_order_post_list": "貼文收單(列表式)",
     "live_order_community": "社團收單",
     "live_records": "收單紀錄",
+    "multi_cart_settings": "多購物車設定",
     "product": {
       "product": "商品管理",
       "list": "商品列表",
@@ -36,6 +37,7 @@
     "live_order_post_list": "貼文收單(列表式)",
     "live_order_community": "社團收單",
     "live_records": "收單紀錄",
+    "multi_cart_settings": "多購物車設定",
     "order_list": "訂單列表",
     "invoice_operations": "發票作業",
     "product_list": "商品列表",
