@@ -186,7 +186,7 @@ const recentCommits = computed<CommitEntry[]>(() => {
       <!-- prototype 更新時間提示：手機隱藏，避免擠壓主要 buttons；右側 info icon 點開 changelog Dialog -->
       <span
         v-if="prototypeUpdateTime"
-        class="hidden lg:inline-flex items-center gap-1 text-[11px] text-[#ef4444] font-medium whitespace-nowrap"
+        class="hidden lg:inline-flex items-center gap-1 text-xs text-[#ef4444] font-medium whitespace-nowrap"
       >
         此為 prototype 展示，更新時間：{{ prototypeUpdateTime }}
         <button
@@ -208,15 +208,15 @@ const recentCommits = computed<CommitEntry[]>(() => {
       header="更新內容"
       :style="{ width: 'min(560px, calc(100vw - 32px))' }"
     >
-      <div v-if="recentCommits.length === 0" class="text-[14px] text-[var(--p-text-muted-color)] py-4 text-center">
+      <div v-if="recentCommits.length === 0" class="text-sm text-[var(--p-text-muted-color)] py-4 text-center">
         尚無 commit 紀錄
       </div>
       <ul v-else class="divide-y divide-[var(--p-content-border-color)]">
-        <li v-for="(c, i) in recentCommits" :key="i" class="py-3 flex flex-col gap-1.5">
-          <span class="text-[12px] text-[var(--p-text-muted-color)] font-mono">{{ c.time }}</span>
-          <span class="text-[14px] font-medium text-[var(--p-text-color)] leading-snug">{{ c.subject }}</span>
+        <li v-for="(c, i) in recentCommits" :key="i" class="py-3 flex flex-col gap-2">
+          <span class="text-xs text-[var(--p-text-muted-color)] font-mono">{{ c.time }}</span>
+          <span class="text-sm font-medium text-[var(--p-text-color)] leading-snug">{{ c.subject }}</span>
           <!-- commit body 拆出來的條列子項；沒有 body 就不顯示 -->
-          <ul v-if="c.bullets.length" class="list-disc pl-5 flex flex-col gap-0.5">
+          <ul v-if="c.bullets.length" class="list-disc pl-5 flex flex-col gap-1">
             <li v-for="(b, bi) in c.bullets" :key="bi" class="text-[13px] text-[var(--p-text-color)] leading-snug">{{ b }}</li>
           </ul>
         </li>

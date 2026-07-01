@@ -367,7 +367,7 @@ function focusTableCell(
   <section class="border-b border-[var(--p-content-border-color)] pb-5">
     <div class="flex items-center justify-between gap-3 mb-4">
       <div class="flex flex-1 flex-wrap items-center gap-3">
-        <h3 class="text-[15px] font-semibold text-[var(--p-text-color)]">
+        <h3 class="text-base font-semibold text-[var(--p-text-color)]">
           {{ t('portal_product.spec_table.section.specs') }}
         </h3>
         <slot name="header-extras" />
@@ -512,7 +512,7 @@ function focusTableCell(
   </section>
 
   <section class="border-b border-[var(--p-content-border-color)] pb-5">
-    <h3 class="text-[15px] font-semibold text-[var(--p-text-color)] mb-4">
+    <h3 class="text-base font-semibold text-[var(--p-text-color)] mb-4">
       {{ t('portal_product.spec_table.section.variant_details') }}
     </h3>
       <div

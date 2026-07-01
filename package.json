@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint:design": "bash scripts/design-md-lint.sh --all"
   },
   "dependencies": {
     "@awesome.me/kit-979923bcd0": "^1.0.3",

@@ -223,12 +223,12 @@ function onSubmit(): void {
       <span class="font-semibold text-[var(--p-text-color)] flex items-center gap-2" style="font-size: 17.5px">
         <i class="pi pi-plus-circle text-[var(--p-primary-color)]" style="font-size: 18px"></i>
         {{ t('live_order.dialog.add_order_header') }}
-        <span v-if="user" class="text-[14px] font-normal text-[var(--p-text-muted-color)]">— {{ user }}</span>
+        <span v-if="user" class="text-sm font-normal text-[var(--p-text-muted-color)]">— {{ user }}</span>
       </span>
     </template>
 
     <div class="flex flex-col gap-3 pt-2">
-      <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+      <label class="text-sm font-medium text-[var(--p-text-color)]">
         {{ t('live_order.label.pick_live_product') }}
       </label>
 
@@ -245,7 +245,7 @@ function onSubmit(): void {
         </label>
       </div>
 
-      <div v-if="filteredProducts.length === 0" class="py-6 text-center text-[14px] text-[var(--p-text-muted-color)]">
+      <div v-if="filteredProducts.length === 0" class="py-6 text-center text-sm text-[var(--p-text-muted-color)]">
         {{ products.length === 0 ? t('live_order.empty.no_live_product') : '沒有符合條件的商品' }}
       </div>
 
@@ -260,7 +260,7 @@ function onSubmit(): void {
             >
               <!-- 主商品 checkbox：全勾為已勾，全空為未勾（不顯示 indeterminate，避免狀態混淆） -->
               <span
-                class="shrink-0 w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center"
+                class="shrink-0 w-[18px] h-[18px] rounded-sm border flex items-center justify-center"
                 :class="isAllSpecsChecked(p)
                   ? 'bg-[var(--p-primary-color)] border-[var(--p-primary-color)]'
                   : 'border-[var(--p-content-border-color)] bg-[var(--p-content-background)]'"
@@ -272,23 +272,23 @@ function onSubmit(): void {
                 v-if="p.imageUrl"
                 :src="p.imageUrl"
                 alt=""
-                class="shrink-0 w-[36px] h-[36px] rounded-[6px] object-cover border border-[var(--p-content-border-color)]"
+                class="shrink-0 w-[36px] h-[36px] rounded-md object-cover border border-[var(--p-content-border-color)]"
               />
               <div
                 v-else
-                class="shrink-0 w-[36px] h-[36px] rounded-[6px] border border-dashed border-[var(--p-content-border-color)] bg-[var(--p-content-hover-background)] flex items-center justify-center"
+                class="shrink-0 w-[36px] h-[36px] rounded-md border border-dashed border-[var(--p-content-border-color)] bg-[var(--p-content-hover-background)] flex items-center justify-center"
               >
                 <i class="pi pi-image text-[var(--p-text-muted-color)]" style="font-size: 14px"></i>
               </div>
               <div class="flex-1 min-w-0">
-                <div class="font-bold text-[14px] text-[var(--p-text-color)] truncate">{{ p.name }}</div>
-                <div class="text-[12px] text-[var(--p-text-muted-color)] truncate">
+                <div class="font-bold text-sm text-[var(--p-text-color)] truncate">{{ p.name }}</div>
+                <div class="text-xs text-[var(--p-text-muted-color)] truncate">
                   {{ t('live_order.label.keyword_with_value', { value: keywordOf(p) }) }}
                 </div>
               </div>
               <span
                 v-if="statusBadge(p)"
-                class="shrink-0 text-[12.25px] font-bold px-[7px] py-[3.5px] rounded-[12px] leading-none"
+                class="shrink-0 text-xs font-bold px-[7px] py-[3.5px] rounded-xl leading-none"
                 :class="statusBadge(p)!.cls"
               >
                 {{ statusBadge(p)!.label }}
@@ -304,15 +304,15 @@ function onSubmit(): void {
             >
               <!-- Checkbox -->
               <span
-                class="shrink-0 w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center"
+                class="shrink-0 w-[18px] h-[18px] rounded-sm border flex items-center justify-center"
                 :class="isSelected(p.id, spec.id)
                   ? 'bg-[var(--p-primary-color)] border-[var(--p-primary-color)]'
                   : 'border-[var(--p-content-border-color)] bg-[var(--p-content-background)]'"
               >
                 <i v-if="isSelected(p.id, spec.id)" class="pi pi-check text-white" style="font-size: 11px"></i>
               </span>
-              <span class="text-[14px] text-[var(--p-text-color)] flex-1 min-w-0 truncate">{{ spec.name }}</span>
-              <span v-if="typeof spec.price === 'number'" class="text-[12px] text-[var(--p-text-muted-color)] shrink-0">
+              <span class="text-sm text-[var(--p-text-color)] flex-1 min-w-0 truncate">{{ spec.name }}</span>
+              <span v-if="typeof spec.price === 'number'" class="text-xs text-[var(--p-text-muted-color)] shrink-0">
                 ${{ spec.price.toLocaleString() }}
               </span>
               <!-- 數量 stepper -->
@@ -328,7 +328,7 @@ function onSubmit(): void {
                   :value="qtyOf(p.id, spec.id)"
                   type="number"
                   min="1"
-                  class="w-[44px] h-[26px] border border-[var(--p-content-border-color)] text-center text-[14px] text-[var(--p-text-color)] outline-none focus:border-[var(--p-primary-color)]"
+                  class="w-[44px] h-[26px] border border-[var(--p-content-border-color)] text-center text-sm text-[var(--p-text-color)] outline-none focus:border-[var(--p-primary-color)]"
                   @input="(e) => setQty(p.id, spec.id, Number((e.target as HTMLInputElement).value))"
                 />
                 <button
@@ -346,11 +346,11 @@ function onSubmit(): void {
           <button
             v-else
             type="button"
-            class="flex items-center gap-3 px-2 py-2.5 text-left hover:bg-[var(--p-content-hover-background)]"
+            class="flex items-center gap-3 px-2 py-3 text-left hover:bg-[var(--p-content-hover-background)]"
             @click="toggle(p.id)"
           >
             <span
-              class="shrink-0 w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center"
+              class="shrink-0 w-[18px] h-[18px] rounded-sm border flex items-center justify-center"
               :class="isSelected(p.id)
                 ? 'bg-[var(--p-primary-color)] border-[var(--p-primary-color)]'
                 : 'border-[var(--p-content-border-color)] bg-[var(--p-content-background)]'"
@@ -361,17 +361,17 @@ function onSubmit(): void {
               v-if="p.imageUrl"
               :src="p.imageUrl"
               alt=""
-              class="shrink-0 w-[36px] h-[36px] rounded-[6px] object-cover border border-[var(--p-content-border-color)]"
+              class="shrink-0 w-[36px] h-[36px] rounded-md object-cover border border-[var(--p-content-border-color)]"
             />
             <div
               v-else
-              class="shrink-0 w-[36px] h-[36px] rounded-[6px] border border-dashed border-[var(--p-content-border-color)] bg-[var(--p-content-hover-background)] flex items-center justify-center"
+              class="shrink-0 w-[36px] h-[36px] rounded-md border border-dashed border-[var(--p-content-border-color)] bg-[var(--p-content-hover-background)] flex items-center justify-center"
             >
               <i class="pi pi-image text-[var(--p-text-muted-color)]" style="font-size: 14px"></i>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="font-bold text-[14px] text-[var(--p-text-color)] truncate">{{ p.name }}</div>
-              <div class="text-[12px] text-[var(--p-text-muted-color)] truncate">
+              <div class="font-bold text-sm text-[var(--p-text-color)] truncate">{{ p.name }}</div>
+              <div class="text-xs text-[var(--p-text-muted-color)] truncate">
                 {{ t('live_order.label.keyword_with_value', { value: keywordOf(p) }) }}
               </div>
             </div>
@@ -387,7 +387,7 @@ function onSubmit(): void {
                 :value="qtyOf(p.id)"
                 type="number"
                 min="1"
-                class="w-[44px] h-[26px] border border-[var(--p-content-border-color)] text-center text-[14px] text-[var(--p-text-color)] outline-none focus:border-[var(--p-primary-color)]"
+                class="w-[44px] h-[26px] border border-[var(--p-content-border-color)] text-center text-sm text-[var(--p-text-color)] outline-none focus:border-[var(--p-primary-color)]"
                 @input="(e) => setQty(p.id, undefined, Number((e.target as HTMLInputElement).value))"
               />
               <button
@@ -400,7 +400,7 @@ function onSubmit(): void {
             </div>
             <span
               v-if="statusBadge(p)"
-              class="shrink-0 text-[12.25px] font-bold px-[7px] py-[3.5px] rounded-[12px] leading-none"
+              class="shrink-0 text-xs font-bold px-[7px] py-[3.5px] rounded-xl leading-none"
               :class="statusBadge(p)!.cls"
             >
               {{ statusBadge(p)!.label }}

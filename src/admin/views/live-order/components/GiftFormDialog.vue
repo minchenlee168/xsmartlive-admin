@@ -145,12 +145,12 @@ function onSubmit(): void {
     <div class="flex flex-col gap-5 pt-2">
       <!-- 禮物資料 -->
       <section class="border-b border-[var(--p-content-border-color)] pb-5">
-        <h3 class="text-[15px] font-semibold text-[var(--p-text-color)] mb-4">
+        <h3 class="text-base font-semibold text-[var(--p-text-color)] mb-4">
           {{ t('live_order.gift_form.section.basic') }}
         </h3>
         <div class="grid grid-cols-2 gap-4">
           <div class="col-span-2 flex flex-col gap-2">
-            <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+            <label class="text-sm font-medium text-[var(--p-text-color)]">
               {{ t('live_order.gift_form.field.name') }}
             </label>
             <InputText
@@ -162,7 +162,7 @@ function onSubmit(): void {
           </div>
 
           <div class="flex flex-col gap-2">
-            <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+            <label class="text-sm font-medium text-[var(--p-text-color)]">
               {{ t('live_order.gift_form.field.keyword') }}
             </label>
             <InputText
@@ -173,7 +173,7 @@ function onSubmit(): void {
           </div>
 
           <div class="flex flex-col gap-2">
-            <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+            <label class="text-sm font-medium text-[var(--p-text-color)]">
               {{ t('live_order.gift_form.field.quantity') }}
             </label>
             <InputNumber
@@ -186,7 +186,7 @@ function onSubmit(): void {
           </div>
 
           <div class="col-span-2 flex flex-col gap-2">
-            <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+            <label class="text-sm font-medium text-[var(--p-text-color)]">
               {{ t('live_order.gift_form.field.message') }}
             </label>
             <Textarea
@@ -201,7 +201,7 @@ function onSubmit(): void {
 
       <!-- 禮物圖片 -->
       <section>
-        <h3 class="text-[15px] font-semibold text-[var(--p-text-color)] mb-4">
+        <h3 class="text-base font-semibold text-[var(--p-text-color)] mb-4">
           {{ t('live_order.gift_form.section.image') }}
         </h3>
         <input
@@ -216,7 +216,7 @@ function onSubmit(): void {
           <img
             :src="imageUrl"
             alt="gift"
-            class="w-[120px] h-[120px] object-cover rounded-[6px] border border-[var(--p-content-border-color)]"
+            class="w-[120px] h-[120px] object-cover rounded-md border border-[var(--p-content-border-color)]"
           />
           <div class="flex flex-col gap-2">
             <Button
@@ -241,11 +241,11 @@ function onSubmit(): void {
         <button
           v-else
           type="button"
-          class="w-[120px] h-[120px] border-2 border-dashed border-[var(--p-content-border-color)] rounded-[6px] bg-[var(--p-content-hover-background)] flex flex-col items-center justify-center gap-1 text-[var(--p-text-muted-color)] hover:border-[var(--p-primary-color)] hover:text-[var(--p-primary-color)]"
+          class="w-[120px] h-[120px] border-2 border-dashed border-[var(--p-content-border-color)] rounded-md bg-[var(--p-content-hover-background)] flex flex-col items-center justify-center gap-1 text-[var(--p-text-muted-color)] hover:border-[var(--p-primary-color)] hover:text-[var(--p-primary-color)]"
           @click="onPickImage"
         >
           <i class="pi pi-image" style="font-size: 28px"></i>
-          <span class="text-[11px]">
+          <span class="text-xs">
             {{ t('live_order.button.upload_from_app') }}
           </span>
         </button>

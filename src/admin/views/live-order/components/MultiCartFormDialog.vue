@@ -215,7 +215,7 @@ function onSave(): void {
 
     <div class="max-h-[calc(85vh-160px)] overflow-y-auto pt-2 pb-4 flex flex-col gap-6">
       <!-- 多購物車名稱 -->
-      <div class="flex flex-col gap-1.5">
+      <div class="flex flex-col gap-2">
         <label class="text-sm font-bold text-color">多購物車名稱</label>
         <InputText
           v-model="name"
@@ -226,15 +226,15 @@ function onSave(): void {
 
       <!-- 結帳行為 -->
       <section class="flex flex-col gap-3">
-        <h3 class="text-[16px] font-bold text-[var(--p-text-color)]">結帳行為</h3>
+        <h3 class="text-base font-bold text-[var(--p-text-color)]">結帳行為</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div
             v-for="card in behaviorCards"
             :key="card.key"
             class="border border-[var(--p-content-border-color)] rounded-md p-4 flex items-center justify-between gap-3"
           >
-            <div class="flex flex-col gap-0.5 min-w-0">
-              <span class="text-[14px] font-bold text-[var(--p-text-color)]">{{ card.label }}</span>
+            <div class="flex flex-col gap-1 min-w-0">
+              <span class="text-sm font-bold text-[var(--p-text-color)]">{{ card.label }}</span>
               <span class="text-xs text-[var(--p-text-muted-color)]">{{ card.desc }}</span>
             </div>
             <ToggleSwitch v-model="behaviors[card.key]" />
@@ -244,7 +244,7 @@ function onSave(): void {
 
       <!-- 選擇金流方式 -->
       <section class="flex flex-col gap-3">
-        <h3 class="flex items-center gap-2 text-[16px] font-bold text-[var(--p-text-color)]">
+        <h3 class="flex items-center gap-2 text-base font-bold text-[var(--p-text-color)]">
           <i class="pi pi-credit-card text-[var(--p-text-muted-color)]" style="font-size: 16px"></i>
           選擇金流方式
         </h3>
@@ -259,8 +259,8 @@ function onSave(): void {
               : 'border-[var(--p-content-border-color)] hover:bg-[var(--p-content-hover-background)]'"
             @click="togglePayment(opt.id)"
           >
-            <div class="flex flex-col gap-0.5 min-w-0">
-              <span class="text-[14px] font-bold text-[var(--p-text-color)]">{{ opt.label }}</span>
+            <div class="flex flex-col gap-1 min-w-0">
+              <span class="text-sm font-bold text-[var(--p-text-color)]">{{ opt.label }}</span>
               <span class="text-xs text-[var(--p-text-muted-color)]">{{ opt.sub }}</span>
             </div>
             <Checkbox :model-value="isPaymentSelected(opt.id)" binary />
@@ -269,11 +269,11 @@ function onSave(): void {
 
         <!-- 貨到付款過濾 -->
         <div class="mt-2 flex flex-col gap-2">
-          <h4 class="text-[14px] font-bold text-[var(--p-text-color)]">貨到付款過濾</h4>
+          <h4 class="text-sm font-bold text-[var(--p-text-color)]">貨到付款過濾</h4>
           <div class="flex flex-col gap-2 rounded-md border border-[var(--p-content-border-color)] p-3">
             <label class="flex items-center gap-2 cursor-pointer">
               <Checkbox v-model="paymentFilters.byStar" binary />
-              <span class="text-[14px]">啟用貨到付款星等過濾</span>
+              <span class="text-sm">啟用貨到付款星等過濾</span>
             </label>
             <!-- 啟用時才能輸入星等門檻 -->
             <div class="ml-6 rounded-md bg-[var(--p-content-hover-background)] px-3 py-2 text-[13px]"
@@ -282,11 +282,11 @@ function onSave(): void {
             </div>
             <label class="flex items-center gap-2 cursor-pointer">
               <Checkbox v-model="paymentFilters.byCvs" binary />
-              <span class="text-[14px]">啟用超商貨到付款過濾</span>
+              <span class="text-sm">啟用超商貨到付款過濾</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
               <Checkbox v-model="paymentFilters.byHomeShipping" binary />
-              <span class="text-[14px]">啟用宅配貨到付款過濾</span>
+              <span class="text-sm">啟用宅配貨到付款過濾</span>
             </label>
           </div>
         </div>
@@ -294,7 +294,7 @@ function onSave(): void {
 
       <!-- 選擇物流方式 -->
       <section class="flex flex-col gap-3">
-        <h3 class="flex items-center gap-2 text-[16px] font-bold text-[var(--p-text-color)]">
+        <h3 class="flex items-center gap-2 text-base font-bold text-[var(--p-text-color)]">
           <i class="pi pi-truck text-[var(--p-text-muted-color)]" style="font-size: 16px"></i>
           選擇物流方式
         </h3>
@@ -309,8 +309,8 @@ function onSave(): void {
               : 'border-[var(--p-content-border-color)] hover:bg-[var(--p-content-hover-background)]'"
             @click="toggleShipping(opt.id)"
           >
-            <div class="flex flex-col gap-0.5 min-w-0">
-              <span class="text-[14px] font-bold text-[var(--p-text-color)]">{{ opt.label }}</span>
+            <div class="flex flex-col gap-1 min-w-0">
+              <span class="text-sm font-bold text-[var(--p-text-color)]">{{ opt.label }}</span>
               <span class="text-xs text-[var(--p-text-muted-color)]">{{ opt.sub }}</span>
             </div>
             <Checkbox :model-value="isShippingSelected(opt.id)" binary />

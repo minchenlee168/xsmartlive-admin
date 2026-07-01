@@ -14,8 +14,8 @@
     <!-- ── Header（共用） ─────────────────────────── -->
     <div class="flex items-center gap-3 px-[17.5px] py-[17.5px]">
       <p class="font-semibold text-[var(--p-text-color)] shrink-0" style="font-size:17.5px">{{ headerTitle }}</p>
-      <button @click="close" class="w-[35px] py-[7px] flex items-center justify-center rounded-[6px] hover:bg-[var(--p-content-hover-background)] shrink-0 ml-auto">
-        <i class="pi pi-times text-[14px] text-[var(--p-text-color)]"></i>
+      <button @click="close" class="w-[35px] py-[7px] flex items-center justify-center rounded-md hover:bg-[var(--p-content-hover-background)] shrink-0 ml-auto">
+        <i class="pi pi-times text-sm text-[var(--p-text-color)]"></i>
       </button>
     </div>
 
@@ -30,10 +30,10 @@
           v-for="opt in platformOptions"
           :key="opt.key"
           @click="onPlatformPick(opt.key)"
-          class="bg-[var(--p-content-background)] border border-[var(--p-content-border-color)] rounded-[6px] px-[13px] py-[17px] flex flex-col items-start gap-4 min-h-[300px] relative overflow-hidden hover:border-[var(--p-primary-color)] transition-colors text-left"
+          class="bg-[var(--p-content-background)] border border-[var(--p-content-border-color)] rounded-md px-[13px] py-[17px] flex flex-col items-start gap-4 min-h-[300px] relative overflow-hidden hover:border-[var(--p-primary-color)] transition-colors text-left"
         >
           <!-- 左上：品牌色 icon -->
-          <div class="rounded-[6px] w-12 h-12 flex items-center justify-center shrink-0" :style="{ background: opt.bg }">
+          <div class="rounded-md w-12 h-12 flex items-center justify-center shrink-0" :style="{ background: opt.bg }">
             <FontAwesomeIcon
               v-if="opt.faIcon"
               :icon="opt.faIcon"
@@ -41,7 +41,7 @@
             />
             <i v-else :class="opt.piIcon" class="text-white" style="font-size:24px"></i>
           </div>
-          <span class="font-bold text-[20px] leading-6 text-[var(--p-text-color)] whitespace-nowrap">{{ opt.title }}</span>
+          <span class="font-bold text-xl leading-6 text-[var(--p-text-color)] whitespace-nowrap">{{ opt.title }}</span>
           <p class="text-[13px] leading-5 text-[var(--p-text-muted-color)]">{{ opt.desc }}</p>
           <!-- 大裝飾 icon -->
           <div class="flex-1 w-full flex items-end justify-end pr-1 pb-1">
@@ -53,8 +53,8 @@
             <i v-else :class="opt.piIcon" :style="{ color: opt.decorColor, fontSize: '90px' }"></i>
           </div>
           <!-- 立即建立 -->
-          <div class="self-center border border-[var(--p-primary-300)] rounded-[6px] px-[13.25px] py-[9.75px] flex gap-[7px] items-center mt-1">
-            <span class="text-[var(--p-primary-color)] text-[15px] font-medium">{{ t('live_order.label.create_now') }}</span>
+          <div class="self-center border border-[var(--p-primary-300)] rounded-md px-[13.25px] py-[9.75px] flex gap-[7px] items-center mt-1">
+            <span class="text-[var(--p-primary-color)] text-base font-medium">{{ t('live_order.label.create_now') }}</span>
             <i class="pi pi-angle-right text-[var(--p-primary-color)]" style="font-size:15px"></i>
           </div>
         </button>
@@ -66,12 +66,12 @@
       <div class="flex flex-col gap-4">
         <!-- 標題列：左 label + 右平台 Tag -->
         <div class="flex items-center justify-between">
-          <p class="text-[14px] font-medium text-[var(--p-text-color)]">
+          <p class="text-sm font-medium text-[var(--p-text-color)]">
             {{ sessionLabel }}
             <span class="text-[var(--p-text-muted-color)]">{{ sessionHint }}</span>
           </p>
           <div
-            class="flex items-center gap-[3.5px] px-[7px] py-[3.5px] rounded-[12px]"
+            class="flex items-center gap-[3.5px] px-[7px] py-[3.5px] rounded-xl"
             :style="{ background: pickedPlatformMeta.tagBg }"
           >
             <FontAwesomeIcon
@@ -80,7 +80,7 @@
               :style="{ color: pickedPlatformMeta.iconColor, fontSize: '10.5px' }"
             />
             <i v-else :class="pickedPlatformMeta.piIcon" :style="{ color: pickedPlatformMeta.iconColor, fontSize: '10.5px' }"></i>
-            <span class="font-bold text-[12.25px]" :style="{ color: pickedPlatformMeta.iconColor }">{{ pickedPlatformMeta.title }}</span>
+            <span class="font-bold text-xs" :style="{ color: pickedPlatformMeta.iconColor }">{{ pickedPlatformMeta.title }}</span>
           </div>
         </div>
 
@@ -103,14 +103,14 @@
         <!-- 分隔線 + 連結貼上 -->
         <div class="flex items-center w-full">
           <div class="flex-1 h-px bg-[var(--p-content-border-color)]"></div>
-          <span class="px-6 text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.label.or') }}</span>
+          <span class="px-6 text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.label.or') }}</span>
           <div class="flex-1 h-px bg-[var(--p-content-border-color)]"></div>
         </div>
 
         <div class="flex flex-col gap-2 w-full">
-          <span class="text-[14px] font-medium text-[var(--p-text-color)]">{{ pasteLinkLabel }}</span>
+          <span class="text-sm font-medium text-[var(--p-text-color)]">{{ pasteLinkLabel }}</span>
           <IconField icon-position="left">
-            <InputIcon><i class="pi pi-link text-[14px]"></i></InputIcon>
+            <InputIcon><i class="pi pi-link text-sm"></i></InputIcon>
             <InputText v-model="pasteUrl" :placeholder="pastePlaceholder" class="w-full" />
           </IconField>
         </div>
@@ -119,9 +119,9 @@
       <!-- footer -->
       <div class="flex gap-[7px] items-center justify-end pt-4">
         <button @click="step = 'platform'"
-          class="bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] px-[11.5px] py-[8px] rounded-[6px] text-[14px] font-medium text-[var(--p-text-color)] hover:bg-[var(--p-content-border-color)]">{{ t('live_order.button.back') }}</button>
+          class="bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] px-[11.5px] py-[8px] rounded-md text-sm font-medium text-[var(--p-text-color)] hover:bg-[var(--p-content-border-color)]">{{ t('live_order.button.back') }}</button>
         <button @click="confirmSession"
-          class="bg-[var(--p-primary-color)] border border-[var(--p-primary-color)] px-[11.5px] py-[8px] rounded-[6px] text-[14px] font-medium text-white hover:bg-[var(--p-primary-hover-color)]">{{ t('live_order.button.confirm') }}</button>
+          class="bg-[var(--p-primary-color)] border border-[var(--p-primary-color)] px-[11.5px] py-[8px] rounded-md text-sm font-medium text-white hover:bg-[var(--p-primary-hover-color)]">{{ t('live_order.button.confirm') }}</button>
       </div>
     </div>
 
@@ -150,7 +150,7 @@ interface PostCardProps {
 const PostCard: FunctionalComponent<PostCardProps, { click: [] }> = (props, { emit }) => h('button', {
   disabled: props.disabled,
   class: [
-    'w-full rounded-[12px] overflow-hidden text-left transition flex items-end relative h-[188px]',
+    'w-full rounded-xl overflow-hidden text-left transition flex items-end relative h-[188px]',
     props.image ? 'bg-cover bg-center' : 'bg-gradient-to-br from-[#fef3c7] via-[#fed7aa] to-[#fda4af]',
     'shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_0px_rgba(0,0,0,0.1)]',
     props.disabled
@@ -167,19 +167,19 @@ const PostCard: FunctionalComponent<PostCardProps, { click: [] }> = (props, { em
       ]),
   props.disabled
     ? h('span', {
-        class: 'absolute top-2 left-2 bg-[var(--p-text-muted-color)] text-white text-[11px] font-bold px-2 py-0.5 rounded-full leading-none',
+        class: 'absolute top-2 left-2 bg-[var(--p-text-muted-color)] text-white text-xs font-bold px-2 py-0.5 rounded-full leading-none',
       }, props.usedLabel ?? '')
     : (props.isLive
         ? h('span', {
-            class: 'absolute top-2 left-2 inline-flex items-center gap-1 bg-[#ef4444] text-white text-[11px] font-bold px-2 py-[3px] rounded-full leading-none shadow-[0_1px_2px_rgba(0,0,0,0.25)]',
+            class: 'absolute top-2 left-2 inline-flex items-center gap-1 bg-[#ef4444] text-white text-xs font-bold px-2 py-[3px] rounded-full leading-none shadow-[0_1px_2px_rgba(0,0,0,0.25)]',
           }, [
             h('span', { class: 'w-1.5 h-1.5 rounded-full bg-white animate-pulse' }),
             'LIVE',
           ])
         : null),
   h('div', { class: 'relative w-full px-[6px] py-[8px] bg-[var(--p-content-background)]/70 flex flex-col gap-1' }, [
-    h('p', { class: 'text-[var(--p-text-color)] text-[16px] leading-6 line-clamp-2 h-[49px] overflow-hidden' }, props.title),
-    h('p', { class: 'text-[var(--p-text-muted-color)] text-[14px] leading-5' }, props.date),
+    h('p', { class: 'text-[var(--p-text-color)] text-base leading-6 line-clamp-2 h-[49px] overflow-hidden' }, props.title),
+    h('p', { class: 'text-[var(--p-text-muted-color)] text-sm leading-5' }, props.date),
   ]),
 ])
 PostCard.props = ['title', 'date', 'selected', 'disabled', 'usedLabel', 'image', 'isLive']

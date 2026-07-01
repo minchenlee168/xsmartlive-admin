@@ -325,16 +325,16 @@ function onConfirm(): void {
           <div class="bg-[var(--p-content-background)] border-b border-[var(--p-content-border-color)] flex items-center px-4">
             <div class="px-2 py-[6px] shrink-0 flex justify-center" style="width: 50px"></div>
             <div class="px-2 py-[6px] shrink-0 w-[28px]"></div>
-            <div class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0" style="width: 380px">
+            <div class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0" style="width: 380px">
               商品名稱
             </div>
-            <div class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0" style="width: 120px">
+            <div class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0" style="width: 120px">
               成本
             </div>
-            <div class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0" style="width: 120px">
+            <div class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0" style="width: 120px">
               售價
             </div>
-            <div class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0" style="width: 100px">
+            <div class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0" style="width: 100px">
               庫存
             </div>
           </div>
@@ -367,42 +367,42 @@ function onConfirm(): void {
                 >
                   <i
                     :class="[
-                      'pi text-[14px] text-[var(--p-text-muted-color)]',
+                      'pi text-sm text-[var(--p-text-muted-color)]',
                       expandedIds.has(p.id) ? 'pi-chevron-up' : 'pi-chevron-down',
                     ]"
                   ></i>
                 </button>
               </div>
               <div class="px-2 py-[6px] flex gap-3 items-center shrink-0" style="width: 380px">
-                <div class="w-[48px] h-[48px] rounded-[6px] bg-[var(--p-content-hover-background)] flex items-center justify-center shrink-0">
-                  <i class="pi pi-image text-[18px] text-[var(--p-text-muted-color)]"></i>
+                <div class="w-[48px] h-[48px] rounded-md bg-[var(--p-content-hover-background)] flex items-center justify-center shrink-0">
+                  <i class="pi pi-image text-lg text-[var(--p-text-muted-color)]"></i>
                 </div>
                 <div class="flex flex-col gap-[2px]">
                   <span
-                    class="font-medium text-[15px]"
+                    class="font-medium text-base"
                     :class="isExistingProduct(p) ? 'text-[var(--p-text-muted-color)]' : 'text-[var(--p-text-color)]'"
                   >{{ p.name }}</span>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ p.sku }}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-[var(--p-text-muted-color)]">{{ p.sku }}</span>
                     <span
                       v-if="hasSpecs(p)"
-                      class="text-[11px] font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-1.5 py-0.5 rounded"
+                      class="text-xs font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-2 py-0.5 rounded"
                     >多規格</span>
                     <span
                       v-if="isExistingProduct(p)"
-                      class="text-[11px] font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-1.5 py-0.5 rounded"
+                      class="text-xs font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-2 py-0.5 rounded"
                     >已加入</span>
                   </div>
                 </div>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                <span class="text-[15px] text-[var(--p-text-color)]">{{ specCostRange(p) }}</span>
+                <span class="text-base text-[var(--p-text-color)]">{{ specCostRange(p) }}</span>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                <span class="text-[15px] text-[var(--p-text-color)]">{{ specPriceRange(p) }}</span>
+                <span class="text-base text-[var(--p-text-color)]">{{ specPriceRange(p) }}</span>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 100px">
-                <span class="text-[15px]" :class="minSpecStock(p) <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">{{ specStockRange(p) }}</span>
+                <span class="text-base" :class="minSpecStock(p) <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">{{ specStockRange(p) }}</span>
               </div>
             </div>
 
@@ -429,25 +429,25 @@ function onConfirm(): void {
                     />
                   </div>
                   <div class="px-2 py-[6px] flex gap-3 items-center shrink-0" style="width: 380px">
-                    <div class="w-[40px] h-[40px] rounded-[6px] bg-[var(--p-content-hover-background)] flex items-center justify-center shrink-0">
-                      <i class="pi pi-image text-[14px] text-[var(--p-text-muted-color)]"></i>
+                    <div class="w-[40px] h-[40px] rounded-md bg-[var(--p-content-hover-background)] flex items-center justify-center shrink-0">
+                      <i class="pi pi-image text-sm text-[var(--p-text-muted-color)]"></i>
                     </div>
                     <div class="flex flex-col gap-[2px]">
-                      <span class="font-medium text-[14px] text-[var(--p-text-color)]">規格：{{ spec.name }}</span>
+                      <span class="font-medium text-sm text-[var(--p-text-color)]">規格：{{ spec.name }}</span>
                       <span
                         v-if="isExistingSpec(p, spec)"
-                        class="text-[11px] font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-1.5 py-0.5 rounded w-fit"
+                        class="text-xs font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-2 py-0.5 rounded w-fit"
                       >已加入</span>
                     </div>
                   </div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                    <span class="text-[14px] text-[var(--p-text-color)]">{{ spec.cost.toLocaleString() }}</span>
+                    <span class="text-sm text-[var(--p-text-color)]">{{ spec.cost.toLocaleString() }}</span>
                   </div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                    <span class="text-[14px] text-[var(--p-text-color)]">{{ spec.price.toLocaleString() }}</span>
+                    <span class="text-sm text-[var(--p-text-color)]">{{ spec.price.toLocaleString() }}</span>
                   </div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 100px">
-                    <span class="text-[14px]" :class="spec.stock <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">{{ spec.stock }}</span>
+                    <span class="text-sm" :class="spec.stock <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">{{ spec.stock }}</span>
                   </div>
                 </div>
               </div>
@@ -456,7 +456,7 @@ function onConfirm(): void {
 
           <div v-if="paged.length === 0" class="flex flex-col items-center justify-center gap-2 py-12">
             <i class="pi pi-inbox text-5xl text-[var(--p-text-muted-color)]"></i>
-            <span class="text-[14px] text-[var(--p-text-muted-color)]">沒有符合條件的商品</span>
+            <span class="text-sm text-[var(--p-text-muted-color)]">沒有符合條件的商品</span>
           </div>
         </div>
       </div>

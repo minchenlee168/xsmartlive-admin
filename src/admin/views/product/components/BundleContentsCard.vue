@@ -265,7 +265,7 @@ function onRowDelete(item: BundleItem, event: Event): void {
       </DataTable>
 
       <!-- 備註 -->
-      <div class="mt-5 flex flex-col gap-1.5">
+      <div class="mt-5 flex flex-col gap-2">
         <label class="text-sm font-bold text-color">備註</label>
         <Textarea v-model="remarkModel" rows="4" class="w-full" />
       </div>

@@ -19,7 +19,7 @@
         variant="outlined"
         @click="mobilePanelVisible = true"
       >
-        <i class="pi pi-link mr-1.5" style="font-size: 13px"></i>
+        <i class="pi pi-link mr-2" style="font-size: 13px"></i>
         {{ t('live_order.tab.sources') }}<span v-if="sources.length > 0" class="ml-1">({{ sources.length }})</span>
       </Button>
 
@@ -81,45 +81,45 @@
       <slot name="right-toolbar" />
 
       <!-- 商品狀態統計：銷售總計（靠左）/ 收單中 / 準備中 — hover 顯示 tooltip -->
-      <div class="flex items-stretch gap-2 px-3 py-[8px] rounded-[6px] border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] shrink-0">
+      <div class="flex items-stretch gap-2 px-3 py-[8px] rounded-md border border-[var(--p-content-border-color)] bg-[var(--p-content-background)] shrink-0">
         <div
           v-tooltip.bottom="t('live_order.tooltip.sales_total')"
-          class="flex-1 min-w-[110px] flex items-center justify-start gap-1.5 text-[14px] font-bold text-[#f97316] cursor-help"
+          class="flex-1 min-w-[110px] flex items-center justify-start gap-2 text-sm font-bold text-[#f97316] cursor-help"
         >
-          <span class="text-[11px] font-bold tracking-wide">NTD</span>
+          <span class="text-xs font-bold tracking-wide">NTD</span>
           {{ salesTotalDisplay }}
         </div>
         <span class="w-px self-stretch bg-[var(--p-content-border-color)]" />
         <div
           v-tooltip.bottom="t('live_order.status.live')"
-          class="w-[56px] flex items-center justify-center gap-1.5 text-[14px] font-medium text-[var(--p-primary-color)] cursor-help"
+          class="w-[56px] flex items-center justify-center gap-2 text-sm font-medium text-[var(--p-primary-color)] cursor-help"
         >
-          <FontAwesomeIcon :icon="['far', 'circle-play']" class="text-[16px]" />
+          <FontAwesomeIcon :icon="['far', 'circle-play']" class="text-base" />
           {{ statusCounts.live }}
         </div>
         <span class="w-px self-stretch bg-[var(--p-content-border-color)]" />
         <div
           v-tooltip.bottom="t('live_order.status.ready')"
-          class="w-[56px] flex items-center justify-center gap-1.5 text-[14px] font-medium text-[var(--p-text-muted-color)] cursor-help"
+          class="w-[56px] flex items-center justify-center gap-2 text-sm font-medium text-[var(--p-text-muted-color)] cursor-help"
         >
-          <FontAwesomeIcon :icon="['far', 'circle-pause']" class="text-[16px]" />
+          <FontAwesomeIcon :icon="['far', 'circle-pause']" class="text-base" />
           {{ statusCounts.ready }}
         </div>
       </div>
 
       <!-- 預覽區（只在 FB 系列來源時顯示，IG / TikTok 無影片畫面隱藏；貼文收單一律不顯示） -->
       <div v-if="sources.length > 0 && hasPreview && !useTable && !isPostMode" class="relative shrink-0">
-        <div class="bg-[#0f172a] rounded-[6px] overflow-hidden relative flex items-center justify-center" style="height:125px">
-          <div class="bg-[var(--p-content-background)] rounded-[6px] overflow-hidden shadow-md flex flex-col" style="width:70px; height:113px">
+        <div class="bg-[#0f172a] rounded-md overflow-hidden relative flex items-center justify-center" style="height:125px">
+          <div class="bg-[var(--p-content-background)] rounded-md overflow-hidden shadow-md flex flex-col" style="width:70px; height:113px">
             <div class="flex-1 bg-gradient-to-br from-[#fef3c7] via-[#fed7aa] to-[#fda4af] flex items-center justify-center">
               <i class="pi pi-image text-[#d97706]" style="font-size:16px"></i>
             </div>
-            <div class="bg-[var(--p-content-background)] px-1 py-0.5 text-[6px] text-[var(--p-text-color)] leading-tight">
+            <div class="bg-[var(--p-content-background)] px-1 py-0.5 text-xs text-[var(--p-text-color)] leading-tight">
               {{ previewMeta.previewLabel }}
             </div>
           </div>
-          <span class="absolute top-1.5 left-1.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded leading-none">{{ previewMeta.badge }}</span>
-          <i :class="previewMeta.previewIcon" class="absolute bottom-1.5 right-1.5 text-white/60" style="font-size:14px"></i>
+          <span class="absolute top-2 left-1.5 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded leading-none">{{ previewMeta.badge }}</span>
+          <i :class="previewMeta.previewIcon" class="absolute bottom-2 right-1.5 text-white/60" style="font-size:14px"></i>
         </div>
 
         <!-- 多來源:左右切換 + 指示點 -->
@@ -132,7 +132,7 @@
             class="absolute right-1.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center">
             <i class="pi pi-chevron-right" style="font-size:12px"></i>
           </button>
-          <div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1">
+          <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
             <span v-for="(_, i) in previewableSources" :key="i"
               :class="['w-1.5 h-1.5 rounded-full', i === previewIndex % previewableSources.length ? 'bg-[var(--p-content-background)]' : 'bg-[var(--p-content-background)]/40']"></span>
           </div>
@@ -142,17 +142,17 @@
       <Tabs v-model:value="activeTab" class="flex flex-col flex-1 min-h-0 !bg-transparent">
         <TabList class="!bg-transparent">
           <Tab v-if="showComments" value="comments" class="!bg-transparent">
-            <span class="flex items-center gap-1.5">
+            <span class="flex items-center gap-2">
               <i class="pi pi-comments" style="font-size:14px"></i>
               <span>{{ t('live_order.tab.comments') }}</span>
             </span>
           </Tab>
           <Tab value="sources" class="!bg-transparent">
-            <span class="flex items-center gap-1.5">
+            <span class="flex items-center gap-2">
               <i class="pi pi-link" style="font-size:14px"></i>
               <span>{{ t('live_order.tab.sources') }}</span>
               <span v-if="sources.length > 0"
-                class="bg-[var(--p-primary-color)] text-white text-[10px] font-bold leading-none rounded-full min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center">
+                class="bg-[var(--p-primary-color)] text-white text-xs font-bold leading-none rounded-full min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center">
                 {{ sources.length }}
               </span>
             </span>
@@ -181,7 +181,7 @@
           <TabPanel value="sources" class="flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto pt-3 pr-1 !bg-transparent">
             <!-- 新增按鈕 -->
             <button @click="$emit('pick-source')"
-              class="bg-[var(--p-content-background)] border border-dashed border-[var(--p-primary-color)] text-[var(--p-primary-color)] rounded-[8px] px-3 py-2.5 text-[14px] font-medium flex items-center justify-center gap-2 hover:bg-[var(--p-primary-50)]">
+              class="bg-[var(--p-content-background)] border border-dashed border-[var(--p-primary-color)] text-[var(--p-primary-color)] rounded-lg px-3 py-3 text-sm font-medium flex items-center justify-center gap-2 hover:bg-[var(--p-primary-50)]">
               <i class="pi pi-plus" style="font-size:14px"></i>
               {{ t('live_order.button.add_source') }}
             </button>
@@ -190,13 +190,13 @@
             <div v-if="sources.length === 0"
               class="flex flex-col items-center gap-2 text-[var(--p-text-muted-color)] pt-8">
               <i class="pi pi-inbox" style="font-size:32px"></i>
-              <span class="text-[12.25px]">{{ t('live_order.empty.no_source_added') }}</span>
+              <span class="text-xs">{{ t('live_order.empty.no_source_added') }}</span>
             </div>
             <div v-else class="flex flex-col gap-2">
               <div v-for="s in sources" :key="s.id"
-                :class="['border rounded-[8px] px-3 py-2.5 flex items-center gap-3 bg-[var(--p-content-background)]',
+                :class="['border rounded-lg px-3 py-2.5 flex items-center gap-3 bg-[var(--p-content-background)]',
                   sourceCardBorderClass(s.type)]">
-                <div :class="['w-[36px] h-[36px] rounded-[8px] flex items-center justify-center shrink-0',
+                <div :class="['w-[36px] h-[36px] rounded-lg flex items-center justify-center shrink-0',
                   sourceCardBgClass(s.type)]">
                   <FontAwesomeIcon
                     :icon="getPlatformMeta(s.type).platformIcon"
@@ -204,8 +204,8 @@
                   />
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="font-bold text-[14px] text-[var(--p-text-color)] truncate">{{ s.label }}</div>
-                  <div class="text-[11px] text-[var(--p-text-muted-color)] mt-0.5">{{ t('live_order.label.added_at', { time: formatTime(s.addedAt) }) }}</div>
+                  <div class="font-bold text-sm text-[var(--p-text-color)] truncate">{{ s.label }}</div>
+                  <div class="text-xs text-[var(--p-text-muted-color)] mt-1">{{ t('live_order.label.added_at', { time: formatTime(s.addedAt) }) }}</div>
                 </div>
                 <button @click="$emit('remove-source', s.id)"
                   v-tooltip.top="t('live_order.tooltip.remove_source')"

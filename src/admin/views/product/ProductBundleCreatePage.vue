@@ -385,7 +385,7 @@ function applyAi(payload: AiApplyPayload): void {
     >
       <!-- 商品資料 -->
       <section class="relative py-6 first:pt-0">
-        <h3 class="text-[18px] font-bold text-[var(--p-text-color)] mb-4">商品資料</h3>
+        <h3 class="text-lg font-bold text-[var(--p-text-color)] mb-4">商品資料</h3>
         <button
           v-if="!readonly"
           v-tooltip.left="'AI 建議'"
@@ -394,7 +394,7 @@ function applyAi(payload: AiApplyPayload): void {
         >AI</button>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">
               <span v-if="!readonly" class="text-red-600 mr-1">*</span>組合商品名稱
             </label>
@@ -402,7 +402,7 @@ function applyAi(payload: AiApplyPayload): void {
             <span v-else class="field-value">{{ form.name || '—' }}</span>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">商品類別</label>
             <Select
               v-if="!readonly"
@@ -416,13 +416,13 @@ function applyAi(payload: AiApplyPayload): void {
             <span v-else class="field-value">{{ form.category || '—' }}</span>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">直播關鍵字</label>
             <InputText v-if="!readonly" v-model="form.keyword" placeholder="可設定直播使用關鍵字加單" class="w-full" />
             <span v-else class="field-value">{{ form.keyword || '—' }}</span>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">標籤</label>
             <MultiSelect
               v-if="!readonly"
@@ -434,29 +434,29 @@ function applyAi(payload: AiApplyPayload): void {
               class="w-full"
               display="chip"
             />
-            <div v-else class="flex flex-wrap gap-1.5">
+            <div v-else class="flex flex-wrap gap-2">
               <span
                 v-for="t in form.tags"
                 :key="t"
-                class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-medium bg-[var(--p-content-hover-background)] text-[var(--p-text-color)]"
+                class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--p-content-hover-background)] text-[var(--p-text-color)]"
               >{{ t }}</span>
               <span v-if="form.tags.length === 0" class="text-sm text-[var(--p-text-muted-color)]">—</span>
             </div>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">啟用優惠券</label>
             <ToggleSwitch v-if="!readonly" v-model="form.enableCoupon" />
             <span v-else class="field-value">{{ form.enableCoupon ? '啟用' : '未啟用' }}</span>
           </div>
 
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <label class="text-sm font-bold text-color">商品重量（公克）</label>
             <InputNumber v-if="!readonly" v-model="form.weight" :min="0" suffix=" g" class="w-full" />
             <span v-else class="field-value">{{ form.weight ?? 0 }} g</span>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">組合商品介紹</label>
             <Editor v-if="!readonly" v-model="form.description" editor-style="height: 320px" />
             <div
@@ -471,7 +471,7 @@ function applyAi(payload: AiApplyPayload): void {
 
       <!-- 商品圖片 -->
       <section class="py-6">
-        <h3 class="text-[18px] font-bold text-[var(--p-text-color)] mb-4">商品圖片</h3>
+        <h3 class="text-lg font-bold text-[var(--p-text-color)] mb-4">商品圖片</h3>
         <MultiImageUploader
           v-if="!readonly"
           v-model:images="form.images"

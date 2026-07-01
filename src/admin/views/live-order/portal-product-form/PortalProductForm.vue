@@ -312,7 +312,7 @@ async function handleApplyCategoryDefaultImage(categoryId: number): Promise<void
   >
     <!-- 基本資料 -->
     <section class="border-b border-[var(--p-content-border-color)] pb-5">
-      <h3 class="text-[15px] font-semibold text-[var(--p-text-color)] mb-4">
+      <h3 class="text-base font-semibold text-[var(--p-text-color)] mb-4">
         {{ t('portal_product.form.section.basic') }}
       </h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
@@ -425,7 +425,7 @@ async function handleApplyCategoryDefaultImage(categoryId: number): Promise<void
 
     <!-- 商品圖片 -->
     <section class="border-b border-[var(--p-content-border-color)] pb-5">
-      <h3 class="text-[15px] font-semibold text-[var(--p-text-color)] mb-4">
+      <h3 class="text-base font-semibold text-[var(--p-text-color)] mb-4">
         {{ t('portal_product.form.section.images') }}
       </h3>
         <MultiImageUploader
@@ -476,7 +476,7 @@ async function handleApplyCategoryDefaultImage(categoryId: number): Promise<void
 
     <!-- 規格設定（無規格時的價格與庫存） -->
     <section v-if="!hasSpec" class="border-b border-[var(--p-content-border-color)] pb-5">
-      <h3 class="text-[15px] font-semibold text-[var(--p-text-color)] mb-4">
+      <h3 class="text-base font-semibold text-[var(--p-text-color)] mb-4">
         {{ t('portal_product.form.section.sales_options') }}
       </h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -571,7 +571,7 @@ async function handleApplyCategoryDefaultImage(categoryId: number): Promise<void
 
     <!-- 商品詳情 -->
     <section>
-      <h3 class="text-[15px] font-semibold text-[var(--p-text-color)] mb-4">
+      <h3 class="text-base font-semibold text-[var(--p-text-color)] mb-4">
         {{ t('portal_product.form.section.details') }}
       </h3>
         <div class="grid grid-cols-1 gap-4 max-w-2xl">

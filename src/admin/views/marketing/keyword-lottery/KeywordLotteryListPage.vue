@@ -152,7 +152,7 @@ function handleDelete(_row: KeywordLotteryRow) {
 
       <template #actions="{ data }">
         <!-- 操作 icon button：改用線框樣式（rounded + outlined）統一視覺 -->
-        <div class="flex items-center gap-1.5">
+        <div class="flex items-center gap-2">
           <Button
             v-tooltip.top="$t('keyword_lottery.button.draw')"
             rounded

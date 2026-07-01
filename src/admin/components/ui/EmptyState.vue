@@ -23,11 +23,11 @@ withDefaults(defineProps<Props>(), {
 <template>
   <div class="empty-state">
     <div class="empty-state-icon">
-      <i :class="icon" class="text-[28px]"></i>
+      <i :class="icon" class="text-3xl"></i>
     </div>
     <div class="empty-state-text">
-      <p class="text-[16px] font-semibold text-color">{{ title }}</p>
-      <p v-if="description" class="text-[14px] text-color-secondary">{{ description }}</p>
+      <p class="text-base font-semibold text-color">{{ title }}</p>
+      <p v-if="description" class="text-sm text-color-secondary">{{ description }}</p>
     </div>
     <slot name="actions" />
   </div>
@@ -37,7 +37,7 @@ withDefaults(defineProps<Props>(), {
 @reference "@/admin/style.css";
 
 .empty-state {
-  @apply flex flex-col items-center justify-center py-16 gap-4 rounded-[8px] border border-dashed;
+  @apply flex flex-col items-center justify-center py-16 gap-4 rounded-lg border border-dashed;
   border-color: var(--p-content-border-color);
 }
 .empty-state-icon {

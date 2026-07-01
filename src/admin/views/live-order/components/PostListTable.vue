@@ -204,12 +204,13 @@ function onDelete(post: OrderPost, event: Event): void {
  * - 準備中：灰底灰字 + pi-history icon
  * - 已結束：灰底灰字
  */
-function statusMeta(status: OrderPost['status']): { label: string; bg: string; color: string; dot?: boolean; icon?: string } {
-  const map = {
-    ongoing: { label: '收單中', bg: '#fee2e2', color: '#dc2626', dot: true },
-    ready:   { label: '準備中', bg: '#f1f5f9', color: '#64748b', icon: 'pi pi-history' },
-    ended:   { label: '已結束', bg: '#f1f5f9', color: '#64748b' },
-  } as const
+type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'
+function statusMeta(status: OrderPost['status']): { label: string; severity: TagSeverity } {
+  const map: Record<OrderPost['status'], { label: string; severity: TagSeverity }> = {
+    ongoing: { label: '收單中', severity: 'danger' },
+    ready:   { label: '準備中', severity: 'secondary' },
+    ended:   { label: '已結束', severity: 'secondary' },
+  }
   return map[status]
 }
 </script>
@@ -226,7 +227,7 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
     <template #content>
       <!-- 標題區 -->
       <div class="flex flex-col gap-1 px-4 pt-4 pb-2">
-        <h2 class="text-[17.5px] font-bold text-[var(--p-text-color)]">收單紀錄列表</h2>
+        <h2 class="text-lg font-bold text-[var(--p-text-color)]">收單紀錄列表</h2>
       </div>
 
       <!-- 頁籤：收單中 / 準備中 / 已結束 / 全部 — design-tokens.json → tabs -->
@@ -238,14 +239,12 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
               :key="t.value"
               :value="t.value"
             >
-              <span class="flex items-center gap-1.5 text-[14px] font-bold">
+              <span class="flex items-center gap-2 text-sm font-bold">
                 {{ t.label }}
-                <span
-                  class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-semibold leading-none"
-                  :style="activeTab === t.value
-                    ? 'background: var(--p-primary-color); color: var(--p-primary-contrast-color)'
-                    : 'background: var(--p-content-hover-background); color: var(--p-text-muted-color)'"
-                >{{ countByStatus(t.value) }}</span>
+                <Tag
+                  :value="String(countByStatus(t.value))"
+                  :severity="activeTab === t.value ? 'contrast' : 'secondary'"
+                />
               </span>
             </Tab>
           </TabList>
@@ -297,23 +296,12 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
         >
           <!-- 名稱 + 狀態 badge 一列 -->
           <div class="flex items-start justify-between gap-2 mb-2">
-            <span class="font-bold text-[15px] text-[var(--p-text-color)] flex-1">{{ p.name }}</span>
-            <span
-              class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold leading-none"
-              :style="{ background: statusMeta(p.status).bg, color: statusMeta(p.status).color }"
-            >
-              <span
-                v-if="statusMeta(p.status).dot"
-                class="w-1.5 h-1.5 rounded-full animate-pulse"
-                :style="{ background: statusMeta(p.status).color }"
-              ></span>
-              <i
-                v-else-if="statusMeta(p.status).icon"
-                :class="statusMeta(p.status).icon"
-                :style="{ fontSize: '11px', color: statusMeta(p.status).color }"
-              ></i>
-              {{ statusMeta(p.status).label }}
-            </span>
+            <span class="font-bold text-base text-[var(--p-text-color)] flex-1">{{ p.name }}</span>
+            <Tag
+              :value="statusMeta(p.status).label"
+              :severity="statusMeta(p.status).severity"
+              class="shrink-0"
+            />
           </div>
 
           <!-- 欄位 label：value 配對 -->
@@ -325,7 +313,7 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
           </div>
 
           <!-- 操作 buttons -->
-          <div class="mt-3 flex items-center gap-1.5" @click.stop>
+          <div class="mt-3 flex items-center gap-2" @click.stop>
             <Button
               v-tooltip.top="'得標清單'"
               icon="pi pi-list"
@@ -354,7 +342,7 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
             />
           </div>
         </button>
-        <div v-if="filteredPosts.length === 0" class="py-8 text-center text-[14px] text-[var(--p-text-muted-color)]">
+        <div v-if="filteredPosts.length === 0" class="py-8 text-center text-sm text-[var(--p-text-muted-color)]">
           目前尚無貼文，請按右上方「選擇貼文」開始。
         </div>
       </div>
@@ -377,7 +365,7 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
 
         <Column field="name" header="名稱" sortable>
           <template #body="{ data }">
-            <span class="text-[14px] font-medium text-[var(--p-text-color)]">{{ data.name }}</span>
+            <span class="text-[var(--p-text-color)]">{{ data.name }}</span>
           </template>
         </Column>
 
@@ -403,7 +391,7 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
           <template #body="{ data }">
             <button
               v-tooltip.top="'點按設定收單期間'"
-              class="inline-flex items-center gap-1.5 text-[13px] text-[var(--p-text-color)] px-2 py-1 -mx-2 -my-1 rounded-[6px] hover:bg-[var(--p-content-hover-background)] hover:text-[var(--p-primary-color)] transition-colors"
+              class="inline-flex items-center gap-2 text-[13px] text-[var(--p-text-color)] px-2 py-1 -mx-2 -my-1 rounded-md hover:bg-[var(--p-content-hover-background)] hover:text-[var(--p-primary-color)] transition-colors"
               @click.stop="openPeriodDialog(data)"
             >
               <i class="pi pi-calendar" style="font-size: 12px"></i>
@@ -420,22 +408,10 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
 
         <Column field="status" header="收單狀態">
           <template #body="{ data }">
-            <span
-              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-semibold leading-none"
-              :style="{ background: statusMeta(data.status).bg, color: statusMeta(data.status).color }"
-            >
-              <span
-                v-if="statusMeta(data.status).dot"
-                class="w-1.5 h-1.5 rounded-full animate-pulse"
-                :style="{ background: statusMeta(data.status).color }"
-              ></span>
-              <i
-                v-else-if="statusMeta(data.status).icon"
-                :class="statusMeta(data.status).icon"
-                :style="{ fontSize: '11px', color: statusMeta(data.status).color }"
-              ></i>
-              {{ statusMeta(data.status).label }}
-            </span>
+            <Tag
+              :value="statusMeta(data.status).label"
+              :severity="statusMeta(data.status).severity"
+            />
           </template>
         </Column>
 
@@ -445,14 +421,14 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
             <div class="flex items-center gap-1" @click.stop>
               <button
                 v-tooltip.top="'得標清單'"
-                class="size-[32px] flex items-center justify-center rounded-[6px] text-[#16a34a] hover:bg-[#dcfce7]"
+                class="size-[32px] flex items-center justify-center rounded-md text-[#16a34a] hover:bg-[#dcfce7]"
                 @click="emit('view-winners', data.id)"
               >
                 <i class="pi pi-list" style="font-size: 15.75px"></i>
               </button>
               <button
                 v-tooltip.top="'商品清單'"
-                class="size-[32px] flex items-center justify-center rounded-[6px] text-[var(--p-primary-color)] hover:bg-[#f2ebff]"
+                class="size-[32px] flex items-center justify-center rounded-md text-[var(--p-primary-color)] hover:bg-[#f2ebff]"
                 @click="emit('view-products', data.id)"
               >
                 <i class="pi pi-shopping-bag" style="font-size: 15.75px"></i>
@@ -462,7 +438,7 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
                 v-tooltip.top="data.status === 'ongoing' ? '結束收單' : data.status === 'ready' ? '開始收單' : '已結束'"
                 :disabled="data.status === 'ended'"
                 :class="[
-                  'size-[32px] flex items-center justify-center rounded-[6px] text-white transition-colors',
+                  'size-[32px] flex items-center justify-center rounded-md text-white transition-colors',
                   data.status === 'ongoing'
                     ? 'bg-[#ef4444] hover:bg-[#dc2626]'
                     : data.status === 'ready'
@@ -481,7 +457,7 @@ function statusMeta(status: OrderPost['status']): { label: string; bg: string; c
         </Column>
 
         <template #empty>
-          <div class="py-8 text-center text-[14px] text-[var(--p-text-muted-color)]">
+          <div class="py-8 text-center text-sm text-[var(--p-text-muted-color)]">
             目前尚無貼文，請按右上方「選擇貼文」開始。
           </div>
         </template>

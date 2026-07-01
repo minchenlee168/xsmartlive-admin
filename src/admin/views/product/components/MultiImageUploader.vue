@@ -182,7 +182,7 @@ const slotStyle = computed(() => ({
         <!-- 主圖 badge -->
         <span
           v-if="idx === 0"
-          class="absolute top-1.5 left-1.5 inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold leading-none bg-primary text-white"
+          class="absolute top-2 left-1.5 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold leading-none bg-primary text-white"
         >主圖</span>
 
         <!-- 移除按鈕 -->
@@ -190,16 +190,16 @@ const slotStyle = computed(() => ({
           v-if="!disabled"
           v-tooltip.top="'移除'"
           type="button"
-          class="absolute top-1.5 right-1.5 size-[24px] rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
+          class="absolute top-2 right-1.5 size-[24px] rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/80"
           @click="removeAt(img.id)"
         >
-          <FontAwesomeIcon :icon="['far', 'trash']" class="text-[11px]" />
+          <FontAwesomeIcon :icon="['far', 'trash']" class="text-xs" />
         </button>
 
         <!-- 拖曳手柄提示（hover 才出現） -->
         <span
           v-if="!disabled"
-          class="absolute bottom-1.5 right-1.5 size-[24px] rounded-md bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-grab"
+          class="absolute bottom-2 right-1.5 size-[24px] rounded-md bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-grab"
           v-tooltip.top="'拖曳調整順序'"
         >
           <i class="pi pi-bars" style="font-size: 11px"></i>

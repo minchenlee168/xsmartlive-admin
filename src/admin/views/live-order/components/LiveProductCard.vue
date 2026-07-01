@@ -2,12 +2,12 @@
   <!-- 直播商品卡：h-266，寬度跟著 grid cell 撐滿（卡片+gap 總寬對齊快速新增）；
        locked=true 時整張卡 pointer-events-none + 透明度降低（其他競價商品收單中時鎖住） -->
   <div
-    class="rounded-[12px] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] overflow-hidden relative h-[266px] w-full bg-[var(--p-content-background)] transition-opacity"
+    class="rounded-xl shadow-[0px_1px_3px_0px_rgba(0,0,0,0.1),0px_1px_2px_-1px_rgba(0,0,0,0.1)] overflow-hidden relative h-[266px] w-full bg-[var(--p-content-background)] transition-opacity"
     :class="locked ? 'pointer-events-none opacity-50' : ''"
   >
 
     <!-- 狀態 Tag（左上絕對定位）— 規範：直播收單區 status-badge -->
-    <div :class="['absolute top-2 left-2 flex items-center gap-1.5 px-[7px] py-[3.5px] rounded-[12px] z-10', statusMeta.bg]">
+    <div :class="['absolute top-2 left-2 flex items-center gap-2 px-[7px] py-[3.5px] rounded-xl z-10', statusMeta.bg]">
       <span
         v-if="status === 'live'"
         class="w-1.5 h-1.5 rounded-full bg-[#dc2626] animate-pulse"
@@ -17,10 +17,10 @@
         :class="statusMeta.icon"
         :style="`font-size:11px; color:${statusMeta.color}`"
       ></i>
-      <span class="font-bold text-[12.25px] leading-none" :style="`color:${statusMeta.color}`">{{ statusMeta.label }}</span>
+      <span class="font-bold text-xs leading-none" :style="`color:${statusMeta.color}`">{{ statusMeta.label }}</span>
     </div>
 
-    <div class="flex flex-col h-full px-2 py-1.5 justify-between">
+    <div class="flex flex-col h-full px-2 py-2 justify-between">
       <div class="flex flex-col gap-2 flex-1 min-h-0">
 
         <!-- Caption row：圖片 + 名稱/簡碼/價格（編輯模式時可撐高，與下方灰色區塊保持間距） -->
@@ -70,15 +70,11 @@
                 >
                   <i class="pi pi-gift" style="font-size:10px"></i>
                 </span>
-                <!-- 組合商品 tag：用綠色「組」字標示（與商品列表的綠色組 tag 同色） -->
-                <span
-                  v-if="isBundle"
-                  v-tooltip.top="'組合商品'"
-                  class="shrink-0 inline-flex items-center justify-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none bg-[#dcfce7] text-[#15803d]"
-                >組</span>
+                <!-- 組合商品 tag：綠色（與商品列表 severity="success" 同源） -->
+                <Tag v-if="isBundle" v-tooltip.top="'組合商品'" value="組" severity="success" class="shrink-0" />
                 <!-- 名稱靠右對齊（與下方關鍵字 tag 同一邊）— 移除 flex-1 / text-left，
                      讓 parent 的 justify-end 把 tag + 名稱整組包到右側 -->
-                <span ref="nameRef" v-tooltip.top="nameTruncated ? displayName : ''" class="font-bold text-[16px] text-[var(--p-text-color)] truncate min-w-0">{{ displayName }}</span>
+                <span ref="nameRef" v-tooltip.top="nameTruncated ? displayName : ''" class="font-bold text-base text-[var(--p-text-color)] truncate min-w-0">{{ displayName }}</span>
               </template>
             </div>
 
@@ -105,11 +101,11 @@
               <template v-else>
                 <span
                   v-if="shortCode"
-                  class="bg-[#e0f2fe] text-[#0369a1] text-[12.25px] font-bold px-[7px] py-[3.5px] rounded-[12px] leading-none"
+                  class="bg-[#e0f2fe] text-[#0369a1] text-xs font-bold px-[7px] py-[3.5px] rounded-xl leading-none"
                 >{{ shortCode }}</span>
                 <span
                   v-else
-                  class="text-[12.25px] text-[var(--p-text-muted-color)] leading-none"
+                  class="text-xs text-[var(--p-text-muted-color)] leading-none"
                 >—</span>
               </template>
             </div>
@@ -127,7 +123,7 @@
                   decrement-button-icon="pi pi-minus"
                   size="small"
                   class="flex-1 min-w-0 price-stepper"
-                  :input-class="'!text-center !text-[14px] !min-h-0'"
+                  :input-class="'!text-center !text-sm !min-h-0'"
                 />
                 <Button
                   icon="pi pi-check"
@@ -140,10 +136,10 @@
                 />
               </template>
               <template v-else-if="isBidding">
-                <span class="font-bold text-[14px] text-[var(--p-primary-color)] whitespace-nowrap">{{ t('live_order.label.bidding_active') }}</span>
+                <span class="font-bold text-sm text-[var(--p-primary-color)] whitespace-nowrap">{{ t('live_order.label.bidding_active') }}</span>
               </template>
               <template v-else>
-                <span class="font-bold text-[16px] text-[var(--p-primary-color)]">{{ priceDisplay }}</span>
+                <span class="font-bold text-base text-[var(--p-primary-color)]">{{ priceDisplay }}</span>
               </template>
             </div>
 
@@ -151,22 +147,22 @@
         </div>
 
         <!-- 統計列（點擊開啟得標人 Dialog） -->
-        <button @click="winnerDialogVisible = true" class="bg-[var(--p-content-hover-background)] hover:bg-[var(--p-content-border-color)] rounded-[6px] px-1.5 py-1 flex items-center gap-2 w-full">
+        <button @click="winnerDialogVisible = true" class="bg-[var(--p-content-hover-background)] hover:bg-[var(--p-content-border-color)] rounded-md px-2 py-1 flex items-center gap-2 w-full">
           <div class="flex-1 flex items-center gap-2 min-w-0">
             <div class="flex items-center gap-1 w-[100px] shrink-0">
               <div v-tooltip.top="t('live_order.label.stock_with_value', { value: stats.stock })" class="flex-1 flex items-center gap-1">
                 <i class="pi pi-box text-[var(--p-text-muted-color)]" style="font-size:12px"></i>
-                <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ stats.stock }}</span>
+                <span class="text-xs text-[var(--p-text-muted-color)]">{{ stats.stock }}</span>
               </div>
               <div v-tooltip.top="t('live_order.label.sold_with_value', { value: stats.sold })" class="flex-1 flex items-center gap-1 justify-center">
                 <i class="pi pi-shopping-bag text-[#f97316]" style="font-size:12px"></i>
-                <span class="text-[12px] font-bold text-[#f97316]">{{ stats.sold }}</span>
+                <span class="text-xs font-bold text-[#f97316]">{{ stats.sold }}</span>
               </div>
             </div>
             <div class="w-px self-stretch bg-[var(--p-content-border-color)]"></div>
             <div v-tooltip.top="t('live_order.label.subtotal_with_value', { value: stats.amount })" class="flex-1 flex items-center gap-1 min-w-0">
               <i class="pi pi-dollar text-[#f97316]" style="font-size:12px"></i>
-              <span class="text-[12px] font-bold text-[#f97316] truncate">{{ stats.amount }}</span>
+              <span class="text-xs font-bold text-[#f97316] truncate">{{ stats.amount }}</span>
             </div>
           </div>
           <i class="pi pi-angle-right text-[var(--p-text-muted-color)]" style="font-size:14px"></i>
@@ -187,7 +183,7 @@
               v-if="moreBundleChildrenCount > 0"
               @mouseenter="onMoreEnter"
               @mouseleave="onMoreLeave"
-              class="self-start text-[12.25px] font-medium text-[var(--p-primary-color)] hover:underline"
+              class="self-start text-xs font-medium text-[var(--p-primary-color)] hover:underline"
             >
               {{ t('live_order.label.more_specs', { count: moreBundleChildrenCount }) }}
             </button>
@@ -200,7 +196,7 @@
                 value: t('live_order.label.spec_summary_with_price', { sold: spec.sold, stock: spec.stock, price: spec.price.toLocaleString() }),
                 escape: false,
               }"
-              class="border border-[var(--p-text-muted-color)] rounded-[6px] flex overflow-hidden text-[14px] font-bold text-[var(--p-text-color)] h-[26px] cursor-default">
+              class="border border-[var(--p-text-muted-color)] rounded-md flex overflow-hidden text-sm font-bold text-[var(--p-text-color)] h-[26px] cursor-default">
               <span class="bg-[var(--p-content-hover-background)] border-r border-[var(--p-text-muted-color)] px-2 flex items-center justify-center leading-none">{{ spec.label }}</span>
               <span class="bg-[var(--p-content-background)] px-2 flex items-center justify-center min-w-[36px] leading-none">{{ spec.stock }}</span>
             </div>
@@ -208,7 +204,7 @@
             <button v-if="moreSpecsCount > 0"
               @mouseenter="onMoreEnter"
               @mouseleave="onMoreLeave"
-              class="border border-[var(--p-primary-300)] rounded-[6px] text-[12.25px] font-medium text-[var(--p-primary-color)] px-[9.75px] h-[26px] hover:bg-[var(--p-primary-50)]">
+              class="border border-[var(--p-primary-300)] rounded-md text-xs font-medium text-[var(--p-primary-color)] px-[9.75px] h-[26px] hover:bg-[var(--p-primary-50)]">
               {{ t('live_order.label.more_specs', { count: moreSpecsCount }) }}
             </button>
           </div>
@@ -220,7 +216,7 @@
           @mouseenter="cancelHideMore" @mouseleave="onMoreLeave">
           <!-- 組合商品：列出全部子商品 -->
           <div v-if="isBundle" class="p-3 min-w-[260px] max-w-[320px]">
-            <div class="text-[14px] font-medium text-[var(--p-text-color)] mb-2">組合內容（共 {{ bundleChildren.length }} 件）</div>
+            <div class="text-sm font-medium text-[var(--p-text-color)] mb-2">組合內容（共 {{ bundleChildren.length }} 件）</div>
             <div class="flex flex-col gap-1 max-h-[280px] overflow-y-auto pr-1">
               <div
                 v-for="(it, i) in bundleChildren"
@@ -234,14 +230,14 @@
           </div>
           <!-- 一般商品：列出全部規格 chips -->
           <div v-else class="p-3 min-w-[280px] max-w-[320px]">
-            <div class="text-[14px] font-medium text-[var(--p-text-color)] mb-2">{{ t('live_order.label.all_specs', { count: allSpecs.length }) }}</div>
-            <div class="grid grid-cols-2 gap-1.5 max-h-[280px] overflow-y-auto pr-1">
+            <div class="text-sm font-medium text-[var(--p-text-color)] mb-2">{{ t('live_order.label.all_specs', { count: allSpecs.length }) }}</div>
+            <div class="grid grid-cols-2 gap-2 max-h-[280px] overflow-y-auto pr-1">
               <div v-for="spec in allSpecs" :key="spec.label"
                 v-tooltip.top="{
                 value: t('live_order.label.spec_summary_with_price', { sold: spec.sold, stock: spec.stock, price: spec.price.toLocaleString() }),
                 escape: false,
               }"
-                class="border border-[var(--p-text-muted-color)] rounded-[6px] flex overflow-hidden text-[14px] font-bold text-[var(--p-text-color)] h-[26px] cursor-default">
+                class="border border-[var(--p-text-muted-color)] rounded-md flex overflow-hidden text-sm font-bold text-[var(--p-text-color)] h-[26px] cursor-default">
                 <span class="bg-[var(--p-content-hover-background)] border-r border-[var(--p-text-muted-color)] px-2 flex-1 flex items-center justify-center leading-none">{{ spec.label }}</span>
                 <span class="bg-[var(--p-content-background)] px-2 flex items-center justify-center min-w-[40px] leading-none">{{ spec.stock }}</span>
               </div>
@@ -256,21 +252,21 @@
           <!-- 得標清單（最左） -->
           <button
             @click="winnerDialogVisible = true"
-            class="w-[35px] h-[30px] border border-[var(--p-content-border-color)] rounded-[6px] flex items-center justify-center hover:bg-[var(--p-content-hover-background)]"
+            class="w-[35px] h-[30px] border border-[var(--p-content-border-color)] rounded-md flex items-center justify-center hover:bg-[var(--p-content-hover-background)]"
             v-tooltip.top="t('live_order.tooltip.winner_list')">
             <i class="pi pi-list text-[var(--p-text-color)]" style="font-size:14px"></i>
           </button>
           <!-- 設定：禮物→新增禮物彈窗；一般商品→直接開「得標設定」（隱藏編輯商品 tab） -->
           <button @click="openProductEdit"
-            class="w-[35px] h-[30px] border border-[var(--p-content-border-color)] rounded-[6px] flex items-center justify-center hover:bg-[var(--p-content-hover-background)]"
+            class="w-[35px] h-[30px] border border-[var(--p-content-border-color)] rounded-md flex items-center justify-center hover:bg-[var(--p-content-hover-background)]"
             v-tooltip.top="t('live_order.tab.order_setting')">
-            <FontAwesomeIcon :icon="['far', 'gear']" class="text-[var(--p-text-color)] text-[14px]" />
+            <FontAwesomeIcon :icon="['far', 'gear']" class="text-[var(--p-text-color)] text-sm" />
           </button>
           <!-- 刪除：破壞性操作；只有準備中（非收單中）才顯示，避免誤刪正在收單的商品 -->
           <button
             v-if="status !== 'live'"
             @click="onDeleteClick"
-            class="w-[35px] h-[30px] border border-[#ef4444] rounded-[6px] flex items-center justify-center hover:bg-[#fee2e2]" v-tooltip.top="t('live_order.tooltip.delete')">
+            class="w-[35px] h-[30px] border border-[#ef4444] rounded-md flex items-center justify-center hover:bg-[#fee2e2]" v-tooltip.top="t('live_order.tooltip.delete')">
             <i class="pi pi-trash text-[#ef4444]" style="font-size:14px"></i>
           </button>
         </div>

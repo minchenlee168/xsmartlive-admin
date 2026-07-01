@@ -17,7 +17,8 @@
     },
     "invoice": {
       "invoice": "E-Invoice",
-      "operations": "Invoice operations"
+      "operations": "Invoice operations",
+      "manual": "Manual invoice"
     },
     "marketing": "Marketing",
     "bid_gift_lottery": "Bid Gift Lottery",
@@ -33,6 +34,7 @@
     "live_order_community": "Community ordering",
     "live_records": "Order records",
     "invoice_operations": "Invoice operations",
+    "invoice_manual": "Manual invoice",
     "product_list": "Product list",
     "product_update": "Edit product",
     "product_create": "New product",

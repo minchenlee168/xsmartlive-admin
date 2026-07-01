@@ -81,7 +81,7 @@ function onCancel(): void { onVisibleChange(false) }
 
       <!-- 區塊 1：重複下單判定模式 -->
       <section class="flex flex-col gap-2">
-        <h3 class="font-bold text-[15px] text-[var(--p-text-color)]">
+        <h3 class="font-bold text-base text-[var(--p-text-color)]">
           {{ t('live_order.panel_setting.duplicate_order_mode') }}
         </h3>
         <p class="text-[13px] text-[var(--p-text-muted-color)]">
@@ -90,19 +90,19 @@ function onCancel(): void { onVisibleChange(false) }
         <div class="flex flex-col gap-2 pt-1">
           <label class="flex items-center gap-2 cursor-pointer">
             <RadioButton v-model="form.duplicateOrderMode" value="keep_latest" input-id="dup-latest" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_keep_latest') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_keep_latest') }}</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <RadioButton v-model="form.duplicateOrderMode" value="keep_highest_bid" input-id="dup-highest" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_keep_highest') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_keep_highest') }}</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <RadioButton v-model="form.duplicateOrderMode" value="allow" input-id="dup-allow" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_allow') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_allow') }}</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <RadioButton v-model="form.duplicateOrderMode" value="reject" input-id="dup-reject" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_reject') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.dup_reject') }}</span>
           </label>
         </div>
 
@@ -110,11 +110,11 @@ function onCancel(): void { onVisibleChange(false) }
         <div class="flex flex-col gap-1 pt-3">
           <label class="flex items-center gap-2 cursor-pointer">
             <Checkbox v-model="form.allowKeywordCancel" :binary="true" />
-            <span class="text-[14px] text-[var(--p-text-color)]">
+            <span class="text-sm text-[var(--p-text-color)]">
               {{ t('live_order.panel_setting.allow_keyword_cancel') }}
             </span>
           </label>
-          <p class="text-[12.5px] text-[var(--p-text-muted-color)] pl-7">
+          <p class="text-xs text-[var(--p-text-muted-color)] pl-7">
             {{ t('live_order.panel_setting.allow_keyword_cancel_desc') }}
           </p>
         </div>
@@ -122,38 +122,38 @@ function onCancel(): void { onVisibleChange(false) }
 
       <!-- 區塊 2：通知設定 -->
       <section class="flex flex-col gap-2">
-        <h3 class="font-bold text-[15px] text-[var(--p-text-color)]">
+        <h3 class="font-bold text-base text-[var(--p-text-color)]">
           {{ t('live_order.panel_setting.notification_section') }}
         </h3>
         <div class="flex flex-col gap-2 pt-1">
           <label class="flex items-center gap-2 cursor-pointer">
             <Checkbox v-model="form.notifyOrderStart" :binary="true" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.notify_order_start') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.notify_order_start') }}</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <Checkbox v-model="form.notifyOrderEnd" :binary="true" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.notify_order_end') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.notify_order_end') }}</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <Checkbox v-model="form.notifyOutOfStock" :binary="true" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.notify_out_of_stock') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.notify_out_of_stock') }}</span>
           </label>
           <label class="flex items-center gap-2 cursor-pointer">
             <Checkbox v-model="form.notifyWinnerOrderCreated" :binary="true" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.notify_winner_order_created') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.notify_winner_order_created') }}</span>
           </label>
         </div>
       </section>
 
       <!-- 區塊 3：列印設定 -->
       <section class="flex flex-col gap-2">
-        <h3 class="font-bold text-[15px] text-[var(--p-text-color)]">
+        <h3 class="font-bold text-base text-[var(--p-text-color)]">
           {{ t('live_order.panel_setting.print_section') }}
         </h3>
         <div class="flex flex-col gap-2 pt-1">
           <label class="flex items-center gap-2 cursor-pointer">
             <Checkbox v-model="form.autoPrintShipment" :binary="true" />
-            <span class="text-[14px] text-[var(--p-text-color)]">{{ t('live_order.panel_setting.auto_print_shipment') }}</span>
+            <span class="text-sm text-[var(--p-text-color)]">{{ t('live_order.panel_setting.auto_print_shipment') }}</span>
           </label>
         </div>
       </section>

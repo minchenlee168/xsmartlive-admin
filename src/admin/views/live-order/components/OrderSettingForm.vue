@@ -220,14 +220,14 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
     <!-- 已選商品提示（單筆） -->
     <div
       v-if="!multiple && displayPicked"
-      class="flex items-center gap-3 bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] rounded-[6px] px-3 py-2"
+      class="flex items-center gap-3 bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] rounded-md px-3 py-2"
     >
       <i class="pi pi-box text-[var(--p-primary-color)]" style="font-size: 18px"></i>
       <div class="flex flex-col">
-        <span class="text-[11px] text-[var(--p-text-muted-color)]">
+        <span class="text-xs text-[var(--p-text-muted-color)]">
           {{ t('live_order.label.picked_product') }}
         </span>
-        <span class="text-[14px] font-medium text-[var(--p-text-color)]">
+        <span class="text-sm font-medium text-[var(--p-text-color)]">
           {{ displayPicked }}
         </span>
       </div>
@@ -236,7 +236,7 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
     <!-- 已選商品摘要（多選）：相同得標設定一次套用到全部 -->
     <div
       v-if="multiple"
-      class="flex flex-col gap-2 bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] rounded-[6px] px-3 py-2.5"
+      class="flex flex-col gap-2 bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] rounded-md px-3 py-3"
     >
       <i18n-t
         keypath="live_order.form.hint.multi_selected_count"
@@ -250,22 +250,21 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
       </i18n-t>
       <div
         v-if="pickedNames.length"
-        class="flex flex-wrap gap-1.5"
+        class="flex flex-wrap gap-2"
       >
-        <span
+        <Tag
           v-for="(name, i) in pickedNames"
           :key="i"
-          class="text-[12px] text-[var(--p-text-color)] bg-[var(--p-content-background)] border border-[var(--p-content-border-color)] rounded-full px-2 py-0.5"
-        >
-          {{ name }}
-        </span>
+          :value="name"
+          severity="secondary"
+        />
       </div>
     </div>
 
     <!-- 下拉 / 數值欄位：2 欄等寬（比照批次設定排版） -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
       <!-- 結帳類型 -->
-      <div class="flex flex-col gap-1.5">
+      <div class="flex flex-col gap-2">
         <span class="text-[13px] text-[var(--p-text-color)]">
           {{ t('live_order.form.field.checkout_type') }}
         </span>
@@ -279,7 +278,7 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
       </div>
 
       <!-- 多購物車：只有結帳類型 = 多購物車-獨立結帳 才可選；一般 / 預購 → disabled -->
-      <div class="flex flex-col gap-1.5">
+      <div class="flex flex-col gap-2">
         <span class="text-[13px] text-[var(--p-text-color)]">
           {{ t('live_order.form.field.multi_cart') }}
         </span>
@@ -295,7 +294,7 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
       </div>
 
       <!-- +1 數量限制 -->
-      <div class="flex flex-col gap-1.5">
+      <div class="flex flex-col gap-2">
         <span class="text-[13px] text-[var(--p-text-color)]">
           {{ t('live_order.form.field.plus_one_limit') }}
         </span>
@@ -308,7 +307,7 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
       </div>
 
       <!-- 星等過濾 -->
-      <div class="flex flex-col gap-1.5">
+      <div class="flex flex-col gap-2">
         <span class="text-[13px] text-[var(--p-text-color)]">
           {{ t('live_order.form.field.star_filter') }}
         </span>
@@ -325,7 +324,7 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
       <!-- SKU（多選時隱藏，各商品沿用自身 SKU） -->
       <div
         v-if="!multiple"
-        class="flex flex-col gap-1.5"
+        class="flex flex-col gap-2"
       >
         <span class="text-[13px] text-[var(--p-text-color)]">
           {{ t('live_order.form.field.sku') }}
@@ -335,23 +334,23 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
     </div>
 
     <!-- 開關選項：每列 label 左、switch 右，外框＋分隔線收齊 -->
-    <div class="flex flex-col rounded-[6px] border border-[var(--p-content-border-color)] divide-y divide-[var(--p-content-border-color)]">
-      <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+    <div class="flex flex-col rounded-md border border-[var(--p-content-border-color)] divide-y divide-[var(--p-content-border-color)]">
+      <div class="flex items-center justify-between gap-3 px-3 py-3">
         <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.bidding') }}</span>
         <ToggleSwitch v-model="form.bidding" />
       </div>
       <!-- 競價價格：競價模式正下方就地展開（一刀價格 + 起標價格） -->
-      <div v-if="form.bidding" class="px-3 py-2.5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-        <div class="flex flex-col gap-1.5">
+      <div v-if="form.bidding" class="px-3 py-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+        <div class="flex flex-col gap-2">
           <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.flat_price') }}</span>
           <InputNumber v-model="form.flatPrice" :min="0" class="w-full" :input-style="{ width: '100%' }" />
         </div>
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-2">
           <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.starting_bid') }}</span>
           <InputNumber v-model="form.startingBid" :min="0" class="w-full" :input-style="{ width: '100%' }" />
         </div>
       </div>
-      <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+      <div class="flex items-center justify-between gap-3 px-3 py-3">
         <span class="flex items-center gap-1 text-[13px] text-[var(--p-text-color)]">
           {{ t('live_order.form.field.allow_mix_color') }}
           <i
@@ -362,13 +361,13 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
         </span>
         <ToggleSwitch v-model="form.allowMixColor" />
       </div>
-      <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+      <div class="flex items-center justify-between gap-3 px-3 py-3">
         <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.allow_oversell') }}</span>
         <ToggleSwitch v-model="form.allowOversell" />
       </div>
       <div
         v-if="!isPreorder"
-        class="flex items-center justify-between gap-3 px-3 py-2.5"
+        class="flex items-center justify-between gap-3 px-3 py-3"
       >
         <span class="flex items-center gap-1 text-[13px] text-[var(--p-text-color)]">
           {{ t('live_order.form.field.pick_spec_after_winning') }}
@@ -380,11 +379,11 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
         </span>
         <ToggleSwitch v-model="form.pickSpecAfterWinning" />
       </div>
-      <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+      <div class="flex items-center justify-between gap-3 px-3 py-3">
         <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.new_customer_any_star') }}</span>
         <ToggleSwitch v-model="form.newCustomerAnyStar" />
       </div>
-      <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+      <div class="flex items-center justify-between gap-3 px-3 py-3">
         <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.member_only') }}</span>
         <ToggleSwitch v-model="form.memberOnly" />
       </div>
@@ -395,7 +394,7 @@ defineExpose({ validate, getData, getSettings, reset, setAllowOversell })
       <span class="text-[13px] font-medium text-[var(--p-text-color)]">
         {{ t('live_order.form.field.quantity_discount') }}
       </span>
-      <span v-if="form.quantityDiscounts.length" class="text-[12px] text-[var(--p-text-muted-color)]">
+      <span v-if="form.quantityDiscounts.length" class="text-xs text-[var(--p-text-muted-color)]">
         {{ t('live_order.form.hint.quantity_discount') }}
       </span>
 

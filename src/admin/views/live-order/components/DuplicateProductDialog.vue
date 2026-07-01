@@ -53,17 +53,17 @@ function close(): void {
     </template>
 
     <div class="flex flex-col gap-3 pt-2">
-      <p class="text-[14px] text-[var(--p-text-color)] leading-relaxed">
+      <p class="text-sm text-[var(--p-text-color)] leading-relaxed">
         {{ t('live_order.label.duplicate_product_reason') }}
       </p>
-      <ul class="flex flex-col gap-1.5">
+      <ul class="flex flex-col gap-2">
         <li
           v-for="(name, i) in names"
           :key="i"
-          class="flex items-center gap-2 rounded-[6px] bg-[var(--p-content-hover-background)] px-3 py-2"
+          class="flex items-center gap-2 rounded-md bg-[var(--p-content-hover-background)] px-3 py-2"
         >
           <i class="pi pi-box text-[var(--p-text-muted-color)]" style="font-size: 13px"></i>
-          <span class="text-[14px] font-medium text-[var(--p-text-color)] truncate">{{ name }}</span>
+          <span class="text-sm font-medium text-[var(--p-text-color)] truncate">{{ name }}</span>
         </li>
       </ul>
     </div>

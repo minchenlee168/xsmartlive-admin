@@ -75,7 +75,7 @@ function onSave(): void {
     </template>
 
     <div class="flex flex-col gap-2 pt-1">
-      <label class="text-[14px] font-medium text-[var(--p-text-color)]">收單時間起訖</label>
+      <label class="text-sm font-medium text-[var(--p-text-color)]">收單時間起訖</label>
       <DatePicker
         v-model="dateRange"
         selection-mode="range"
@@ -85,7 +85,7 @@ function onSave(): void {
         placeholder="YYYY/MM/DD HH:mm - YYYY/MM/DD HH:mm"
         class="w-full"
       />
-      <p class="text-[12px] text-[var(--p-text-muted-color)]">留空 = 未設結單。設定開始時間後，系統會在時間到時自動切換為收單中。</p>
+      <p class="text-xs text-[var(--p-text-muted-color)]">留空 = 未設結單。設定開始時間後，系統會在時間到時自動切換為收單中。</p>
     </div>
 
     <template #footer>

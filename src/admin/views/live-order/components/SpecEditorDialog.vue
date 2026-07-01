@@ -273,7 +273,7 @@ function groupColumnHeader(g: SpecGroup, index: number): string {
     <div class="flex flex-col gap-4 pt-2">
       <!-- 空狀態 -->
       <div v-if="!hasGroups" class="flex flex-col items-center gap-3 py-8 text-center">
-        <span class="text-[14px] text-[var(--p-text-muted-color)]">
+        <span class="text-sm text-[var(--p-text-muted-color)]">
           {{ t('live_order.spec_editor.empty') }}
         </span>
         <Button
@@ -292,7 +292,7 @@ function groupColumnHeader(g: SpecGroup, index: number): string {
           :key="group.id"
           class="flex flex-col gap-3"
         >
-          <span class="text-[14px] font-semibold text-[var(--p-text-color)]">
+          <span class="text-sm font-semibold text-[var(--p-text-color)]">
             {{ t('live_order.spec_editor.label.group_title', { index: groupIndex + 1 }) }}
           </span>
 
@@ -313,7 +313,7 @@ function groupColumnHeader(g: SpecGroup, index: number): string {
                   <span class="font-medium text-[var(--p-text-color)]">{{ option }}</span>
                   <span
                     v-if="SPEC_VALUE_DEFAULTS[option]?.length"
-                    class="text-[12px] text-[var(--p-text-muted-color)]"
+                    class="text-xs text-[var(--p-text-muted-color)]"
                   >
                     - {{ SPEC_VALUE_DEFAULTS[option].join('、') }}
                   </span>
@@ -362,7 +362,7 @@ function groupColumnHeader(g: SpecGroup, index: number): string {
               <button
                 v-if="group.values.length > 1"
                 v-tooltip.top="t('live_order.spec_editor.button.remove')"
-                class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--p-text-muted-color)] text-white text-[10px] flex items-center justify-center opacity-0 group-hover/value:opacity-100 transition-opacity"
+                class="absolute -top-2 -right-1.5 w-4 h-4 rounded-full bg-[var(--p-text-muted-color)] text-white text-xs flex items-center justify-center opacity-0 group-hover/value:opacity-100 transition-opacity"
                 @click="removeValue(group, valueIndex)"
               >
                 <i class="pi pi-times" style="font-size: 8px"></i>
@@ -385,7 +385,7 @@ function groupColumnHeader(g: SpecGroup, index: number): string {
         v-if="hasTable"
         class="flex flex-col gap-3 pt-4 border-t border-[var(--p-content-border-color)]"
       >
-        <span class="text-[15px] font-semibold text-[var(--p-text-color)]">
+        <span class="text-base font-semibold text-[var(--p-text-color)]">
           {{ t('live_order.spec_editor.section.spec_table') }}
         </span>
 
@@ -451,12 +451,12 @@ function groupColumnHeader(g: SpecGroup, index: number): string {
         <div
           v-for="(parts, rowIndex) in combinations"
           :key="comboKey(parts) + '-' + rowIndex"
-          class="grid items-center border-b border-[var(--p-content-border-color)] last:border-b-0 text-[14px]"
+          class="grid items-center border-b border-[var(--p-content-border-color)] last:border-b-0 text-sm"
           :style="`grid-template-columns: 80px repeat(${groups.length}, minmax(120px, 1fr)) 120px 120px 120px 120px;`"
         >
           <div class="px-2 py-2">
             <button
-              class="w-[48px] h-[48px] border-2 border-dashed border-[var(--p-content-border-color)] rounded-[6px] bg-[var(--p-content-hover-background)] flex items-center justify-center hover:border-[var(--p-primary-color)] relative"
+              class="w-[48px] h-[48px] border-2 border-dashed border-[var(--p-content-border-color)] rounded-md bg-[var(--p-content-hover-background)] flex items-center justify-center hover:border-[var(--p-primary-color)] relative"
             >
               <i class="pi pi-image text-[var(--p-text-muted-color)]" style="font-size: 16px"></i>
               <i

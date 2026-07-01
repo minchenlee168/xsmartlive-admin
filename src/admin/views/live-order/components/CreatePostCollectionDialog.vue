@@ -82,7 +82,7 @@ function onCreate(): void {
 
     <div class="flex flex-col gap-4 pt-1">
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+        <label class="text-sm font-medium text-[var(--p-text-color)]">
           <span class="text-[#dc2626] mr-1">*</span>{{ collectionNoun }}收單名稱
         </label>
         <InputText
@@ -92,12 +92,12 @@ function onCreate(): void {
           :invalid="hasError && isNameMissing"
           @keyup.enter="onCreate"
         />
-        <span v-if="hasError && isNameMissing" class="text-[12px] text-[#dc2626]">請輸入貼文收單名稱</span>
+        <span v-if="hasError && isNameMissing" class="text-xs text-[#dc2626]">請輸入貼文收單名稱</span>
       </div>
 
       <!-- 收單時間起訖（區間選擇，必填） -->
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+        <label class="text-sm font-medium text-[var(--p-text-color)]">
           <span class="text-[#dc2626] mr-1">*</span>收單時間起訖
         </label>
         <DatePicker
@@ -110,7 +110,7 @@ function onCreate(): void {
           class="w-full"
           :invalid="hasError && isPeriodMissing"
         />
-        <span v-if="hasError && isPeriodMissing" class="text-[12px] text-[#dc2626]">請選擇收單期間的起與迄時間</span>
+        <span v-if="hasError && isPeriodMissing" class="text-xs text-[#dc2626]">請選擇收單期間的起與迄時間</span>
       </div>
     </div>
 

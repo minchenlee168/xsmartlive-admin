@@ -80,7 +80,7 @@ function onSubmit(): void {
 
     <div class="flex flex-col gap-4 pt-2">
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+        <label class="text-sm font-medium text-[var(--p-text-color)]">
           {{ t('live_order.form.field.gift_name') }}
         </label>
         <InputText
@@ -92,7 +92,7 @@ function onSubmit(): void {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+        <label class="text-sm font-medium text-[var(--p-text-color)]">
           {{ t('live_order.form.field.gift_message') }}
         </label>
         <Textarea

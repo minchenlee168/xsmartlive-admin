@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import OrderRowDetail from './components/OrderRowDetail.vue'
+import ShippingConfigDialog from './components/ShippingConfigDialog.vue'
+import IssueInvoiceDialog from './components/IssueInvoiceDialog.vue'
+import SplitShippingPage from './components/SplitShippingPage.vue'
+import ShippingListPrintDialog from './components/ShippingListPrintDialog.vue'
 
 /**
  * 訂單管理 → 訂單列表頁。
@@ -33,6 +37,36 @@ interface OrderRow {
   socialPlatform?: 'facebook' | 'line' | 'instagram' | 'tiktok' | 'other'
   multiCart: 'default' | 'main' | 'ice' | 'ice_grocery'
   sessionName?: 'session_0620' | 'session_0622' | 'session_0624' | 'session_0625'
+  /** 購買通路（欄位字典 order.source）：顯示商城 / Facebook / LINE / Instagram 等 */
+  channel: string
+  /** 優惠券活動名稱（欄位字典 order.couponActivity） */
+  couponActivity?: string
+  /** 優惠券折抵金額（欄位字典 order.totals.couponDiscount） */
+  couponDiscount?: number
+  /** 紅利點數折抵金額（欄位字典 order.totals.points） */
+  pointsDiscount?: number
+  /** 出貨批次數（欄位字典 order.dispatchBatches.length）；> 0 顯示「已分批 N 批」tag */
+  dispatchBatchCount?: number
+  /** 發票開立紀錄（欄位字典 invoiceIssued.number）；null / undefined = 尚未開立 */
+  invoiceNumber?: string
+  /** 發票開立時間（欄位字典 invoiceIssued.time） */
+  invoiceIssuedAt?: string
+  /** 差額調整（欄位字典 order.diffAdj） */
+  diffAdj?: DiffAdj
+}
+
+/** 差額調整（欄位字典第 4 節） */
+export interface DiffAdj {
+  amount: number
+  settleType: 'absorb' | 'charge' | 'refund'
+  payMethod?: 'link' | 'atm' | 'cod'
+  refundMethod?: 'refund' | 'coupon' | 'points'
+  reason?: string
+  invoiceMode?: 'auto' | 'manual'
+  validity?: '90' | '180' | '365' | 'none'
+  faceValue?: number
+  status: string
+  at: number
 }
 
 // 篩選欄位「草稿」狀態：使用者調整 UI 控件即時更新；只有按下「搜尋」才會 commit 到 applied。
@@ -243,12 +277,12 @@ function tagFor(name: string) {
 }
 
 const orders = ref<OrderRow[]>([
-  { id: '1', createdAt: '2026-05-10 10:20', cartTag: tagFor('服飾專區'), orderNo: 'A20260510101', buyerName: '楊雅雯', buyerPhone: '0925-111-222', amount: 1400, itemCount: 1, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'live', socialPlatform: 'facebook',  multiCart: 'default',     sessionName: 'session_0620' },
-  { id: '2', createdAt: '2026-05-10 15:45', cartTag: tagFor('生活雜貨'), orderNo: 'A20260510102', buyerName: '楊雅雯', buyerPhone: '0925-111-222', amount:  405, itemCount: 3, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'shop',                              multiCart: 'ice_grocery'                              },
-  { id: '3', createdAt: '2026-05-10 11:30', cartTag: tagFor('服飾專區'), orderNo: 'A20260510103', buyerName: '蔡明宏', buyerPhone: '0936-333-444', amount: 1300, itemCount: 2, shippingMethod: '常溫宅配', paymentStatus: 'unpaid', shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'live', socialPlatform: 'line',      multiCart: 'main',        sessionName: 'session_0622' },
-  { id: '4', createdAt: '2026-05-11 09:00', cartTag: tagFor('服飾專區'), orderNo: 'A20260511101', buyerName: '何併併', buyerPhone: '0912-345-678', amount:  510, itemCount: 1, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'live', socialPlatform: 'instagram', multiCart: 'default',     sessionName: 'session_0624' },
-  { id: '5', createdAt: '2026-05-11 10:30', cartTag: tagFor('服飾專區'), orderNo: 'A20260511102', buyerName: '何併併', buyerPhone: '0912-345-678', amount: 1250, itemCount: 1, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'shop',                              multiCart: 'main'                                     },
-  { id: '6', createdAt: '2026-05-11 13:15', cartTag: tagFor('服飾專區'), orderNo: 'A20260511103', buyerName: '何併併', buyerPhone: '0912-345-678', amount: 1250, itemCount: 2, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'live', socialPlatform: 'tiktok',    multiCart: 'ice',         sessionName: 'session_0625' },
+  { id: '1', createdAt: '2026-05-10 10:20', cartTag: tagFor('服飾專區'), orderNo: 'A20260510101', buyerName: '楊雅雯', buyerPhone: '0925-111-222', amount: 1400, itemCount: 1, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'live', socialPlatform: 'facebook',  multiCart: 'default',     sessionName: 'session_0620', channel: 'Facebook',  couponActivity: '母親節限定 8 折', couponDiscount: 200, pointsDiscount: 50, dispatchBatchCount: 0 },
+  { id: '2', createdAt: '2026-05-10 15:45', cartTag: tagFor('生活雜貨'), orderNo: 'A20260510102', buyerName: '楊雅雯', buyerPhone: '0925-111-222', amount:  405, itemCount: 3, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'shop',                              multiCart: 'ice_grocery',                              channel: '商城',                                                                                                                                        invoiceNumber: 'AB12345678', invoiceIssuedAt: '2026-05-10 16:00' },
+  { id: '3', createdAt: '2026-05-10 11:30', cartTag: tagFor('服飾專區'), orderNo: 'A20260510103', buyerName: '蔡明宏', buyerPhone: '0936-333-444', amount: 1300, itemCount: 2, shippingMethod: '常溫宅配', paymentStatus: 'unpaid', shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'live', socialPlatform: 'line',      multiCart: 'main',        sessionName: 'session_0622', channel: 'LINE',                                          pointsDiscount: 100, dispatchBatchCount: 2 },
+  { id: '4', createdAt: '2026-05-11 09:00', cartTag: tagFor('服飾專區'), orderNo: 'A20260511101', buyerName: '何併併', buyerPhone: '0912-345-678', amount:  510, itemCount: 1, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'live', socialPlatform: 'instagram', multiCart: 'default',     sessionName: 'session_0624', channel: 'Instagram',                                                                                                          },
+  { id: '5', createdAt: '2026-05-11 10:30', cartTag: tagFor('服飾專區'), orderNo: 'A20260511102', buyerName: '何併併', buyerPhone: '0912-345-678', amount: 1250, itemCount: 1, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'shop',                              multiCart: 'main',                                     channel: '商城',      couponActivity: '春季新品優惠', couponDiscount: 100,                                                                                          invoiceNumber: 'CD98765432', invoiceIssuedAt: '2026-05-11 11:15' },
+  { id: '6', createdAt: '2026-05-11 13:15', cartTag: tagFor('服飾專區'), orderNo: 'A20260511103', buyerName: '何併併', buyerPhone: '0912-345-678', amount: 1250, itemCount: 2, shippingMethod: '常溫宅配', paymentStatus: 'paid',   shippingStatus: 'pending', carrierStatus: 'unconfigured', trackingStatus: null, orderSource: 'live', socialPlatform: 'tiktok',    multiCart: 'ice',         sessionName: 'session_0625', channel: 'TikTok',                                                             dispatchBatchCount: 1 },
 ])
 
 /** 全站合計 85 筆（圖中右上的總數）— 顯示用，篩選後仍顯示原始總數。 */
@@ -283,21 +317,18 @@ const filtered = computed<OrderRow[]>(() => {
   return list
 })
 
-function statusBadgeForPayment(s: OrderRow['paymentStatus']) {
-  return s === 'paid'
-    ? { label: '已付款', bg: '#dcfce7', color: '#16a34a' }
-    : { label: '待付款', bg: '#ffedd5', color: '#c2410c' }
-}
-function statusBadgeForShipping(s: OrderRow['shippingStatus']) {
-  const map = {
-    pending:           { label: '待出貨', bg: '#f1f5f9', color: '#64748b' },
-    preparing:         { label: '備貨中', bg: '#dbeafe', color: '#1d4ed8' },
-    shipping:          { label: '出貨中', bg: '#fef3c7', color: '#b45309' },
-    awaiting_receipt:  { label: '待收貨', bg: '#ede9fe', color: '#6d28d9' },
-    arrived:           { label: '已送達', bg: '#dcfce7', color: '#16a34a' },
-    completed:         { label: '已完成', bg: '#f1f5f9', color: '#475569' },
-    cancelled:         { label: '已取消', bg: '#fee2e2', color: '#dc2626' },
-  } as const
+/** 狀態 → PrimeVue Tag severity（Design.md 7.0 用元件 + 二 走語意色） */
+type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'
+function statusBadgeForShipping(s: OrderRow['shippingStatus']): { label: string; severity: TagSeverity } {
+  const map: Record<OrderRow['shippingStatus'], { label: string; severity: TagSeverity }> = {
+    pending:          { label: '待出貨', severity: 'secondary' },
+    preparing:        { label: '備貨中', severity: 'info' },
+    shipping:         { label: '出貨中', severity: 'warn' },
+    awaiting_receipt: { label: '待收貨', severity: 'secondary' },
+    arrived:          { label: '已送達', severity: 'success' },
+    completed:        { label: '已完成', severity: 'secondary' },
+    cancelled:        { label: '已取消', severity: 'danger' },
+  }
   return map[s]
 }
 
@@ -324,6 +355,84 @@ const detailDialogOrder = ref<OrderRow | null>(null)
 function openDetailDialog(o: OrderRow): void {
   detailDialogOrder.value = o
   detailDialogVisible.value = true
+}
+
+/** 付款狀態 inline 編輯：點 Tag → Select 模式；按打勾 commit 回 Tag */
+const paymentEditOptions = [
+  { label: '已付款', value: 'paid' as const },
+  { label: '待付款', value: 'unpaid' as const },
+]
+const editingPaymentRowId = ref<string | null>(null)
+const editPaymentValueMap = ref<Record<string, 'paid' | 'unpaid'>>({})
+function startEditPayment(o: OrderRow, event: Event): void {
+  event.stopPropagation()
+  editingPaymentRowId.value = o.id
+  editPaymentValueMap.value[o.id] = o.paymentStatus
+}
+function commitPayment(o: OrderRow, event: Event): void {
+  event.stopPropagation()
+  o.paymentStatus = editPaymentValueMap.value[o.id]
+  editingPaymentRowId.value = null
+}
+function cancelEditPayment(event: Event): void {
+  event.stopPropagation()
+  editingPaymentRowId.value = null
+}
+
+/** 表格「設定配送」按鈕：點下開啟 ShippingConfigDialog，confirm 後把物流商 / 取號寫回該筆訂單 */
+const shippingConfigDialogVisible = ref(false)
+const shippingConfigOrder = ref<OrderRow | null>(null)
+function openShippingConfig(o: OrderRow, event: Event): void {
+  event.stopPropagation()
+  shippingConfigOrder.value = o
+  shippingConfigDialogVisible.value = true
+}
+function onShippingConfigConfirm(payload: { carrierName: string; method: string; trackingNo: string | null }): void {
+  const o = shippingConfigOrder.value
+  if (!o) return
+  o.carrierStatus = 'configured'
+  o.carrierName = payload.carrierName
+  o.trackingStatus = payload.trackingNo
+}
+
+/** 表格「開立發票」按鈕：點下開啟 IssueInvoiceDialog，confirm 後把發票號碼 / 時間寫回該筆訂單 */
+const issueInvoiceDialogVisible = ref(false)
+const issueInvoiceOrder = ref<OrderRow | null>(null)
+function openIssueInvoice(o: OrderRow, event: Event): void {
+  event.stopPropagation()
+  issueInvoiceOrder.value = o
+  issueInvoiceDialogVisible.value = true
+}
+function onIssueInvoiceConfirm(payload: { number: string; time: string }): void {
+  const o = issueInvoiceOrder.value
+  if (!o) return
+  o.invoiceNumber = payload.number
+  o.invoiceIssuedAt = payload.time
+}
+
+/**
+ * 分批出貨作業全頁模式：splitPageOrderId 有值時，主畫面改渲染 SplitShippingPage
+ * 隱藏搜尋 / 日期 / 進階篩選 / 狀態 tabs（依規範第 9 節）
+ */
+const splitPageOrderId = ref<string | null>(null)
+const splitPageOrder = computed<OrderRow | null>(() =>
+  splitPageOrderId.value ? orders.value.find(o => o.id === splitPageOrderId.value) ?? null : null,
+)
+function openSplitPage(orderId: string): void {
+  splitPageOrderId.value = orderId
+  detailDialogVisible.value = false  // 關閉詳情彈窗
+}
+function closeSplitPage(): void {
+  splitPageOrderId.value = null
+}
+
+/** 表格「列印出貨單」按鈕：點下開啟 ShippingListPrintDialog */
+const printDialogVisible = ref(false)
+const printOrder = ref<OrderRow | null>(null)
+function openPrintDialog(o: OrderRow, event: Event): void {
+  event.stopPropagation()
+  printOrder.value = o
+  printDialogVisible.value = true
 }
 // ── Loading 狀態：初始載入 + 手動刷新都會顯示 LoaderSpinner 蓋在表格上 ──
 const isLoading = ref(true)
@@ -378,6 +487,15 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
 <template>
   <div class="flex flex-col gap-4 flex-1 min-h-0">
 
+    <!-- 分批出貨全頁模式：訂單管理分頁改渲染 SplitShippingPage，隱藏搜尋 / 篩選 / 表格 -->
+    <SplitShippingPage
+      v-if="splitPageOrder"
+      :order="splitPageOrder"
+      @close="closeSplitPage"
+    />
+
+    <template v-else>
+
     <!-- ── 篩選 Card：標題 + 副標 + 右側批次操作 + 搜尋 / 篩選 — shrink-0 鎖內容高度，不隨 viewport 壓縮 ── -->
     <Card
       :pt="{
@@ -391,7 +509,7 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
         <div class="flex items-start justify-between gap-3 px-5 pt-5 pb-2 flex-wrap">
           <div class="flex flex-col gap-1">
             <div class="flex items-center gap-2">
-              <h1 class="text-[22px] font-bold text-[var(--p-text-color)]">訂單管理</h1>
+              <h1 class="text-2xl font-bold text-[var(--p-text-color)]">訂單管理</h1>
               <button
                 v-tooltip.top="'手動刷新訂單資訊'"
                 class="size-[28px] flex items-center justify-center rounded-full hover:bg-[var(--p-primary-50)]"
@@ -449,7 +567,7 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
             class="!w-[320px]"
           />
 
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-2">
             <Button label="今日"     severity="secondary" variant="outlined" size="small" @click="setDateRangePreset('today')" />
             <Button label="近 7 天"  severity="secondary" variant="outlined" size="small" @click="setDateRangePreset('last7')" />
             <Button label="本月"     severity="secondary" variant="outlined" size="small" @click="setDateRangePreset('thisMonth')" />
@@ -461,13 +579,13 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
         <div class="px-5 py-2 flex items-center gap-3">
           <button
             type="button"
-            class="inline-flex items-center gap-1.5 text-[13px] text-[var(--p-text-color)] hover:text-[var(--p-primary-color)]"
+            class="inline-flex items-center gap-2 text-[13px] text-[var(--p-text-color)] hover:text-[var(--p-primary-color)]"
             @click="advancedFilterExpanded = !advancedFilterExpanded"
           >
             <span class="font-medium">進階篩選</span>
             <span
               v-if="appliedAdvancedCount > 0"
-              class="bg-[var(--p-primary-color)] text-white text-[10px] font-bold leading-none rounded-full min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center"
+              class="bg-[var(--p-primary-color)] text-white text-xs font-bold leading-none rounded-full min-w-[16px] h-[16px] px-1 inline-flex items-center justify-center"
             >{{ appliedAdvancedCount }}</span>
             <i :class="advancedFilterExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" style="font-size: 11px"></i>
           </button>
@@ -524,7 +642,7 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
             <button
               v-for="q in quickFilters"
               :key="q.value"
-              class="px-3 py-1.5 rounded-full text-[13px] border transition-colors"
+              class="px-3 py-2 rounded-full text-[13px] border transition-colors"
               :style="quickFilter === q.value
                 ? 'background: var(--p-primary-50); color: var(--p-primary-color); border-color: var(--p-primary-color)'
                 : 'background: var(--p-content-background); color: var(--p-text-muted-color); border-color: var(--p-content-border-color)'"
@@ -541,20 +659,20 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
       </template>
     </Card>
 
-    <!-- ── 表格 Card：橫向卷軸、操作欄固定右側；flex chain 讓 DataTable scrollable 能容納展開內容 ── -->
+    <!-- ── 表格 Card：shrink-0 鎖內容高度（依 paginator 每頁筆數自然高），不隨 viewport 縮放 ── -->
     <Card
       :pt="{
-        root: { class: 'w-full flex-1 min-h-0 flex flex-col overflow-hidden' },
-        body: { class: 'p-0 flex-1 min-h-0 flex flex-col' },
-        content: { class: 'p-0 flex-1 min-h-0 flex flex-col' },
+        root: { class: 'w-full shrink-0 overflow-hidden' },
+        body: { class: 'p-0' },
+        content: { class: 'p-0' },
       }"
     >
       <template #content>
-        <div class="p-5 relative flex-1 min-h-0 flex flex-col">
+        <div class="p-5 relative">
           <!-- Loading 蓋層：用 PrimeVue 標準 ProgressSpinner，不走品牌 logo 動畫 -->
           <div
             v-if="isLoading"
-            class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-[var(--p-content-background)]/85 backdrop-blur-sm rounded-[8px]"
+            class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-[var(--p-content-background)]/85 backdrop-blur-sm rounded-lg"
           >
             <ProgressSpinner style="width: 48px; height: 48px" stroke-width="4" animation-duration=".9s" />
             <span class="text-[13px] text-[var(--p-text-muted-color)]">載入中…</span>
@@ -580,26 +698,36 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
           >
           <Column header="建立時間" field="createdAt">
             <template #body="{ data }">
-              <span class="text-[13px] text-[var(--p-text-color)]">{{ data.createdAt }}</span>
+              <span class="text-[var(--p-text-color)]">{{ data.createdAt }}</span>
             </template>
           </Column>
 
           <Column header="購物車 / 訂單編號">
             <template #body="{ data }">
               <div class="flex flex-col gap-1">
-                <span
-                  class="inline-flex items-center px-2 py-0.5 rounded-md text-[11.5px] font-semibold leading-none w-fit"
-                  :style="{ background: data.cartTag.bg, color: data.cartTag.color }"
-                >{{ data.cartTag.label }}</span>
-                <div class="flex items-center gap-1.5">
-                  <span class="text-[13px] font-medium text-[var(--p-text-color)]">{{ data.orderNo }}</span>
-                  <button
+                <div class="flex items-center gap-2 flex-wrap">
+                  <Tag
+                    :value="data.cartTag.label"
+                    :pt="{ root: { style: { background: data.cartTag.bg, color: data.cartTag.color } } }"
+                  />
+                  <!-- 已分批 N 批 tag（dispatchBatchCount > 0 才顯示） -->
+                  <Tag
+                    v-if="(data.dispatchBatchCount ?? 0) > 0"
+                    :value="`已分批 ${data.dispatchBatchCount} 批`"
+                    severity="info"
+                  />
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="font-medium text-[var(--p-text-color)]">{{ data.orderNo }}</span>
+                  <Button
                     v-tooltip.top="'複製'"
-                    class="size-[20px] flex items-center justify-center rounded text-[var(--p-text-muted-color)] hover:bg-[var(--p-content-hover-background)]"
+                    icon="pi pi-copy"
+                    severity="secondary"
+                    variant="text"
+                    size="small"
+                    rounded
                     @click="onCopyOrderNo(data.orderNo)"
-                  >
-                    <i class="pi pi-copy" style="font-size: 12px"></i>
-                  </button>
+                  />
                 </div>
               </div>
             </template>
@@ -607,28 +735,28 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
 
           <Column header="訂購人">
             <template #body="{ data }">
-              <div class="flex flex-col gap-0.5">
-                <span class="text-[13px] text-[var(--p-text-color)]">{{ data.buyerName }}</span>
-                <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ data.buyerPhone }}</span>
+              <div class="flex flex-col gap-1">
+                <span class="text-[var(--p-text-color)]">{{ data.buyerName }}</span>
+                <span class="text-xs text-[var(--p-text-muted-color)]">{{ data.buyerPhone }}</span>
               </div>
             </template>
           </Column>
 
           <Column header="金額" field="amount" body-class="text-right" header-class="text-right">
             <template #body="{ data }">
-              <span class="text-[14px] font-bold text-[var(--p-primary-color)]">${{ data.amount.toLocaleString() }}</span>
+              <span class="text-[var(--p-primary-color)]">${{ data.amount.toLocaleString() }}</span>
             </template>
           </Column>
 
           <Column header="商品數量" field="itemCount" body-class="text-right" header-class="text-right">
             <template #body="{ data }">
-              <span class="text-[13px] text-[var(--p-text-color)]">{{ data.itemCount }}</span>
+              <span class="text-[var(--p-text-color)]">{{ data.itemCount }}</span>
             </template>
           </Column>
 
           <Column header="出貨方式">
             <template #body="{ data }">
-              <span class="inline-flex items-center gap-1.5 text-[13px] text-[var(--p-text-color)]">
+              <span class="inline-flex items-center gap-2 text-[var(--p-text-color)]">
                 <i class="pi pi-truck" style="font-size: 13px; color: var(--p-text-muted-color)"></i>
                 {{ data.shippingMethod }}
               </span>
@@ -637,21 +765,44 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
 
           <Column header="付款狀態">
             <template #body="{ data }">
-              <span
-                class="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-semibold leading-none"
-                :style="{ background: statusBadgeForPayment(data.paymentStatus).bg, color: statusBadgeForPayment(data.paymentStatus).color }"
-              >{{ statusBadgeForPayment(data.paymentStatus).label }}</span>
+              <!-- 編輯模式：Select + 打勾 / 取消 -->
+              <span v-if="editingPaymentRowId === data.id" class="inline-flex items-center gap-1" @click.stop>
+                <Select
+                  v-model="editPaymentValueMap[data.id]"
+                  :options="paymentEditOptions"
+                  option-label="label"
+                  option-value="value"
+                  size="small"
+                  class="!w-[100px]"
+                />
+                <Button v-tooltip.top="'確認'" icon="pi pi-check" severity="secondary" variant="text" size="small" rounded @click="commitPayment(data, $event)" />
+                <Button v-tooltip.top="'取消'" icon="pi pi-times" severity="secondary" variant="text" size="small" rounded @click="cancelEditPayment" />
+              </span>
+              <!-- 檢視模式：Tag 可直接點按進編輯 -->
+              <button
+                v-else
+                type="button"
+                class="inline-flex items-center gap-1 cursor-pointer"
+                v-tooltip.top="'點擊修改'"
+                @click="startEditPayment(data, $event)"
+              >
+                <Tag
+                  :value="data.paymentStatus === 'paid' ? '已付款' : '待付款'"
+                  :severity="data.paymentStatus === 'paid' ? 'success' : 'warn'"
+                />
+                <i class="pi pi-pencil text-xs text-[var(--p-text-muted-color)]"></i>
+              </button>
             </template>
           </Column>
 
           <Column header="出貨狀態">
             <template #body="{ data }">
-              <!-- 模式 A：單一標籤 -->
-              <span
+              <!-- 模式 A：單一標籤（PrimeVue Tag + severity） -->
+              <Tag
                 v-if="shippingDisplayMode === 'badge'"
-                class="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-semibold leading-none"
-                :style="{ background: statusBadgeForShipping(data.shippingStatus).bg, color: statusBadgeForShipping(data.shippingStatus).color }"
-              >{{ statusBadgeForShipping(data.shippingStatus).label }}</span>
+                :value="statusBadgeForShipping(data.shippingStatus).label"
+                :severity="statusBadgeForShipping(data.shippingStatus).severity"
+              />
               <!-- 模式 B：PrimeVue Timeline 顯示 5 階段，水平排列，目前階段主色加粗 -->
               <Timeline
                 v-else
@@ -672,7 +823,7 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
                 </template>
                 <template #content="{ item }">
                   <span
-                    class="text-[11px] whitespace-nowrap pt-1.5 pr-2"
+                    class="text-xs whitespace-nowrap pt-1.5 pr-2"
                     :style="item.isCurrent
                       ? 'color: var(--p-primary-color); font-weight: 600'
                       : 'color: var(--p-text-muted-color)'"
@@ -686,14 +837,21 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
           </Column>
 
           <Column header="物流商資訊">
-            <template #body>
-              <Button label="設定配送" icon="pi pi-truck" size="small" />
+            <template #body="{ data }">
+              <!-- 已設定：只顯示物流商名稱（取號另在「取號狀態」欄顯示）；未設定：設定配送按鈕 -->
+              <span v-if="data.carrierStatus === 'configured'" class="inline-flex items-center gap-2 text-[var(--p-text-color)]">
+                <i class="pi pi-truck text-[var(--p-primary-color)] text-[13px]"></i>
+                <span class="font-medium">{{ data.carrierName }}</span>
+              </span>
+              <Button v-else label="設定配送" icon="pi pi-truck" size="small" @click="openShippingConfig(data, $event)" />
             </template>
           </Column>
 
           <Column header="取號狀態">
             <template #body="{ data }">
-              <span class="text-[13px] text-[var(--p-text-muted-color)]">{{ data.trackingStatus ?? '—' }}</span>
+              <!-- 有取號 → 綠色「已取號」Tag；沒取號 → dash -->
+              <Tag v-if="data.trackingStatus" value="已取號" severity="success" />
+              <span v-else class="text-[var(--p-text-muted-color)]">—</span>
             </template>
           </Column>
 
@@ -708,25 +866,28 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
               <div class="flex items-center justify-end gap-1">
                 <button
                   v-tooltip.top="'出貨單列印'"
-                  class="size-[32px] flex items-center justify-center rounded-[6px] text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+                  class="size-[32px] flex items-center justify-center rounded-md text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+                  @click="openPrintDialog(data, $event)"
                 >
                   <i class="pi pi-print" style="font-size: 15.75px"></i>
                 </button>
                 <button
                   v-tooltip.top="'標籤列印'"
-                  class="size-[32px] flex items-center justify-center rounded-[6px] text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+                  class="size-[32px] flex items-center justify-center rounded-md text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
                 >
                   <i class="pi pi-tag" style="font-size: 15.75px"></i>
                 </button>
                 <button
-                  v-tooltip.top="'開立發票'"
-                  class="size-[32px] flex items-center justify-center rounded-[6px] text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+                  v-tooltip.top="data.invoiceNumber ? `已開立：${data.invoiceNumber}` : '開立發票'"
+                  class="size-[32px] flex items-center justify-center rounded-md hover:bg-[var(--p-content-hover-background)]"
+                  :class="data.invoiceNumber ? 'text-[#16A34A]' : 'text-[var(--p-text-color)]'"
+                  @click="openIssueInvoice(data, $event)"
                 >
                   <i class="pi pi-file" style="font-size: 15.75px"></i>
                 </button>
                 <button
                   v-tooltip.top="'查看更多'"
-                  class="size-[32px] flex items-center justify-center rounded-[6px] text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+                  class="size-[32px] flex items-center justify-center rounded-md text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
                   @click="openDetailDialog(data)"
                 >
                   <i class="pi pi-eye" style="font-size: 15.75px"></i>
@@ -736,7 +897,7 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
           </Column>
 
           <template #empty>
-            <div class="py-8 text-center text-[14px] text-[var(--p-text-muted-color)]">
+            <div class="py-8 text-center text-sm text-[var(--p-text-muted-color)]">
               目前無訂單。
             </div>
           </template>
@@ -744,6 +905,8 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
         </div>
       </template>
     </Card>
+
+    </template>
 
     <!-- 「查看更多」彈窗：點訂單列眼睛 icon 開啟，顯示 OrderRowDetail 完整資訊 -->
     <Dialog
@@ -754,7 +917,7 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
       :style="{ width: 'min(1200px, calc(100vw - 32px))' }"
       :pt="{ content: { style: 'padding: 0' } }"
     >
-      <OrderRowDetail v-if="detailDialogOrder" :order="detailDialogOrder" />
+      <OrderRowDetail v-if="detailDialogOrder" :order="detailDialogOrder" @open-split-page="openSplitPage" />
       <!-- footer：取消訂單獨立靠左（destructive 動作分區）；右側維持取消/儲存 -->
       <template #footer>
         <div class="flex items-center justify-between gap-2 w-full">
@@ -766,5 +929,22 @@ function progressItemsFor(s: OrderRow['shippingStatus']): ProgressItem[] {
         </div>
       </template>
     </Dialog>
+
+    <!-- 表格「設定配送」共用彈窗 -->
+    <ShippingConfigDialog
+      v-model:visible="shippingConfigDialogVisible"
+      :order="shippingConfigOrder"
+      @confirm="onShippingConfigConfirm"
+    />
+
+    <!-- 表格「開立發票」共用彈窗 -->
+    <IssueInvoiceDialog
+      v-model:visible="issueInvoiceDialogVisible"
+      :order="issueInvoiceOrder"
+      @confirm="onIssueInvoiceConfirm"
+    />
+
+    <!-- 表格「出貨單列印」共用彈窗 -->
+    <ShippingListPrintDialog v-model:visible="printDialogVisible" :order="printOrder" />
   </div>
 </template>

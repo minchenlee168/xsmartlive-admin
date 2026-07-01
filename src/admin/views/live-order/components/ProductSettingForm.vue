@@ -4,18 +4,18 @@
     <!-- 左欄：商品圖 + 備註 -->
     <div class="w-[280px] shrink-0 flex flex-col gap-4">
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)] flex items-center gap-1">
+        <label class="text-sm font-medium text-[var(--p-text-color)] flex items-center gap-1">
           {{ t('live_order.form.field.product_image') }}
           <i v-if="isLocked('image')" v-tooltip.top="t('live_order.text.locked_field_hint')" class="pi pi-lock text-[var(--p-text-muted-color)]" style="font-size:12px"></i>
         </label>
-        <div class="aspect-square border-2 border-dashed border-[var(--p-content-border-color)] rounded-[6px] bg-[var(--p-content-hover-background)] flex items-center justify-center">
+        <div class="aspect-square border-2 border-dashed border-[var(--p-content-border-color)] rounded-md bg-[var(--p-content-hover-background)] flex items-center justify-center">
           <i class="pi pi-image text-[var(--p-text-muted-color)]" style="font-size:64px"></i>
         </div>
         <Button :label="t('live_order.button.upload_from_app')" icon="pi pi-camera" class="w-full" severity="info" :disabled="isLocked('image')" />
       </div>
 
       <div class="flex flex-col gap-2 flex-1">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.note') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.note') }}</label>
         <Textarea v-model="form.note" rows="6" class="w-full resize-none" />
       </div>
     </div>
@@ -26,19 +26,19 @@
       <!-- 競價模式提示：直播關鍵字與庫存不計入 -->
       <div
         v-if="form.bidding"
-        class="col-span-4 flex items-center gap-2 text-[13px] text-[var(--p-text-color)] bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] rounded-[6px] px-3 py-2"
+        class="col-span-4 flex items-center gap-2 text-[13px] text-[var(--p-text-color)] bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] rounded-md px-3 py-2"
       >
         <i class="pi pi-info-circle text-[var(--p-primary-color)]" style="font-size:14px"></i>
         {{ t('live_order.text.bidding_exclude_hint') }}
       </div>
 
       <div class="col-span-4 flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.checkout_type') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.checkout_type') }}</label>
         <Select v-model="form.checkoutType" :options="checkoutTypes" option-label="label" option-value="value" :placeholder="t('live_order.form.placeholder.general_cart')" class="w-full" />
       </div>
 
       <div class="col-span-4 flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.multi_cart') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.multi_cart') }}</label>
         <div class="flex gap-2">
           <Select v-model="form.multiCart" :options="multiCarts" option-label="label" option-value="value" :placeholder="t('live_order.form.placeholder.multi_cart_name')" class="flex-1" />
           <Button icon="pi pi-plus" outlined severity="secondary" />
@@ -46,14 +46,14 @@
       </div>
 
       <div class="col-span-2 flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+        <label class="text-sm font-medium text-[var(--p-text-color)]">
           <span class="text-[#dc2626]">{{ t('live_order.text.required') }}</span>{{ t('live_order.form.field.product_name') }}
         </label>
         <InputText v-model="form.name" :class="{ 'p-invalid': hasError && !form.name?.trim() }" class="w-full" />
-        <span v-if="hasError && !form.name?.trim()" class="text-[12px] text-[#dc2626]">{{ t('live_order.form.validation.product_name_required') }}</span>
+        <span v-if="hasError && !form.name?.trim()" class="text-xs text-[#dc2626]">{{ t('live_order.form.validation.product_name_required') }}</span>
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.spec') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.spec') }}</label>
         <Button
           icon="pi pi-tags"
           severity="primary"
@@ -64,30 +64,30 @@
         />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.discount_price') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.discount_price') }}</label>
         <Button icon="pi pi-dollar" severity="primary" class="w-full" v-tooltip.top="t('live_order.form.hint.set_discount_price')" />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)] flex items-center gap-1">
+        <label class="text-sm font-medium text-[var(--p-text-color)] flex items-center gap-1">
           {{ t('live_order.form.field.keyword') }}
           <i v-if="form.bidding" v-tooltip.top="t('live_order.text.bidding_locked_hint')" class="pi pi-lock text-[var(--p-text-muted-color)]" style="font-size:12px"></i>
         </label>
         <InputText v-model="form.keyword" :placeholder="t('live_order.form.placeholder.prefix')" :disabled="form.bidding" class="w-full" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.code') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.code') }}</label>
         <InputText v-model="form.code" class="w-full" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)] flex items-center gap-1">
+        <label class="text-sm font-medium text-[var(--p-text-color)] flex items-center gap-1">
           {{ t('live_order.form.field.cost') }}
           <i v-if="isLocked('cost')" v-tooltip.top="t('live_order.text.locked_field_hint')" class="pi pi-lock text-[var(--p-text-muted-color)]" style="font-size:12px"></i>
         </label>
         <InputNumber v-model="form.cost" :min="0" :disabled="isLocked('cost')" class="w-full" :input-style="{ width: '100%' }" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)] flex items-center gap-1">
+        <label class="text-sm font-medium text-[var(--p-text-color)] flex items-center gap-1">
           {{ t('live_order.form.field.price') }}
           <i v-if="isLocked('price')" v-tooltip.top="t('live_order.text.locked_field_hint')" class="pi pi-lock text-[var(--p-text-muted-color)]" style="font-size:12px"></i>
         </label>
@@ -95,7 +95,7 @@
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)] flex items-center gap-1">
+        <label class="text-sm font-medium text-[var(--p-text-color)] flex items-center gap-1">
           {{ t('live_order.form.field.total_stock') }}
           <i
             v-if="isLocked('stock') || form.bidding"
@@ -107,59 +107,59 @@
         <InputNumber v-model="form.stock" :min="0" :disabled="isLocked('stock') || form.bidding" class="w-full" :input-style="{ width: '100%' }" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.weight') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.weight') }}</label>
         <InputNumber v-model="form.weight" :min="0" class="w-full" :input-style="{ width: '100%' }" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.bidding') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.bidding') }}</label>
         <ToggleSwitch v-model="form.bidding" />
       </div>
       <div v-if="form.bidding" class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.flat_price') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.flat_price') }}</label>
         <InputNumber v-model="form.flatPrice" :min="0" class="w-full" :input-style="{ width: '100%' }" />
       </div>
       <div v-if="form.bidding" class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.starting_bid') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.starting_bid') }}</label>
         <InputNumber v-model="form.startingBid" :min="0" class="w-full" :input-style="{ width: '100%' }" />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)] flex items-center gap-1">
+        <label class="text-sm font-medium text-[var(--p-text-color)] flex items-center gap-1">
           {{ t('live_order.form.field.allow_mix_color') }}
           <i class="pi pi-info-circle text-[var(--p-text-muted-color)]" style="font-size:12px" v-tooltip.top="t('live_order.form.hint.allow_mix_color_tooltip')"></i>
         </label>
         <ToggleSwitch v-model="form.allowMixColor" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.allow_oversell') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.allow_oversell') }}</label>
         <ToggleSwitch v-model="form.allowOversell" />
       </div>
       <div class="col-span-2 flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)] flex items-center gap-1">
+        <label class="text-sm font-medium text-[var(--p-text-color)] flex items-center gap-1">
           {{ t('live_order.form.field.pick_spec_after_winning') }}
           <i class="pi pi-info-circle text-[var(--p-text-muted-color)]" style="font-size:12px" v-tooltip.top="t('live_order.form.hint.pick_spec_after_winning_tooltip')"></i>
         </label>
         <ToggleSwitch v-model="form.pickSpecAfterWinning" />
       </div>
       <div class="col-span-2 flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.sku') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.sku') }}</label>
         <InputText v-model="form.sku" class="w-full" />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.plus_one_limit') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.plus_one_limit') }}</label>
         <InputNumber v-model="form.plusLimit" :min="0" class="w-full" :input-style="{ width: '100%' }" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.star_filter') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.star_filter') }}</label>
         <Select v-model="form.starFilter" :options="starOptions" option-label="label" option-value="value" :placeholder="t('live_order.form.placeholder.no_limit')" class="w-full" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.new_customer_any_star') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.new_customer_any_star') }}</label>
         <ToggleSwitch v-model="form.newCustomerAnyStar" />
       </div>
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.member_only') }}</label>
+        <label class="text-sm font-medium text-[var(--p-text-color)]">{{ t('live_order.form.field.member_only') }}</label>
         <ToggleSwitch v-model="form.memberOnly" />
       </div>
 

@@ -72,7 +72,7 @@ const isPeriodInvalid = computed(() =>
     <template #content>
       <!-- 優惠開始 / 結束日期 + 新增區間：檢視模式整列隱藏 -->
       <div v-if="!readonly" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-color">優惠開始</label>
           <DatePicker
             v-model="promote.startAt"
@@ -82,7 +82,7 @@ const isPeriodInvalid = computed(() =>
             fluid
           />
         </div>
-        <div class="flex flex-col gap-1.5">
+        <div class="flex flex-col gap-2">
           <label class="text-sm font-bold text-color">優惠結束</label>
           <DatePicker
             v-model="promote.endAt"
@@ -151,7 +151,7 @@ const isPeriodInvalid = computed(() =>
                 class="size-[32px] flex items-center justify-center rounded-md text-red-500 hover:bg-red-50"
                 @click="removeTier(i)"
               >
-                <FontAwesomeIcon :icon="['far', 'trash']" class="text-[14px]" />
+                <FontAwesomeIcon :icon="['far', 'trash']" class="text-sm" />
               </button>
             </td>
           </tr>

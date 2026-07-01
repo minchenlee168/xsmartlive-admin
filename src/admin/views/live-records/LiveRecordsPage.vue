@@ -10,8 +10,8 @@
 <template>
   <div class="flex-1 min-h-0 flex flex-col items-center justify-center gap-3 text-center">
     <i class="pi pi-clipboard text-[var(--p-text-muted-color)]" style="font-size: 56px"></i>
-    <h2 class="text-[18px] font-bold text-[var(--p-text-color)]">收單紀錄</h2>
-    <p class="text-[14px] text-[var(--p-text-muted-color)] max-w-[420px] leading-relaxed">
+    <h2 class="text-lg font-bold text-[var(--p-text-color)]">收單紀錄</h2>
+    <p class="text-sm text-[var(--p-text-muted-color)] max-w-[420px] leading-relaxed">
       此頁面正等候 wireframe 設計，原型先暫時移除。<br />
       待規格確認後會再依新版重做。
     </p>

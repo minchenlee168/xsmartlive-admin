@@ -17,17 +17,17 @@
         <span class="font-semibold text-[var(--p-text-color)]" style="font-size: 17.5px">
           {{ t('live_order.dialog.order_detail_header') }}
         </span>
-        <span class="text-[14px] text-[var(--p-text-muted-color)]">#{{ detail.orderNo }}</span>
+        <span class="text-sm text-[var(--p-text-muted-color)]">#{{ detail.orderNo }}</span>
       </div>
     </template>
 
     <!-- 商品明細區 -->
     <section class="px-5 pt-2">
       <div class="flex items-center justify-between mb-3">
-        <span class="text-[14px] font-semibold text-[var(--p-text-color)]">
+        <span class="text-sm font-semibold text-[var(--p-text-color)]">
           {{ t('live_order.label.product_detail') }}
         </span>
-        <span class="text-[12px] text-[var(--p-text-muted-color)]">
+        <span class="text-xs text-[var(--p-text-muted-color)]">
           {{ t('live_order.label.total_items', { count: detail.totalCount }) }}
         </span>
       </div>
@@ -39,23 +39,23 @@
           class="flex items-start gap-3"
         >
           <!-- 圖片 + index 角標 -->
-          <div class="relative w-[44px] h-[44px] rounded-[10px] bg-[var(--p-primary-50)] flex items-center justify-center shrink-0">
-            <FontAwesomeIcon :icon="['far', 'bag-shopping']" class="text-[var(--p-primary-color)] text-[18px]" />
-            <span class="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--p-primary-color)] text-white text-[10px] font-bold flex items-center justify-center">
+          <div class="relative w-[44px] h-[44px] rounded-lg bg-[var(--p-primary-50)] flex items-center justify-center shrink-0">
+            <FontAwesomeIcon :icon="['far', 'bag-shopping']" class="text-[var(--p-primary-color)] text-lg" />
+            <span class="absolute -top-1 -left-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[var(--p-primary-color)] text-white text-xs font-bold flex items-center justify-center">
               {{ i + 1 }}
             </span>
           </div>
           <!-- 名稱 + 規格 + 價數量 -->
           <div class="flex-1 min-w-0 flex justify-between gap-3">
             <div class="min-w-0 flex flex-col">
-              <span class="text-[14px] font-medium text-[var(--p-text-color)] truncate">{{ item.name }}</span>
-              <span v-if="item.spec" class="text-[12px] text-[var(--p-text-muted-color)] truncate">{{ item.spec }}</span>
+              <span class="text-sm font-medium text-[var(--p-text-color)] truncate">{{ item.name }}</span>
+              <span v-if="item.spec" class="text-xs text-[var(--p-text-muted-color)] truncate">{{ item.spec }}</span>
             </div>
             <div class="flex flex-col items-end shrink-0">
-              <span class="text-[14px] font-bold text-[var(--p-text-color)]">
+              <span class="text-sm font-bold text-[var(--p-text-color)]">
                 {{ t('live_order.label.currency_ntd') }} {{ item.subtotal.toLocaleString() }}
               </span>
-              <span class="text-[12px] text-[var(--p-text-muted-color)]">
+              <span class="text-xs text-[var(--p-text-muted-color)]">
                 {{ item.unitPrice.toLocaleString() }} × {{ item.qty }}
               </span>
             </div>
@@ -65,11 +65,11 @@
     </section>
 
     <!-- 訂單金額 highlight row -->
-    <div class="mx-5 my-4 px-3 py-2.5 rounded-[8px] bg-[var(--p-primary-50)] flex items-center justify-between">
-      <span class="text-[14px] font-semibold text-[var(--p-text-color)]">
+    <div class="mx-5 my-4 px-3 py-3 rounded-lg bg-[var(--p-primary-50)] flex items-center justify-between">
+      <span class="text-sm font-semibold text-[var(--p-text-color)]">
         {{ t('live_order.label.order_amount') }}
       </span>
-      <span class="text-[20px] font-bold text-[var(--p-primary-color)]">
+      <span class="text-xl font-bold text-[var(--p-primary-color)]">
         {{ t('live_order.label.currency_ntd') }} {{ detail.totalAmount.toLocaleString() }}
       </span>
     </div>
@@ -78,12 +78,12 @@
 
     <!-- 留言內容 -->
     <section class="px-5 py-4">
-      <div class="text-[14px] font-semibold text-[var(--p-text-color)] mb-3">
+      <div class="text-sm font-semibold text-[var(--p-text-color)] mb-3">
         {{ t('live_order.label.comment_content') }}
       </div>
       <div class="flex items-start gap-2">
-        <FontAwesomeIcon :icon="['far', 'comment']" class="text-[var(--p-text-muted-color)] text-[14px] mt-0.5" />
-        <span class="text-[14px] text-[var(--p-text-color)] break-words leading-relaxed">
+        <FontAwesomeIcon :icon="['far', 'comment']" class="text-[var(--p-text-muted-color)] text-sm mt-1" />
+        <span class="text-sm text-[var(--p-text-color)] break-words leading-relaxed">
           {{ detail.keyword || '—' }}
         </span>
       </div>

@@ -86,15 +86,10 @@
 .qty-stepper.is-sm .p-inputnumber-input { width: 36px; font-size: 11px; padding-top: 0; padding-bottom: 0; }
 .qty-stepper.is-sm .p-inputnumber-button { width: 26px; }
 
-/* 觸控友善：表單文字輸入框與下拉選單最小高度 44px（數量步進器維持自有尺寸） */
-.p-inputtext,
-.p-select {
-  min-height: 44px;
-}
-/* 預設大小的 Button 也對齊 44px 避免跟 InputText 並排時差 2px；size="small"/"large" 不受影響 */
-.p-button:not(.p-button-sm):not(.p-button-lg):not(.p-button-icon-only) {
-  min-height: 44px;
-}
+/* 沿用 PrimeVue Aura 預設高度（~42px），不再強拉 44px：
+   - 拉高會讓 .p-select-label 文字沉頂跟 chevron 錯位，得再靠 :pt 或全域 CSS 修
+   - Aura 預設對齊 + 觸控目標 42px 已接近標準，差 2px 可接受
+   - 若真的要更大目標區，用 size="large" 而非全域覆蓋 */
 .qty-stepper .p-inputnumber-input { min-height: 0; }
 
 /* 視窗縮到手機寬時，所有 PrimeVue Dialog 對齊 viewport 寬（保留 PrimeVue 自身的置中 transform，
@@ -119,4 +114,30 @@ html.frame-mode .p-drawer-mask {
   left: var(--frame-left, 0) !important;
   width: var(--frame-width, 100vw) !important;
   height: calc(100vh - var(--frame-bottom, 0px)) !important;
+}
+
+/* 出貨單列印：只印 Dialog 內的 .shipping-print-area，其他 UI 全隱藏
+   注意：window.print 會印 body 全部，因此列印時把非列印區都設 display:none */
+@media print {
+  body > *:not(.p-dialog-mask):not(.p-dialog) {
+    display: none !important;
+  }
+  .p-dialog-mask,
+  .p-dialog,
+  .p-dialog-content {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    position: static !important;
+    max-height: none !important;
+    width: 100% !important;
+  }
+  .p-dialog-header,
+  .p-dialog-footer {
+    display: none !important;
+  }
+  .shipping-print-area {
+    padding: 0 !important;
+    color: #000 !important;
+  }
 }

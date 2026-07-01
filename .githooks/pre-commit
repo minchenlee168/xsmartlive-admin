@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#
+# Git pre-commit hook：commit 前跑 Design.md lint 掃 staged .vue 檔
+# 啟用方式：git config core.hooksPath .githooks
+
+set -e
+
+# 只掃 staged 的 .vue 檔
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.vue$' || true)
+
+if [[ -z "$FILES" ]]; then
+  exit 0
+fi
+
+echo "🔍 Design.md lint（staged .vue 檔）..."
+bash scripts/design-md-lint.sh --files $FILES

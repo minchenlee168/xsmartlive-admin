@@ -259,16 +259,16 @@ const hasMoreHistory = computed(() => filteredHistory.value.length > PREVIEW_LIM
         class="flex items-center justify-between gap-2 text-left"
         @click="showHistory = !showHistory"
       >
-        <span class="text-[14px] font-semibold text-[var(--p-text-color)]">近十筆調整紀錄</span>
+        <span class="text-sm font-semibold text-[var(--p-text-color)]">近十筆調整紀錄</span>
         <i :class="showHistory ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" style="font-size: 12px"></i>
       </button>
 
       <template v-if="showHistory">
         <div class="flex items-center justify-between gap-3 flex-wrap">
-          <div class="flex items-center gap-1.5 flex-wrap">
+          <div class="flex items-center gap-2 flex-wrap">
             <button
               type="button"
-              class="px-3 py-1.5 rounded-[6px] text-[13px] font-medium border"
+              class="px-3 py-2 rounded-md text-[13px] font-medium border"
               :class="historyFilter === 'all'
                 ? 'bg-[var(--p-primary-color)] text-white border-[var(--p-primary-color)]'
                 : 'bg-[var(--p-content-background)] text-[var(--p-text-color)] border-[var(--p-content-border-color)] hover:bg-[var(--p-content-hover-background)]'"
@@ -278,7 +278,7 @@ const hasMoreHistory = computed(() => filteredHistory.value.length > PREVIEW_LIM
               v-for="s in product?.specs ?? []"
               :key="s.id"
               type="button"
-              class="px-3 py-1.5 rounded-[6px] text-[13px] font-medium border"
+              class="px-3 py-2 rounded-md text-[13px] font-medium border"
               :class="historyFilter === s.id
                 ? 'bg-[var(--p-primary-color)] text-white border-[var(--p-primary-color)]'
                 : 'bg-[var(--p-content-background)] text-[var(--p-text-color)] border-[var(--p-content-border-color)] hover:bg-[var(--p-content-hover-background)]'"
@@ -308,19 +308,17 @@ const hasMoreHistory = computed(() => filteredHistory.value.length > PREVIEW_LIM
           <Column field="before" header="調整前" style="width: 80px" />
           <Column header="異動" style="width: 80px">
             <template #body="{ data }">
-              <span
-                class="inline-flex items-center px-1.5 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none"
-                :style="data.delta >= 0
-                  ? 'background:#d1fae5;color:#047857'
-                  : 'background:#fee2e2;color:#b91c1c'"
-              >{{ data.delta >= 0 ? '+' : '' }}{{ data.delta }}</span>
+              <Tag
+                :value="`${data.delta >= 0 ? '+' : ''}${data.delta}`"
+                :severity="data.delta >= 0 ? 'success' : 'danger'"
+              />
             </template>
           </Column>
           <Column field="after" header="調整後" style="width: 80px" />
           <Column field="reason" header="調整原因" style="width: 120px" />
           <Column field="operator" header="操作人員" />
           <template #empty>
-            <div class="py-6 text-center text-[14px] text-[var(--p-text-muted-color)]">
+            <div class="py-6 text-center text-sm text-[var(--p-text-muted-color)]">
               沒有符合條件的調整紀錄
             </div>
           </template>
@@ -336,10 +334,10 @@ const hasMoreHistory = computed(() => filteredHistory.value.length > PREVIEW_LIM
     <div v-if="view === 'history'" class="flex flex-col gap-3">
       <!-- 規格 chips + 原因搜尋（與 main 視圖共用 state） -->
       <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div class="flex items-center gap-1.5 flex-wrap">
+        <div class="flex items-center gap-2 flex-wrap">
           <button
             type="button"
-            class="px-3 py-1.5 rounded-[6px] text-[13px] font-medium border"
+            class="px-3 py-2 rounded-md text-[13px] font-medium border"
             :class="historyFilter === 'all'
               ? 'bg-[var(--p-primary-color)] text-white border-[var(--p-primary-color)]'
               : 'bg-[var(--p-content-background)] text-[var(--p-text-color)] border-[var(--p-content-border-color)] hover:bg-[var(--p-content-hover-background)]'"
@@ -349,7 +347,7 @@ const hasMoreHistory = computed(() => filteredHistory.value.length > PREVIEW_LIM
             v-for="s in product?.specs ?? []"
             :key="s.id"
             type="button"
-            class="px-3 py-1.5 rounded-[6px] text-[13px] font-medium border"
+            class="px-3 py-2 rounded-md text-[13px] font-medium border"
             :class="historyFilter === s.id
               ? 'bg-[var(--p-primary-color)] text-white border-[var(--p-primary-color)]'
               : 'bg-[var(--p-content-background)] text-[var(--p-text-color)] border-[var(--p-content-border-color)] hover:bg-[var(--p-content-hover-background)]'"
@@ -380,19 +378,17 @@ const hasMoreHistory = computed(() => filteredHistory.value.length > PREVIEW_LIM
         <Column field="before" header="調整前" style="width: 80px" />
         <Column header="異動" style="width: 80px">
           <template #body="{ data }">
-            <span
-              class="inline-flex items-center px-1.5 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none"
-              :style="data.delta >= 0
-                ? 'background:#d1fae5;color:#047857'
-                : 'background:#fee2e2;color:#b91c1c'"
-            >{{ data.delta >= 0 ? '+' : '' }}{{ data.delta }}</span>
+            <Tag
+              :value="`${data.delta >= 0 ? '+' : ''}${data.delta}`"
+              :severity="data.delta >= 0 ? 'success' : 'danger'"
+            />
           </template>
         </Column>
         <Column field="after" header="調整後" style="width: 80px" />
         <Column field="reason" header="調整原因" style="width: 120px" />
         <Column field="operator" header="操作人員" />
         <template #empty>
-          <div class="py-6 text-center text-[14px] text-[var(--p-text-muted-color)]">
+          <div class="py-6 text-center text-sm text-[var(--p-text-muted-color)]">
             沒有符合條件的調整紀錄
           </div>
         </template>

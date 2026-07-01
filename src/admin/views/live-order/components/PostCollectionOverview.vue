@@ -140,7 +140,7 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
       <div class="flex flex-col gap-3 px-4 pt-4 pb-2">
         <!-- 標題 + 新增 + 排序 -->
         <div class="flex items-center justify-between gap-3 flex-wrap">
-          <h2 class="font-medium text-[18px] text-[var(--p-text-color)]">{{ collectionNoun }}收單列表</h2>
+          <h2 class="font-medium text-lg text-[var(--p-text-color)]">{{ collectionNoun }}收單列表</h2>
           <div class="flex items-center gap-2">
             <Button :label="`新增${collectionNoun}收單`" icon="pi pi-plus" size="small" @click="emit('create')" />
             <span class="text-[13px] text-[var(--p-text-muted-color)] ml-2">排序</span>
@@ -170,39 +170,39 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
           <div
             v-for="post in filteredPosts"
             :key="post.id"
-            class="py-3 flex flex-col gap-1.5 cursor-pointer"
+            class="py-3 flex flex-col gap-2 cursor-pointer"
             @click="emit('select', post.id)"
           >
             <!-- 頂部：名稱 + 狀態 Tag -->
             <div class="flex items-start justify-between gap-2">
-              <div class="flex flex-col gap-0.5 min-w-0 flex-1">
-                <span class="text-[14px] font-medium text-[var(--p-text-color)]">{{ post.name }}</span>
-                <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ post.updateNote }}</span>
+              <div class="flex flex-col gap-1 min-w-0 flex-1">
+                <span class="text-sm font-medium text-[var(--p-text-color)]">{{ post.name }}</span>
+                <span class="text-xs text-[var(--p-text-muted-color)]">{{ post.updateNote }}</span>
               </div>
               <Tag
                 :value="statusBadge(post.status).label"
                 :severity="statusBadge(post.status).severity"
-                class="!text-[11px] !px-2 !py-0.5 shrink-0"
+                class="shrink-0"
               />
             </div>
             <!-- 收單期間 -->
-            <div class="flex items-center gap-1.5 text-[13px]">
+            <div class="flex items-center gap-2 text-[13px]">
               <span class="text-[var(--p-text-muted-color)] w-[68px] shrink-0">收單期間</span>
               <span class="text-[var(--p-text-color)]">{{ formatPeriod(post) }}</span>
             </div>
             <!-- 留言數 / 已成單（同一列） -->
             <div class="flex items-center gap-4 text-[13px]">
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-2">
                 <span class="text-[var(--p-text-muted-color)]">留言數</span>
                 <span class="text-[var(--p-text-color)]">{{ post.commentCount }}</span>
               </div>
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-2">
                 <span class="text-[var(--p-text-muted-color)]">已成單</span>
                 <span class="font-bold text-[#f97316]">{{ post.soldCount }}</span>
               </div>
             </div>
             <!-- 結單時間 -->
-            <div class="flex items-center gap-1.5 text-[13px]">
+            <div class="flex items-center gap-2 text-[13px]">
               <span class="text-[var(--p-text-muted-color)] w-[68px] shrink-0">結單時間</span>
               <span
                 v-if="post.status === 'closed_today'"
@@ -216,7 +216,7 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
                     : 'var(--p-text-color)'
                 }"
               >
-                <i v-if="post.deadlineSeverity === 'danger'" class="pi pi-clock mr-1" style="font-size: 11px" />
+                <i v-if="post.deadlineSeverity === 'danger'" class="pi pi-clock mr-1 text-xs" />
                 {{ post.deadlineText }}
               </span>
             </div>
@@ -226,7 +226,7 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
                 label="得標清單"
                 icon="pi pi-list"
                 severity="success"
-                text
+                variant="text"
                 size="small"
                 @click="emit('view-winners', post.id)"
               />
@@ -244,7 +244,7 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
           </div>
           <div
             v-if="filteredPosts.length === 0"
-            class="py-10 text-center text-[14px] text-[var(--p-text-muted-color)]"
+            class="py-12 text-center text-sm text-[var(--p-text-muted-color)]"
           >
             目前沒有符合條件的貼文
           </div>
@@ -265,25 +265,26 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
         >
           <Column field="name" :header="`${collectionNoun}收單名稱`">
             <template #body="{ data }">
-              <div class="flex flex-col gap-0.5 min-w-0">
-                <span class="text-[14px] font-medium text-[var(--p-text-color)] truncate">{{ data.name }}</span>
-                <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ data.updateNote }}</span>
+              <!-- Design.md 7.5：主資訊用預設 14px / 400（不寫 text-sm / font-medium 覆蓋）；補充說明用 text-xs -->
+              <div class="flex flex-col gap-1 min-w-0">
+                <span class="text-[var(--p-text-color)] truncate">{{ data.name }}</span>
+                <span class="text-xs text-[var(--p-text-muted-color)]">{{ data.updateNote }}</span>
               </div>
             </template>
           </Column>
           <Column header="收單期間" style="width: 200px">
             <template #body="{ data }">
-              <span class="text-[13px] text-[var(--p-text-color)]">{{ formatPeriod(data) }}</span>
+              <span class="text-[var(--p-text-color)]">{{ formatPeriod(data) }}</span>
             </template>
           </Column>
           <Column field="commentCount" header="留言數" sortable style="width: 90px">
             <template #body="{ data }">
-              <span class="text-[13px] text-[var(--p-text-color)]">{{ data.commentCount }}</span>
+              <span class="text-[var(--p-text-color)]">{{ data.commentCount }}</span>
             </template>
           </Column>
           <Column field="soldCount" header="已成單" sortable style="width: 90px">
             <template #body="{ data }">
-              <span class="text-[13px] font-bold text-[#f97316]">{{ data.soldCount }}</span>
+              <span class="font-bold text-[#f97316]">{{ data.soldCount }}</span>
             </template>
           </Column>
           <Column header="結單時間" style="width: 160px">
@@ -291,38 +292,36 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
               <!-- 已結束的 collection 結單時間欄統一顯示「已結單」（不再帶 deadlineText 殘值）-->
               <span
                 v-if="data.status === 'closed_today'"
-                class="text-[13px] text-[var(--p-text-muted-color)]"
+                class="text-[var(--p-text-muted-color)]"
               >已結單</span>
               <span
                 v-else
-                class="text-[13px]"
                 :style="{
                   color: data.deadlineSeverity === 'danger' ? '#ef4444'
-                    : data.deadlineSeverity === 'warning' ? '#f97316'
+                    : data.deadlineSeverity === 'warning' ? '#CA8A04'
                     : 'var(--p-text-color)'
                 }"
               >
-                <i v-if="data.deadlineSeverity === 'danger'" class="pi pi-clock mr-1" style="font-size: 11px" />
+                <i v-if="data.deadlineSeverity === 'danger'" class="pi pi-clock mr-1 text-xs" />
                 {{ data.deadlineText }}
               </span>
             </template>
           </Column>
           <Column header="狀態" style="width: 90px">
             <template #body="{ data }">
-              <Tag :value="statusBadge(data.status).label" :severity="statusBadge(data.status).severity" class="!text-[11px] !px-2 !py-0.5" />
+              <Tag :value="statusBadge(data.status).label" :severity="statusBadge(data.status).severity" />
             </template>
           </Column>
           <Column header="操作" style="width: 180px">
             <template #body="{ data }">
-              <div class="flex items-center gap-1.5" @click.stop>
+              <div class="flex items-center gap-2" @click.stop>
                 <Button
                   v-tooltip.top="'得標清單'"
                   icon="pi pi-list"
                   severity="success"
-                  text
+                  variant="text"
                   rounded
                   size="small"
-                  class="!w-8 !h-8 !p-0"
                   @click="emit('view-winners', data.id)"
                 />
                 <Button
@@ -339,7 +338,7 @@ function statusBadge(s: PostCollectionStatus): { label: string; severity: 'succe
           </Column>
 
           <template #empty>
-            <div class="py-10 text-center text-[14px] text-[var(--p-text-muted-color)]">
+            <div class="py-12 text-center text-sm text-[var(--p-text-muted-color)]">
               目前沒有符合條件的貼文
             </div>
           </template>

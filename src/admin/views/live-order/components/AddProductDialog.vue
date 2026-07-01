@@ -32,7 +32,7 @@
               : 'bg-[var(--p-content-hover-background)] text-[var(--p-text-muted-color)]'"
           >{{ s.step }}</span>
           <span
-            class="text-[14px] font-medium"
+            class="text-sm font-medium"
             :class="stepNum === s.step ? 'text-[var(--p-text-color)]' : 'text-[var(--p-text-muted-color)]'"
           >{{ s.label }}</span>
         </div>
@@ -44,23 +44,17 @@
       <Tabs :value="pickerTab" @update:value="(v) => pickerTab = v as PickerTab">
         <TabList>
           <Tab value="general">
-            <span class="flex items-center gap-1.5 text-[14px] font-medium">
+            <span class="flex items-center gap-2 text-sm font-medium">
               <i class="pi pi-shopping-bag" style="font-size: 13px" />
               一般商品
-              <span
-                v-if="selectedProductCount > 0"
-                class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-semibold leading-none bg-[var(--p-primary-color)] text-[var(--p-primary-contrast-color)]"
-              >{{ selectedProductCount }}</span>
+              <Tag v-if="selectedProductCount > 0" :value="String(selectedProductCount)" severity="contrast" />
             </span>
           </Tab>
           <Tab value="bundle">
-            <span class="flex items-center gap-1.5 text-[14px] font-medium">
+            <span class="flex items-center gap-2 text-sm font-medium">
               <i class="pi pi-box" style="font-size: 13px" />
               組合商品
-              <span
-                v-if="selectedBundleIds.size > 0"
-                class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[11px] font-semibold leading-none bg-[var(--p-primary-color)] text-[var(--p-primary-contrast-color)]"
-              >{{ selectedBundleIds.size }}</span>
+              <Tag v-if="selectedBundleIds.size > 0" :value="String(selectedBundleIds.size)" severity="contrast" />
             </span>
           </Tab>
         </TabList>
@@ -71,7 +65,7 @@
       <!-- Row 1：分類 + 搜尋（select + input + 紫色「搜尋」鈕） -->
       <div class="flex gap-4 items-end flex-wrap">
         <div class="flex flex-col gap-2">
-          <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+          <label class="text-sm font-medium text-[var(--p-text-color)]">
             {{ t('live_order.form.field.category') }}
           </label>
           <Select
@@ -87,7 +81,7 @@
           />
         </div>
         <div class="flex flex-col gap-2 flex-1 min-w-[320px]">
-          <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+          <label class="text-sm font-medium text-[var(--p-text-color)]">
             {{ t('live_order.form.field.search') }}
           </label>
           <div class="flex h-[42px]">
@@ -117,7 +111,7 @@
         </span>
         <label class="flex items-center gap-[7px] cursor-pointer">
           <Checkbox v-model="pickerOnlyAvailable" binary />
-          <span class="text-[14px] text-[var(--p-text-color)]">
+          <span class="text-sm text-[var(--p-text-color)]">
             {{ t('live_order.label.only_show_available') }}
           </span>
         </label>
@@ -132,25 +126,25 @@
             <div class="px-2 py-[6px] shrink-0 flex justify-center" style="width: 50px"></div>
             <div class="px-2 py-[6px] shrink-0 w-[28px]"></div>
             <div
-              class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0"
+              class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0"
               style="width: 380px"
             >
               {{ t('live_order.label.product_name_spec') }}
             </div>
             <div
-              class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0"
+              class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0"
               style="width: 120px"
             >
               {{ t('live_order.label.cost') }}
             </div>
             <div
-              class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0"
+              class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0"
               style="width: 120px"
             >
               {{ t('live_order.label.price') }}
             </div>
             <div
-              class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0"
+              class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0"
               style="width: 100px"
             >
               {{ t('live_order.label.stock') }}
@@ -183,7 +177,7 @@
                 >
                   <i
                     :class="[
-                      'pi text-[14px] text-[var(--p-text-muted-color)]',
+                      'pi text-sm text-[var(--p-text-muted-color)]',
                       pickerExpanded.includes(p.id) ? 'pi-chevron-up' : 'pi-chevron-down',
                     ]"
                   ></i>
@@ -191,44 +185,44 @@
               </div>
               <div class="px-2 py-[6px] flex gap-3 items-center shrink-0" style="width: 380px">
                 <div
-                  class="w-[48px] h-[48px] rounded-[6px] bg-[var(--p-content-hover-background)] flex items-center justify-center shrink-0"
+                  class="w-[48px] h-[48px] rounded-md bg-[var(--p-content-hover-background)] flex items-center justify-center shrink-0"
                 >
-                  <i class="pi pi-image text-[18px] text-[var(--p-text-muted-color)]"></i>
+                  <i class="pi pi-image text-lg text-[var(--p-text-muted-color)]"></i>
                 </div>
                 <div class="flex flex-col gap-[2px]">
-                  <span class="font-medium text-[15px]"
+                  <span class="font-medium text-base"
                     :class="isProductExisting(p) ? 'text-[var(--p-text-muted-color)]' : 'text-[var(--p-text-color)]'"
                   >
                     {{ p.name }}
                   </span>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ p.sku }}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-[var(--p-text-muted-color)]">{{ p.sku }}</span>
                     <span
                       v-if="p.keyword"
-                      class="text-[11px] font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-1.5 py-0.5 rounded"
+                      class="text-xs font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-2 py-0.5 rounded"
                     >
                       {{ t('live_order.label.keyword_with_value', { value: p.keyword }) }}
                     </span>
                     <span v-if="isProductExisting(p)"
-                      class="text-[11px] font-medium text-white bg-[var(--p-text-muted-color)] px-1.5 py-0.5 rounded">
+                      class="text-xs font-medium text-white bg-[var(--p-text-muted-color)] px-2 py-0.5 rounded">
                       {{ t('live_order.label.already_added') }}
                     </span>
                   </div>
                 </div>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                <span class="text-[15px] text-[var(--p-text-color)]">
+                <span class="text-base text-[var(--p-text-color)]">
                   {{ specCostRange(p) }}
                 </span>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                <span class="text-[15px] text-[var(--p-text-color)]">
+                <span class="text-base text-[var(--p-text-color)]">
                   {{ specPriceRange(p) }}
                 </span>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 100px">
                 <span
-                  class="text-[15px]"
+                  class="text-base"
                   :class="totalStockOf(p) <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'"
                 >
                   {{ specStockRange(p) }}
@@ -259,30 +253,30 @@
                   </div>
                   <div class="px-2 py-[6px] flex gap-3 items-center shrink-0" style="width: 380px">
                     <div
-                      class="w-[40px] h-[40px] rounded-[6px] bg-[var(--p-content-hover-background)] flex items-center justify-center shrink-0"
+                      class="w-[40px] h-[40px] rounded-md bg-[var(--p-content-hover-background)] flex items-center justify-center shrink-0"
                     >
-                      <i class="pi pi-image text-[14px] text-[var(--p-text-muted-color)]"></i>
+                      <i class="pi pi-image text-sm text-[var(--p-text-muted-color)]"></i>
                     </div>
                     <div class="flex flex-col gap-[2px]">
-                      <span class="font-medium text-[14px] text-[var(--p-text-color)]">
+                      <span class="font-medium text-sm text-[var(--p-text-color)]">
                         {{ t('live_order.label.spec_label', { name: spec.name }) }}
                       </span>
-                      <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ spec.sku }}</span>
+                      <span class="text-xs text-[var(--p-text-muted-color)]">{{ spec.sku }}</span>
                     </div>
                   </div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                    <span class="text-[14px] text-[var(--p-text-color)]">
+                    <span class="text-sm text-[var(--p-text-color)]">
                       {{ spec.cost.toLocaleString() }}
                     </span>
                   </div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                    <span class="text-[14px] text-[var(--p-text-color)]">
+                    <span class="text-sm text-[var(--p-text-color)]">
                       {{ spec.price.toLocaleString() }}
                     </span>
                   </div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 100px">
                     <span
-                      class="text-[14px]"
+                      class="text-sm"
                       :class="spec.stock <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'"
                     >
                       {{ spec.stock }}
@@ -298,7 +292,7 @@
             class="flex flex-col items-center justify-center gap-2 py-12"
           >
             <i class="pi pi-inbox text-5xl text-[var(--p-text-muted-color)]"></i>
-            <span class="text-[14px] text-[var(--p-text-muted-color)]">
+            <span class="text-sm text-[var(--p-text-muted-color)]">
               {{ t('live_order.empty.no_matching_product') }}
             </span>
           </div>
@@ -306,7 +300,7 @@
       </div>
 
       <div class="flex items-center justify-between">
-        <span class="text-[14px] text-[var(--p-text-color)]">
+        <span class="text-sm text-[var(--p-text-color)]">
           {{ t('live_order.text.total_products', { count: filteredPickerProducts.length }) }}
         </span>
         <Paginator
@@ -323,7 +317,7 @@
       <!-- Row 1：搜尋（select + input + 紫色「搜尋」鈕） -->
       <div class="flex gap-4 items-end flex-wrap">
         <div class="flex flex-col gap-2 flex-1 min-w-[320px]">
-          <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+          <label class="text-sm font-medium text-[var(--p-text-color)]">
             {{ t('live_order.form.field.search') }}
           </label>
           <div class="flex h-[42px]">
@@ -353,7 +347,7 @@
         </span>
         <label class="flex items-center gap-[7px] cursor-pointer">
           <Checkbox v-model="bundleOnlyAvailable" binary />
-          <span class="text-[14px] text-[var(--p-text-color)]">
+          <span class="text-sm text-[var(--p-text-color)]">
             {{ t('live_order.label.only_show_available') }}
           </span>
         </label>
@@ -365,16 +359,16 @@
             <!-- checkbox 移到最前面 -->
             <div class="px-2 py-[6px] shrink-0 flex justify-center" style="width: 50px"></div>
             <div class="px-2 py-[6px] shrink-0 w-[28px]"></div>
-            <div class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0" style="width: 380px">
+            <div class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0" style="width: 380px">
               {{ t('live_order.label.product_name_spec') }}
             </div>
-            <div class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0" style="width: 120px">
+            <div class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0" style="width: 120px">
               {{ t('live_order.label.cost') }}
             </div>
-            <div class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0" style="width: 120px">
+            <div class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0" style="width: 120px">
               {{ t('live_order.label.price') }}
             </div>
-            <div class="px-2 py-[6px] font-bold text-[15px] text-[var(--p-text-color)] shrink-0" style="width: 100px">
+            <div class="px-2 py-[6px] font-bold text-base text-[var(--p-text-color)] shrink-0" style="width: 100px">
               {{ t('live_order.label.stock') }}
             </div>
           </div>
@@ -401,41 +395,41 @@
                 <button @click="toggleBundleExpand(b.id)" class="w-full flex items-center justify-center">
                   <i
                     :class="[
-                      'pi text-[14px] text-[var(--p-text-muted-color)]',
+                      'pi text-sm text-[var(--p-text-muted-color)]',
                       bundleExpanded.includes(b.id) ? 'pi-chevron-up' : 'pi-chevron-down',
                     ]"
                   ></i>
                 </button>
               </div>
               <div class="px-2 py-[6px] flex gap-3 items-center shrink-0" style="width: 380px">
-                <div class="w-[48px] h-[48px] rounded-[6px] bg-[var(--p-primary-50)] flex items-center justify-center shrink-0">
+                <div class="w-[48px] h-[48px] rounded-md bg-[var(--p-primary-50)] flex items-center justify-center shrink-0">
                   <FontAwesomeIcon :icon="['far', 'bag-shopping']" class="text-[var(--p-primary-color)]" style="font-size: 18px" />
                 </div>
                 <div class="flex flex-col gap-[2px]">
                   <span
-                    class="font-medium text-[15px]"
+                    class="font-medium text-base"
                     :class="isBundleExisting(b) ? 'text-[var(--p-text-muted-color)]' : 'text-[var(--p-text-color)]'"
                   >{{ b.name }}</span>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ b.sku }}</span>
-                    <span class="text-[11px] font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-1.5 py-0.5 rounded">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-[var(--p-text-muted-color)]">{{ b.sku }}</span>
+                    <span class="text-xs font-medium text-[var(--p-primary-color)] bg-[var(--p-primary-50)] px-2 py-0.5 rounded">
                       {{ t('live_order.bundle_picker.keyword_with_value', { value: b.keyword }) }}
                     </span>
                     <span
                       v-if="isBundleExisting(b)"
-                      class="text-[11px] font-medium text-white bg-[var(--p-text-muted-color)] px-1.5 py-0.5 rounded"
+                      class="text-xs font-medium text-white bg-[var(--p-text-muted-color)] px-2 py-0.5 rounded"
                     >{{ t('live_order.label.already_added') }}</span>
                   </div>
                 </div>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                <span class="text-[15px] text-[var(--p-text-color)]">{{ costApprox(b).toLocaleString() }}</span>
+                <span class="text-base text-[var(--p-text-color)]">{{ costApprox(b).toLocaleString() }}</span>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                <span class="text-[15px] text-[var(--p-text-color)]">{{ b.price.toLocaleString() }}</span>
+                <span class="text-base text-[var(--p-text-color)]">{{ b.price.toLocaleString() }}</span>
               </div>
               <div class="px-2 py-[6px] shrink-0" style="width: 100px">
-                <span class="text-[15px]" :class="b.stock <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">{{ b.stock }}</span>
+                <span class="text-base" :class="b.stock <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">{{ b.stock }}</span>
               </div>
             </div>
 
@@ -452,34 +446,34 @@
                   <!-- 對齊新表頭：leading 50px 空欄取代原本最右側的 80px 空欄 -->
                   <div class="px-2 py-[6px] shrink-0" style="width: 50px"></div>
                   <div class="px-2 py-[6px] flex gap-3 items-center shrink-0" style="width: 380px">
-                    <div class="w-[36px] h-[36px] rounded-[6px] bg-[var(--p-content-background)] border border-dashed border-[var(--p-content-border-color)] flex items-center justify-center shrink-0">
-                      <i class="pi pi-image text-[14px] text-[var(--p-text-muted-color)]"></i>
+                    <div class="w-[36px] h-[36px] rounded-md bg-[var(--p-content-background)] border border-dashed border-[var(--p-content-border-color)] flex items-center justify-center shrink-0">
+                      <i class="pi pi-image text-sm text-[var(--p-text-muted-color)]"></i>
                     </div>
                     <div class="flex flex-col gap-[2px]">
-                      <span class="text-[14px] text-[var(--p-text-color)] truncate">{{ s.name }}</span>
-                      <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ s.sku }}</span>
+                      <span class="text-sm text-[var(--p-text-color)] truncate">{{ s.name }}</span>
+                      <span class="text-xs text-[var(--p-text-muted-color)]">{{ s.sku }}</span>
                     </div>
                   </div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 120px"></div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 120px">
-                    <span class="text-[14px] text-[var(--p-text-color)]">{{ s.price.toLocaleString() }}</span>
+                    <span class="text-sm text-[var(--p-text-color)]">{{ s.price.toLocaleString() }}</span>
                   </div>
                   <div class="px-2 py-[6px] shrink-0" style="width: 100px">
-                    <span class="text-[14px] text-[var(--p-text-color)]">× {{ s.qty }}</span>
+                    <span class="text-sm text-[var(--p-text-color)]">× {{ s.qty }}</span>
                   </div>
                 </div>
               </div>
             </template>
           </template>
 
-          <div v-if="pagedBundles.length === 0" class="py-10 text-center text-[14px] text-[var(--p-text-muted-color)]">
+          <div v-if="pagedBundles.length === 0" class="py-10 text-center text-sm text-[var(--p-text-muted-color)]">
             {{ t('live_order.bundle_picker.empty') }}
           </div>
         </div>
       </div>
 
       <div class="flex items-center justify-between">
-        <span class="text-[14px] text-[var(--p-text-color)]">
+        <span class="text-sm text-[var(--p-text-color)]">
           {{ t('live_order.text.total_products', { count: filteredBundles.length }) }}
         </span>
         <Paginator

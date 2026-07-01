@@ -103,6 +103,11 @@ export const sidebarMenu: MenuItem[] = [
         icon: ['far', 'clipboard-list'],
         to: RouteName.InvoiceOperations,
       },
+      {
+        labelKey: 'nav.invoice.manual',
+        icon: ['far', 'pen-to-square'],
+        to: RouteName.InvoiceManual,
+      },
     ],
   },
   {

@@ -8,6 +8,7 @@ import type { RouteRecordRaw } from 'vue-router'
  */
 export const InvoiceRouteName = {
   InvoiceOperations: 'invoice.operations',
+  InvoiceManual: 'invoice.manual',
 } as const
 
 export const invoiceRoutes: RouteRecordRaw[] = [
@@ -17,6 +18,15 @@ export const invoiceRoutes: RouteRecordRaw[] = [
     component: () => import('@/admin/views/invoice/InvoiceOperationsPage.vue'),
     meta: {
       i18nKey: 'route.invoice_operations',
+      layout: 'default',
+    },
+  },
+  {
+    path: 'invoice/manual',
+    name: InvoiceRouteName.InvoiceManual,
+    component: () => import('@/admin/views/invoice/InvoiceManualPage.vue'),
+    meta: {
+      i18nKey: 'route.invoice_manual',
       layout: 'default',
     },
   },

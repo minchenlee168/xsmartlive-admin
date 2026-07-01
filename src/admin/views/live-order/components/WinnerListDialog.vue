@@ -30,59 +30,59 @@
         }"
       >
         <Column field="orderNo" :header="t('live_order.table.column.order_no')">
-          <template #body="{ data }"><span class="text-[16px] text-[var(--p-text-color)]">{{ data.orderNo }}</span></template>
+          <template #body="{ data }"><span class="text-base text-[var(--p-text-color)]">{{ data.orderNo }}</span></template>
         </Column>
         <Column field="member" :header="t('live_order.table.column.member')">
-          <template #body="{ data }"><span class="text-[16px] text-[var(--p-text-color)]">{{ data.member }}</span></template>
+          <template #body="{ data }"><span class="text-base text-[var(--p-text-color)]">{{ data.member }}</span></template>
         </Column>
         <Column field="spec" :header="t('live_order.table.column.product_spec')">
-          <template #body="{ data }"><span class="text-[16px] text-[var(--p-text-color)]">{{ data.spec }}</span></template>
+          <template #body="{ data }"><span class="text-base text-[var(--p-text-color)]">{{ data.spec }}</span></template>
         </Column>
         <Column field="qty" :header="t('live_order.table.column.qty')">
-          <template #body="{ data }"><span class="text-[16px] text-[var(--p-text-color)]">{{ data.qty }}</span></template>
+          <template #body="{ data }"><span class="text-base text-[var(--p-text-color)]">{{ data.qty }}</span></template>
         </Column>
         <Column field="paid" :header="t('live_order.table.column.checkout_status')">
           <template #body="{ data }">
             <span
-              class="inline-flex items-center px-[7px] py-[3.5px] rounded-[12px] text-[12.25px] font-bold leading-none"
+              class="inline-flex items-center px-[7px] py-[3.5px] rounded-xl text-xs font-bold leading-none"
               :class="data.paid ? 'checkout-paid' : 'checkout-unpaid'">
               {{ data.paid ? t('live_order.table.value.checkout_paid') : t('live_order.table.value.checkout_unpaid') }}
             </span>
           </template>
         </Column>
         <Column field="createdAt" :header="t('live_order.table.column.created_at')">
-          <template #body="{ data }"><span class="text-[16px] text-[var(--p-text-color)]">{{ data.createdAt }}</span></template>
+          <template #body="{ data }"><span class="text-base text-[var(--p-text-color)]">{{ data.createdAt }}</span></template>
         </Column>
         <Column :header="t('live_order.table.column.actions')">
           <template #body="{ data }">
             <div class="flex items-center gap-2">
               <button
                 v-tooltip.top="t('live_order.tooltip.order_detail')"
-                class="w-[32px] h-[32px] rounded-[6px] flex items-center justify-center text-[var(--p-primary-color)] hover:bg-[var(--p-primary-50)]"
+                class="w-[32px] h-[32px] rounded-md flex items-center justify-center text-[var(--p-primary-color)] hover:bg-[var(--p-primary-50)]"
                 @click="openDetail(data)"
               >
                 <i class="pi pi-search" style="font-size: 14px"></i>
               </button>
               <button
                 v-tooltip.top="t('live_order.button.remove_order')"
-                class="w-[32px] h-[32px] rounded-[6px] flex items-center justify-center text-[#ef4444] hover:bg-[#fee2e2]"
+                class="w-[32px] h-[32px] rounded-md flex items-center justify-center text-[#ef4444] hover:bg-[#fee2e2]"
                 @click="removeOrder(data.orderNo)"
               >
-                <FontAwesomeIcon :icon="['far', 'trash']" class="text-[14px]" />
+                <FontAwesomeIcon :icon="['far', 'trash']" class="text-sm" />
               </button>
             </div>
           </template>
         </Column>
 
         <template #empty>
-          <div class="py-6 text-center text-[16px] text-[var(--p-text-muted-color)]">{{ t('live_order.empty.no_order') }}</div>
+          <div class="py-6 text-center text-base text-[var(--p-text-muted-color)]">{{ t('live_order.empty.no_order') }}</div>
         </template>
       </DataTable>
 
       <div class="flex justify-end items-center">
-        <span class="text-[14px] text-[var(--p-text-color)] leading-[21px]">{{ t('live_order.label.subtotal') }}</span>
-        <span class="text-[16px] font-medium text-[var(--p-text-color)]">：</span>
-        <span class="text-[14px] font-bold text-[#f97316]">${{ subtotal.toLocaleString() }}</span>
+        <span class="text-sm text-[var(--p-text-color)] leading-[21px]">{{ t('live_order.label.subtotal') }}</span>
+        <span class="text-base font-medium text-[var(--p-text-color)]">：</span>
+        <span class="text-sm font-bold text-[#f97316]">${{ subtotal.toLocaleString() }}</span>
       </div>
     </div>
 

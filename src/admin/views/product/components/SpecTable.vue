@@ -158,7 +158,7 @@ function closeSpec(): void {
         <div
           v-for="group in specs"
           :key="group.id"
-          class="flex items-center gap-2 text-[16px] font-bold text-[var(--p-text-color)]"
+          class="flex items-center gap-2 text-base font-bold text-[var(--p-text-color)]"
         >
           <span>{{ group.name || '規格' }}：</span>
           <span>{{ group.options.filter((o) => o.name.trim()).map((o) => o.name).join('、') || '—' }}</span>

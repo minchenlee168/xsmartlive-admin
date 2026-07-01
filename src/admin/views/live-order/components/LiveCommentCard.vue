@@ -1,8 +1,12 @@
 <template>
-  <!-- 留言卡：6 種變體（Default / 黑名單 / VIP / 官方小編 × FB/IG/直播） -->
+  <!-- 留言卡：6 種變體（Default / 黑名單 / VIP / 官方小編 × FB/IG/直播）
+       bare 拿掉 card 樣式，官方小編（pinned）也不特別加紫底（Drawer 內只靠 badge 區別） -->
   <div :class="[
-    'rounded-[8px] border px-2.5 py-2 flex gap-2 items-start shadow-sm',
-    isPinned ? 'bg-[var(--p-primary-50)] border-[var(--p-primary-400)]' : 'bg-[var(--p-content-background)] border-[var(--p-content-border-color)]',
+    'px-2.5 py-2 flex gap-2 items-start',
+    props.bare
+      ? ''
+      : ['rounded-lg border shadow-sm',
+         isPinned ? 'bg-[var(--p-primary-50)] border-[var(--p-primary-400)]' : 'bg-[var(--p-content-background)] border-[var(--p-content-border-color)]'],
   ]">
 
     <!-- 左：頭像 + 底部標籤 -->
@@ -16,20 +20,20 @@
       </div>
       <!-- Badge -->
       <div v-if="comment.tagType === 'official'"
-        class="bg-[var(--p-primary-color)] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-0.5 leading-none whitespace-nowrap">
+        class="bg-[var(--p-primary-color)] text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1 leading-none whitespace-nowrap">
         <i class="pi pi-check-circle" style="font-size:8px"></i>{{ t('live_order.label.official_editor') }}
       </div>
-      <span v-else-if="isBlacklist" class="bg-black text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">{{ t('live_order.label.blacklist') }}</span>
-      <span v-else-if="comment.tagType === 'vip'" class="bg-[#fbbf24] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">{{ t('live_order.label.vip') }}</span>
+      <span v-else-if="isBlacklist" class="bg-black text-white text-xs font-bold px-2 py-0.5 rounded-full leading-none whitespace-nowrap">{{ t('live_order.label.blacklist') }}</span>
+      <span v-else-if="comment.tagType === 'vip'" class="bg-[#fbbf24] text-white text-xs font-bold px-2 py-0.5 rounded-full leading-none whitespace-nowrap">{{ t('live_order.label.vip') }}</span>
       <div v-else-if="comment.stars" class="flex gap-0">
         <i v-for="i in 5" :key="i" :class="['pi', i <= comment.stars ? 'pi-star-fill text-[#fbbf24]' : 'pi-star text-[var(--p-content-border-color)]']" style="font-size:8px"></i>
       </div>
     </div>
 
     <!-- 中：名字 + 留言 -->
-    <div class="flex-1 min-w-0 flex flex-col gap-0.5">
+    <div class="flex-1 min-w-0 flex flex-col gap-1">
       <div class="flex items-center gap-1">
-        <span class="text-[14px] font-bold text-[var(--p-text-color)] truncate">{{ comment.user }}</span>
+        <span class="text-sm font-bold text-[var(--p-text-color)] truncate">{{ comment.user }}</span>
       </div>
       <div class="flex items-center gap-1">
         <!-- 綠色實心圓 + 白勾：留言含「+N」或追加訂單成功時顯示（下單成功標示） -->
@@ -44,7 +48,7 @@
     <!-- 右：動作 icons + 平台 + 時間 -->
     <div class="flex flex-col items-end gap-1 shrink-0 h-full">
       <!-- 動作 icons：pinned/官方小編 不顯示 -->
-      <div v-if="!isPinned" class="flex gap-1.5">
+      <div v-if="!isPinned" class="flex gap-2">
         <button @click="onLockClick" class="text-[var(--p-text-muted-color)] hover:text-[var(--p-text-color)]"
           v-tooltip.top="isBlacklist ? t('live_order.tooltip.remove_from_blacklist') : t('live_order.tooltip.add_to_blacklist')">
           <i :class="isBlacklist ? 'pi pi-lock-open' : 'pi pi-lock'" style="font-size:13px"></i>
@@ -64,7 +68,7 @@
           :icon="platformMeta.platformIcon"
           :style="{ fontSize: '10px', color: platformMeta.platformColor }"
         />
-        <span class="text-[10px] text-[var(--p-text-muted-color)] whitespace-nowrap">{{ comment.time }}</span>
+        <span class="text-xs text-[var(--p-text-muted-color)] whitespace-nowrap">{{ comment.time }}</span>
       </div>
     </div>
 
@@ -122,10 +126,13 @@ interface Props {
   liveProducts?: LiveProductLike[]
   /** 當前場次所有商品（含尚未收單的）；訂單明細用此 prop 配對留言提及的商品。 */
   sessionProducts?: LiveProductLike[]
+  /** bare = 拿掉外框 / 圓角 / 陰影 / 背景，給 Drawer 用 divide-y 分隔線串接時使用 */
+  bare?: boolean
 }
 const props = withDefaults(defineProps<Props>(), {
   liveProducts: () => [],
   sessionProducts: () => [],
+  bare: false,
 })
 
 const emit = defineEmits<{

@@ -61,10 +61,12 @@ const pagedProducts = computed(() =>
 // 篩選改變時回到第 1 頁（避免空頁）
 watch(filteredProducts, () => { pageFirst.value = 0 })
 
-function statusMeta(status: ProductStatus): { label: string; bg: string; color: string } {
-  if (status === 'on_shelf') return { label: '上架', bg: '#e0d0fc', color: '#3d0f91' }
-  if (status === 'off_shelf') return { label: '下架', bg: '#f1f5f9', color: '#64748b' }
-  return { label: '草稿', bg: '#fef3c7', color: '#92400e' }
+/** 商品狀態 → PrimeVue Tag severity（Design.md 二 語意色） */
+type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'
+function statusMeta(status: ProductStatus): { label: string; severity: TagSeverity } {
+  if (status === 'on_shelf')  return { label: '上架', severity: 'info' }
+  if (status === 'off_shelf') return { label: '下架', severity: 'secondary' }
+  return { label: '草稿', severity: 'warn' }
 }
 
 function toggleExpand(id: number): void {
@@ -274,7 +276,7 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
     <div class="flex items-center justify-between gap-3 flex-wrap">
       <div class="flex items-center gap-4 flex-1 min-w-0 flex-wrap">
         <!-- 手機讓標題獨占一列，搜尋 + 新增鈕才能並排 -->
-        <h2 class="text-[20px] font-medium text-[var(--p-text-color)] shrink-0 w-full sm:w-auto">商品列表</h2>
+        <h2 class="text-xl font-medium text-[var(--p-text-color)] shrink-0 w-full sm:w-auto">商品列表</h2>
         <!-- 搜尋 + 手機新增鈕一定同列；items-stretch 讓兩個按鈕跟 InputGroup 同高 -->
         <div class="flex items-stretch gap-2 w-full sm:w-auto">
           <div class="flex items-center flex-1 sm:flex-initial sm:w-[380px]">
@@ -294,11 +296,11 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
           </div>
         </div>
         <!-- 商品類型篩選：一般商品 / 組合商品（兩個都勾或都不勾 = 顯示全部） -->
-        <label class="flex items-center gap-1.5 text-[14px] cursor-pointer">
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
           <Checkbox v-model="filterNormal" binary />
           <span>一般商品</span>
         </label>
-        <label class="flex items-center gap-1.5 text-[14px] cursor-pointer">
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
           <Checkbox v-model="filterBundle" binary />
           <span>組合商品</span>
         </label>
@@ -316,7 +318,7 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
 
     <!-- 頁首第二列：全選 + 批次刪除 -->
     <div class="flex items-center justify-between gap-3 flex-wrap">
-      <label class="flex items-center gap-1.5 text-[14px] cursor-pointer">
+      <label class="flex items-center gap-2 text-sm cursor-pointer">
         <Checkbox v-model="allSelected" binary />
         <span>全選</span>
       </label>
@@ -338,50 +340,43 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
           <!-- Header：checkbox + 名稱 (+ 組合 tag) + 狀態 tag + 動作 -->
           <div class="flex items-center gap-3 px-4 py-3">
             <Checkbox :model-value="isSelected(p.id)" binary @change="toggleSelect(p.id)" />
-            <span class="font-bold text-[15px] text-[var(--p-text-color)]">{{ p.name }}</span>
-            <span
-              v-if="p.kind === 'bundle'"
-              v-tooltip.top="'組合商品'"
-              class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none bg-[#dcfce7] text-[#15803d]"
-            >組</span>
-            <span
-              class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none"
-              :style="{ background: statusMeta(p.status).bg, color: statusMeta(p.status).color }"
-            >{{ statusMeta(p.status).label }}</span>
+            <span class="font-bold text-base text-[var(--p-text-color)]">{{ p.name }}</span>
+            <Tag v-if="p.kind === 'bundle'" v-tooltip.top="'組合商品'" value="組" severity="success" />
+            <Tag :value="statusMeta(p.status).label" :severity="statusMeta(p.status).severity" />
 
-            <div class="ml-auto flex items-center gap-1.5">
+            <div class="ml-auto flex items-center gap-2">
               <!-- 桌機才顯示 檢視 / 編輯 / 刪除 icon 按鈕；手機收進「更多」menu -->
               <button
                 v-tooltip.top="'檢視'"
-                class="hidden md:flex size-[35px] items-center justify-center rounded-[6px] border border-[#bbf7d0] text-[#22c55e] hover:bg-[#dcfce7]"
+                class="hidden md:flex size-[35px] items-center justify-center rounded-md border border-[#bbf7d0] text-[#22c55e] hover:bg-[#dcfce7]"
                 @click="onView(p)"
               >
                 <i class="pi pi-eye" style="font-size: 14px"></i>
               </button>
               <button
                 v-tooltip.top="'編輯'"
-                class="hidden md:flex size-[35px] items-center justify-center rounded-[6px] border border-[#c29ffa] text-[var(--p-primary-color)] hover:bg-[var(--p-primary-50)]"
+                class="hidden md:flex size-[35px] items-center justify-center rounded-md border border-[#c29ffa] text-[var(--p-primary-color)] hover:bg-[var(--p-primary-50)]"
                 @click="onEdit(p)"
               >
-                <FontAwesomeIcon :icon="['far', 'pen-to-square']" class="text-[14px]" />
+                <FontAwesomeIcon :icon="['far', 'pen-to-square']" class="text-sm" />
               </button>
               <button
                 v-tooltip.top="'刪除'"
-                class="hidden md:flex size-[35px] items-center justify-center rounded-[6px] border border-[#fecaca] text-[#ef4444] hover:bg-[#fee2e2]"
+                class="hidden md:flex size-[35px] items-center justify-center rounded-md border border-[#fecaca] text-[#ef4444] hover:bg-[#fee2e2]"
                 @click="onDelete(p, $event)"
               >
                 <i class="pi pi-trash" style="font-size: 14px"></i>
               </button>
               <button
                 v-tooltip.top="'更多'"
-                class="size-[35px] flex items-center justify-center rounded-[6px] text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+                class="size-[35px] flex items-center justify-center rounded-md text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
                 @click="openMore(p, $event)"
               >
                 <i class="pi pi-ellipsis-v" style="font-size: 14px"></i>
               </button>
               <button
                 v-tooltip.top="isExpanded(p.id) ? '收合' : '展開'"
-                class="size-[35px] flex items-center justify-center rounded-[6px] text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+                class="size-[35px] flex items-center justify-center rounded-md text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
                 @click="toggleExpand(p.id)"
               >
                 <i :class="isExpanded(p.id) ? 'pi pi-chevron-up' : 'pi pi-chevron-down'" style="font-size: 14px"></i>
@@ -391,22 +386,22 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
 
           <!-- 摘要列（淺灰底）：分類 / 價格 / 總庫存 / 總銷量；卡片左右留白 → 灰塊不貼齊邊 -->
           <!-- 摘要 4 欄 grid：手機（< 640px）→ 2 欄；≥ sm → 4 欄 -->
-          <div class="mx-4 mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4 px-4 py-3 bg-[#f5f5f5] rounded-[6px]">
+          <div class="mx-4 mb-4 grid grid-cols-2 sm:grid-cols-4 gap-4 px-4 py-3 bg-[#f5f5f5] rounded-md">
             <div class="flex flex-col gap-1">
-              <span class="text-[12px] text-[var(--p-text-muted-color)]">分類</span>
-              <span class="text-[14px] text-[var(--p-text-color)]">{{ p.category }}</span>
+              <span class="text-xs text-[var(--p-text-muted-color)]">分類</span>
+              <span class="text-sm text-[var(--p-text-color)]">{{ p.category }}</span>
             </div>
             <div class="flex flex-col gap-1">
-              <span class="text-[12px] text-[var(--p-text-muted-color)]">價格</span>
-              <span class="text-[14px] text-[var(--p-text-color)]">{{ priceRangeOf(p) }}</span>
+              <span class="text-xs text-[var(--p-text-muted-color)]">價格</span>
+              <span class="text-sm text-[var(--p-text-color)]">{{ priceRangeOf(p) }}</span>
             </div>
             <div class="flex flex-col gap-1">
-              <span class="text-[12px] text-[var(--p-text-muted-color)]">總庫存</span>
-              <span class="text-[14px] text-[var(--p-text-color)]">{{ totalStockOf(p) }}</span>
+              <span class="text-xs text-[var(--p-text-muted-color)]">總庫存</span>
+              <span class="text-sm text-[var(--p-text-color)]">{{ totalStockOf(p) }}</span>
             </div>
             <div class="flex flex-col gap-1">
-              <span class="text-[12px] text-[var(--p-text-muted-color)]">總銷量</span>
-              <span class="text-[14px] text-[var(--p-text-color)]">{{ p.totalSold }}</span>
+              <span class="text-xs text-[var(--p-text-muted-color)]">總銷量</span>
+              <span class="text-sm text-[var(--p-text-color)]">{{ p.totalSold }}</span>
             </div>
           </div>
 
@@ -420,12 +415,12 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
                      沒設過 → 退回「規格名稱」字眼 -->
                 {{ p.kind === 'bundle' ? '商品名稱' : (p.specGroupNames?.[0] || '規格名稱') }}
               </span>
-              <span class="text-[13px] font-semibold text-[var(--p-text-color)] text-right inline-flex items-center justify-end gap-1.5">
+              <span class="text-[13px] font-semibold text-[var(--p-text-color)] text-right inline-flex items-center justify-end gap-2">
                 庫存
                 <button
                   v-if="p.kind !== 'bundle'"
                   v-tooltip.top="'批量調整庫存'"
-                  class="inline-flex items-center justify-center text-[var(--p-primary-color)] hover:bg-[var(--p-primary-50)] rounded-[4px] p-1"
+                  class="inline-flex items-center justify-center text-[var(--p-primary-color)] hover:bg-[var(--p-primary-50)] rounded-sm p-1"
                   @click="openStockAdjust(p)"
                 >
                   <i class="pi pi-pencil" style="font-size: 11px"></i>
@@ -439,7 +434,7 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
               <div
                 v-for="(s, i) in p.specs"
                 :key="s.id"
-                class="grid items-center gap-4 px-2 py-2.5"
+                class="grid items-center gap-4 px-2 py-3"
                 :class="i < p.specs.length - 1 ? 'border-b border-[var(--p-content-border-color)]' : ''"
                 style="grid-template-columns: 1fr 100px 100px"
               >
@@ -455,7 +450,7 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
                 <div
                   v-for="(r, i) in bundleRowsOf(p)"
                   :key="r.id"
-                  class="grid items-center gap-4 px-2 py-2.5"
+                  class="grid items-center gap-4 px-2 py-3"
                   :class="i < bundleRowsOf(p).length - 1 ? 'border-b border-[var(--p-content-border-color)]' : ''"
                   style="grid-template-columns: 1fr 100px 100px"
                 >
@@ -474,7 +469,7 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
 
       <div v-if="filteredProducts.length === 0" class="flex flex-col items-center gap-2 py-12 text-[var(--p-text-muted-color)]">
         <i class="pi pi-inbox text-5xl"></i>
-        <span class="text-[14px]">沒有符合條件的商品</span>
+        <span class="text-sm">沒有符合條件的商品</span>
       </div>
     </div>
 

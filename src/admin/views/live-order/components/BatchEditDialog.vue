@@ -27,7 +27,7 @@
                 : 'bg-[var(--p-content-hover-background)] text-[var(--p-text-muted-color)]'"
             >{{ s.step }}</span>
             <span
-              class="text-[14px] font-medium"
+              class="text-sm font-medium"
               :class="currentStep === s.step ? 'text-[var(--p-text-color)]' : 'text-[var(--p-text-muted-color)]'"
             >{{ s.label }}</span>
           </div>
@@ -53,13 +53,13 @@
           </Column>
           <Column :header="t('live_order.table.column.product_name')" field="name">
             <template #body="{ data }">
-              <span class="text-[14px] text-[var(--p-text-color)]">{{ data.name || t('live_order.table.value.unnamed_product') }}</span>
+              <span class="text-sm text-[var(--p-text-color)]">{{ data.name || t('live_order.table.value.unnamed_product') }}</span>
             </template>
           </Column>
           <template #empty>
             <div class="flex flex-col items-center justify-center gap-2 py-12">
               <i class="pi pi-inbox text-5xl text-[var(--p-text-muted-color)]"></i>
-              <span class="text-[14px] text-[var(--p-text-muted-color)]">{{ t('live_order.empty.no_session_product') }}</span>
+              <span class="text-sm text-[var(--p-text-muted-color)]">{{ t('live_order.empty.no_session_product') }}</span>
             </div>
           </template>
         </DataTable>
@@ -81,7 +81,7 @@
         <!-- 下拉 / 數值欄位：2 欄等寬（只有改動過的欄位會套用） -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
           <!-- 結帳類型 -->
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <span class="text-[13px] text-[var(--p-text-color)]">
               {{ t('live_order.form.field.checkout_type') }}
             </span>
@@ -90,7 +90,7 @@
           </div>
 
           <!-- 多購物車：只有結帳類型 = 多購物車-獨立結帳 才可選；一般 / 預購 → disabled -->
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <span class="text-[13px] text-[var(--p-text-color)]">
               {{ t('live_order.form.field.multi_cart') }}
             </span>
@@ -101,7 +101,7 @@
           </div>
 
           <!-- +1 數量限制 -->
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <span class="text-[13px] text-[var(--p-text-color)]">
               {{ t('live_order.form.field.plus_one_limit') }}
             </span>
@@ -109,7 +109,7 @@
           </div>
 
           <!-- 星等過濾 -->
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <span class="text-[13px] text-[var(--p-text-color)]">
               {{ t('live_order.form.field.star_filter') }}
             </span>
@@ -119,46 +119,46 @@
         </div>
 
         <!-- 開關選項：每列 label 左、switch 右，外框＋分隔線收齊 -->
-        <div class="flex flex-col rounded-[6px] border border-[var(--p-content-border-color)] divide-y divide-[var(--p-content-border-color)]">
-          <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+        <div class="flex flex-col rounded-md border border-[var(--p-content-border-color)] divide-y divide-[var(--p-content-border-color)]">
+          <div class="flex items-center justify-between gap-3 px-3 py-3">
             <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.bidding') }}</span>
             <ToggleSwitch v-model="form.bidding" />
           </div>
           <!-- 競價價格：競價模式正下方就地展開（一刀價格 + 起標價格） -->
-          <div v-if="form.bidding" class="px-3 py-2.5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-            <div class="flex flex-col gap-1.5">
+          <div v-if="form.bidding" class="px-3 py-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
+            <div class="flex flex-col gap-2">
               <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.flat_price') }}</span>
               <InputNumber v-model="form.flatPrice" :min="0" :show-buttons="false" class="w-full" inputClass="w-full" />
             </div>
-            <div class="flex flex-col gap-1.5">
+            <div class="flex flex-col gap-2">
               <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.starting_bid') }}</span>
               <InputNumber v-model="form.startingBid" :min="0" :show-buttons="false" class="w-full" inputClass="w-full" />
             </div>
           </div>
-          <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+          <div class="flex items-center justify-between gap-3 px-3 py-3">
             <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.allow_mix_color') }}</span>
             <ToggleSwitch v-model="form.allowMixColor" />
           </div>
-          <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+          <div class="flex items-center justify-between gap-3 px-3 py-3">
             <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.allow_oversell') }}</span>
             <ToggleSwitch v-model="form.allowOversell" />
           </div>
-          <div v-if="!isPreorder" class="flex items-center justify-between gap-3 px-3 py-2.5">
+          <div v-if="!isPreorder" class="flex items-center justify-between gap-3 px-3 py-3">
             <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.pick_spec_after_winning') }}</span>
             <ToggleSwitch v-model="form.pickSpecAfterWinning" />
           </div>
-          <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+          <div class="flex items-center justify-between gap-3 px-3 py-3">
             <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.new_customer_any_star') }}</span>
             <ToggleSwitch v-model="form.newCustomerAnyStar" />
           </div>
-          <div class="flex items-center justify-between gap-3 px-3 py-2.5">
+          <div class="flex items-center justify-between gap-3 px-3 py-3">
             <span class="text-[13px] text-[var(--p-text-color)]">{{ t('live_order.form.field.member_only') }}</span>
             <ToggleSwitch v-model="form.memberOnly" />
           </div>
         </div>
 
         <!-- 提示 -->
-        <div class="text-[12px] text-[var(--p-text-muted-color)]">
+        <div class="text-xs text-[var(--p-text-muted-color)]">
           {{ t('live_order.form.hint.batch_apply_hint') }}
         </div>
       </div>

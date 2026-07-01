@@ -88,7 +88,7 @@ function onSave(): void {
     </template>
 
     <div class="flex flex-col gap-2">
-      <div class="grid grid-cols-[1fr_140px] gap-3 px-3 py-2 text-[12px] text-[var(--p-text-muted-color)]">
+      <div class="grid grid-cols-[1fr_140px] gap-3 px-3 py-2 text-xs text-[var(--p-text-muted-color)]">
         <span>{{ t('live_order.table.column.spec') }}</span>
         <span>{{ t('live_order.table.column.price') }}</span>
       </div>
@@ -97,7 +97,7 @@ function onSave(): void {
         :key="row.id"
         class="grid grid-cols-[1fr_140px] gap-3 px-3 py-2 border-t border-[var(--p-content-border-color)] items-center"
       >
-        <span class="text-[14px] text-[var(--p-text-color)] truncate">{{ row.name }}</span>
+        <span class="text-sm text-[var(--p-text-color)] truncate">{{ row.name }}</span>
         <InputNumber
           v-model="row.price"
           :min="0"

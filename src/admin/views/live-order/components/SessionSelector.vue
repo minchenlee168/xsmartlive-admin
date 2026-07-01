@@ -7,7 +7,7 @@
     class="session-select"
     :class="[isSelectedLive ? 'is-live' : '', size === 'lg' ? 'is-lg' : 'is-sm']"
     :pt="{
-      root: { class: 'rounded-[6px]' },
+      root: { class: 'rounded-md' },
       label: { class: 'flex items-center !py-0' },
     }"
     @update:model-value="(v) => emit('select', v as LiveSession)"
@@ -29,8 +29,8 @@
     <!-- 選項：場次名 + 日期；正在收單時加紫色脈動點 -->
     <template #option="{ option }">
       <div class="flex flex-col min-w-0 w-full">
-        <div class="flex items-center gap-1.5">
-          <span class="text-[14px] font-medium text-[var(--p-text-color)] truncate">{{ (option as LiveSession).name }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-medium text-[var(--p-text-color)] truncate">{{ (option as LiveSession).name }}</span>
           <i
             v-if="(option as LiveSession).products?.some((p: LiveSessionProduct) => p.status === 'live')"
             v-tooltip.top="t('live_order.tooltip.ordering_in_progress')"
@@ -38,12 +38,12 @@
             style="font-size:8px"
           />
         </div>
-        <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ (option as LiveSession).date }}</span>
+        <span class="text-xs text-[var(--p-text-muted-color)]">{{ (option as LiveSession).date }}</span>
       </div>
     </template>
 
     <template #empty>
-      <div class="px-3 py-6 text-center text-[12px] text-[var(--p-text-muted-color)]">
+      <div class="px-3 py-6 text-center text-xs text-[var(--p-text-muted-color)]">
         {{ t('live_order.empty.no_session') }}
       </div>
     </template>

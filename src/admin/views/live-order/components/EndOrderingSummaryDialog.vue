@@ -184,15 +184,15 @@ function onSave(): void {
       <section
         v-for="p in summaries"
         :key="p.id"
-        class="rounded-[8px] border border-[var(--p-content-border-color)] overflow-hidden"
+        class="rounded-lg border border-[var(--p-content-border-color)] overflow-hidden"
       >
         <!-- 商品 header：名稱 + 主要指標 -->
         <div class="flex items-center justify-between gap-3 px-4 py-3 bg-[var(--p-content-hover-background)] border-b border-[var(--p-content-border-color)]">
           <div class="flex items-center gap-2 min-w-0">
-            <span class="font-bold text-[15px] text-[var(--p-text-color)] truncate">{{ p.name }}</span>
+            <span class="font-bold text-base text-[var(--p-text-color)] truncate">{{ p.name }}</span>
             <span
               v-if="p.keyword"
-              class="text-[11px] font-bold text-[#0369a1] bg-[#e0f2fe] px-1.5 py-0.5 rounded-full leading-none shrink-0"
+              class="text-xs font-bold text-[#0369a1] bg-[#e0f2fe] px-2 py-0.5 rounded-full leading-none shrink-0"
             >
               {{ p.keyword }}
             </span>
@@ -220,7 +220,7 @@ function onSave(): void {
         <!-- 規格 sub-table -->
         <table class="w-full border-collapse">
           <thead>
-            <tr class="text-[12.5px] text-[var(--p-text-muted-color)] bg-[var(--p-content-background)]">
+            <tr class="text-xs text-[var(--p-text-muted-color)] bg-[var(--p-content-background)]">
               <th class="text-left font-medium px-4 py-2 border-b border-[var(--p-content-border-color)] w-[30%]">{{ t('live_order.label.spec_name') }}</th>
               <th class="text-right font-medium px-4 py-2 border-b border-[var(--p-content-border-color)]">{{ t('live_order.label.stock') }}</th>
               <th class="text-right font-medium px-4 py-2 border-b border-[var(--p-content-border-color)]">{{ t('live_order.summary.winner_count') }}</th>
@@ -254,26 +254,26 @@ function onSave(): void {
           <label :for="`fs-${p.id}`" class="text-[13px] text-[var(--p-text-color)] cursor-pointer">
             {{ t('live_order.summary.free_shipping') }}
           </label>
-          <span class="text-[11.5px] text-[var(--p-text-muted-color)]">
+          <span class="text-xs text-[var(--p-text-muted-color)]">
             ※ {{ t('live_order.summary.free_shipping_note') }}
           </span>
         </div>
       </section>
 
       <!-- 上架加購區設定 -->
-      <section class="rounded-[8px] border border-[var(--p-content-border-color)] overflow-hidden">
+      <section class="rounded-lg border border-[var(--p-content-border-color)] overflow-hidden">
         <div class="flex items-center justify-between gap-3 px-4 py-3">
           <div class="flex flex-col gap-1">
-            <span class="text-[14px] font-medium text-[var(--p-text-color)]">上架加購區</span>
-            <span class="text-[12px] text-[var(--p-text-muted-color)]">結束收單後，把這批商品丟到購物車加購區，提升客單價</span>
+            <span class="text-sm font-medium text-[var(--p-text-color)]">上架加購區</span>
+            <span class="text-xs text-[var(--p-text-muted-color)]">結束收單後，把這批商品丟到購物車加購區，提升客單價</span>
           </div>
           <ToggleSwitch v-model="publishToAddOn" />
         </div>
         <!-- 下架日期：與上架加購區獨立設定，可單獨填寫 -->
         <div class="flex items-center justify-between gap-3 px-4 py-3 border-t border-[var(--p-content-border-color)]">
           <div class="flex flex-col gap-1">
-            <span class="text-[14px] font-medium text-[var(--p-text-color)]">下架日期</span>
-            <span class="text-[12px] font-medium" style="color: #ef4444">※ 未填寫將自動延展 7 天</span>
+            <span class="text-sm font-medium text-[var(--p-text-color)]">下架日期</span>
+            <span class="text-xs font-medium" style="color: #ef4444">※ 未填寫將自動延展 7 天</span>
           </div>
           <DatePicker
             v-model="unlistDate"
@@ -292,7 +292,7 @@ function onSave(): void {
             ? t('live_order.summary.post_total')
             : t('live_order.summary.grand_total') }}
         </span>
-        <span class="text-[20px] font-bold text-[var(--p-primary-color)]">
+        <span class="text-xl font-bold text-[var(--p-primary-color)]">
           ${{ grandTotal.toLocaleString() }}
         </span>
       </div>

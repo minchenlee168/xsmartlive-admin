@@ -220,7 +220,7 @@ function onDeleteCart(c: Cart, event: Event): void {
     <template #content>
       <!-- 頁首：標題 + 說明 icon -->
       <div class="px-6 pt-5 pb-3 flex items-center gap-2">
-        <h1 class="text-[22px] font-bold text-[var(--p-text-color)]">多購物車設定</h1>
+        <h1 class="text-2xl font-bold text-[var(--p-text-color)]">多購物車設定</h1>
         <i
           v-tooltip.top="'透過多購物車設定，讓不同類型訂單走獨立的金物流組合'"
           class="pi pi-info-circle text-[var(--p-text-muted-color)] cursor-help"
@@ -238,7 +238,7 @@ function onDeleteCart(c: Cart, event: Event): void {
 
       <!-- 副標 + 新增 -->
       <div class="px-6 pt-4 pb-3 flex items-center justify-between gap-3 flex-wrap">
-        <p class="text-[14px] text-[var(--p-text-muted-color)]">
+        <p class="text-sm text-[var(--p-text-muted-color)]">
           建立多組多購物車設定，商品卡可選擇適合的多購物車組合
         </p>
         <Button label="新增多購物車" icon="pi pi-plus" @click="onAddCart" />
@@ -253,8 +253,8 @@ function onDeleteCart(c: Cart, event: Event): void {
         >
           <div class="flex items-start justify-between gap-3 flex-wrap">
             <div class="flex items-center gap-2">
-              <span class="text-[16px] font-bold text-[var(--p-text-color)]">{{ defaultCart.name }}</span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none bg-[var(--p-primary-50)] text-[var(--p-primary-color)]">預設</span>
+              <span class="text-base font-bold text-[var(--p-text-color)]">{{ defaultCart.name }}</span>
+              <Tag value="預設" severity="info" />
             </div>
             <div class="flex items-center gap-3">
               <div class="flex items-center gap-2">
@@ -274,20 +274,20 @@ function onDeleteCart(c: Cart, event: Event): void {
 
           <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <div class="flex items-center gap-1.5 mb-2 text-[13px] text-[var(--p-text-muted-color)]">
+              <div class="flex items-center gap-2 mb-2 text-[13px] text-[var(--p-text-muted-color)]">
                 <i class="pi pi-credit-card" style="font-size: 13px"></i>
                 支援金流
               </div>
-              <div class="flex flex-wrap gap-1.5">
+              <div class="flex flex-wrap gap-2">
                 <Tag v-for="(p, i) in defaultCart.payments" :key="i" :value="p" severity="info" />
               </div>
             </div>
             <div>
-              <div class="flex items-center gap-1.5 mb-2 text-[13px] text-[var(--p-text-muted-color)]">
+              <div class="flex items-center gap-2 mb-2 text-[13px] text-[var(--p-text-muted-color)]">
                 <i class="pi pi-truck" style="font-size: 13px"></i>
                 支援物流
               </div>
-              <div class="flex flex-wrap gap-1.5">
+              <div class="flex flex-wrap gap-2">
                 <Tag v-for="(s, i) in defaultCart.shippings" :key="i" :value="s" severity="info" />
               </div>
             </div>
@@ -299,7 +299,7 @@ function onDeleteCart(c: Cart, event: Event): void {
           <button
             v-for="t in statusTabs"
             :key="t.key"
-            class="pb-3 text-[14px] font-medium transition-colors relative -mb-px"
+            class="pb-3 text-sm font-medium transition-colors relative -mb-px"
             :class="statusTab === t.key
               ? 'text-[var(--p-primary-color)] border-b-2 border-[var(--p-primary-color)]'
               : 'text-[var(--p-text-muted-color)] hover:text-[var(--p-text-color)]'"
@@ -315,8 +315,8 @@ function onDeleteCart(c: Cart, event: Event): void {
         >
           <div class="flex items-start justify-between gap-3 flex-wrap">
             <div class="flex flex-col gap-1">
-              <span class="text-[16px] font-bold text-[var(--p-text-color)]">{{ c.name }}</span>
-              <span class="text-[12px] text-[var(--p-text-muted-color)]">建立日期:{{ c.createdAt }}</span>
+              <span class="text-base font-bold text-[var(--p-text-color)]">{{ c.name }}</span>
+              <span class="text-xs text-[var(--p-text-muted-color)]">建立日期:{{ c.createdAt }}</span>
             </div>
             <div class="flex items-center gap-3">
               <div class="flex items-center gap-2">
@@ -344,20 +344,20 @@ function onDeleteCart(c: Cart, event: Event): void {
 
           <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <div class="flex items-center gap-1.5 mb-2 text-[13px] text-[var(--p-text-muted-color)]">
+              <div class="flex items-center gap-2 mb-2 text-[13px] text-[var(--p-text-muted-color)]">
                 <i class="pi pi-credit-card" style="font-size: 13px"></i>
                 支援金流
               </div>
-              <div class="flex flex-wrap gap-1.5">
+              <div class="flex flex-wrap gap-2">
                 <Tag v-for="(p, i) in c.payments" :key="i" :value="p" severity="info" />
               </div>
             </div>
             <div>
-              <div class="flex items-center gap-1.5 mb-2 text-[13px] text-[var(--p-text-muted-color)]">
+              <div class="flex items-center gap-2 mb-2 text-[13px] text-[var(--p-text-muted-color)]">
                 <i class="pi pi-truck" style="font-size: 13px"></i>
                 支援物流
               </div>
-              <div class="flex flex-wrap gap-1.5">
+              <div class="flex flex-wrap gap-2">
                 <Tag v-for="(s, i) in c.shippings" :key="i" :value="s" severity="info" />
               </div>
             </div>
@@ -389,13 +389,10 @@ function onDeleteCart(c: Cart, event: Event): void {
           </Column>
           <Column header="名稱">
             <template #body="{ data }">
-              <div class="flex flex-col gap-0.5">
+              <div class="flex flex-col gap-1">
                 <div class="flex items-center gap-2">
                   <span class="font-bold">{{ data.name }}</span>
-                  <span
-                    v-if="data.isDefault"
-                    class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-bold leading-none bg-[var(--p-primary-50)] text-[var(--p-primary-color)]"
-                  >預設</span>
+                  <Tag v-if="data.isDefault" value="預設" severity="info" />
                 </div>
                 <span v-if="data.description" class="text-xs text-[var(--p-text-muted-color)]">{{ data.description }}</span>
               </div>
@@ -403,7 +400,7 @@ function onDeleteCart(c: Cart, event: Event): void {
           </Column>
           <Column header="支援功能" style="width: 280px">
             <template #body="{ data }">
-              <div class="flex flex-wrap gap-1.5">
+              <div class="flex flex-wrap gap-2">
                 <Tag :value="`金流 ${data.payments.length}`" severity="info" />
                 <Tag :value="`物流 ${data.shippings.length}`" severity="info" />
                 <Tag v-if="data.featureBonus" value="紅利" severity="success" />

@@ -224,7 +224,7 @@ function onFormCancel(): void {
     <div v-if="!orderOnly" class="flex gap-1 border-b border-[var(--p-content-border-color)] mb-4">
       <button
         type="button"
-        class="px-4 py-2 text-[14px] font-medium -mb-px border-b-2 transition-colors"
+        class="px-4 py-2 text-sm font-medium -mb-px border-b-2 transition-colors"
         :class="activeTab === 'product'
           ? 'border-[var(--p-primary-color)] text-[var(--p-primary-color)]'
           : 'border-transparent text-[var(--p-text-muted-color)] hover:text-[var(--p-text-color)]'"
@@ -234,7 +234,7 @@ function onFormCancel(): void {
       </button>
       <button
         type="button"
-        class="px-4 py-2 text-[14px] font-medium -mb-px border-b-2 transition-colors"
+        class="px-4 py-2 text-sm font-medium -mb-px border-b-2 transition-colors"
         :class="activeTab === 'order'
           ? 'border-[var(--p-primary-color)] text-[var(--p-primary-color)]'
           : 'border-transparent text-[var(--p-text-muted-color)] hover:text-[var(--p-text-color)]'"

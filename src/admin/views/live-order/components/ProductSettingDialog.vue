@@ -19,11 +19,11 @@
     <template #footer>
       <div class="flex justify-between gap-2">
         <button
-          class="border border-[var(--p-content-border-color)] text-[var(--p-text-color)] px-[13.25px] py-[9.75px] rounded-[6px] text-[15.75px] font-medium flex items-center gap-[7px] hover:bg-[var(--p-content-hover-background)]">
+          class="border border-[var(--p-content-border-color)] text-[var(--p-text-color)] px-[13.25px] py-[9.75px] rounded-md text-base font-medium flex items-center gap-[7px] hover:bg-[var(--p-content-hover-background)]">
           <i class="pi pi-bookmark" style="font-size:15.75px"></i>{{ t('live_order.button.add_favourite') }}
         </button>
         <button @click="onSave"
-          class="bg-[var(--p-primary-color)] border border-[var(--p-primary-color)] text-white px-[13.25px] py-[9.75px] rounded-[6px] text-[15.75px] font-medium flex items-center gap-[7px] hover:bg-[var(--p-primary-hover-color)]">
+          class="bg-[var(--p-primary-color)] border border-[var(--p-primary-color)] text-white px-[13.25px] py-[9.75px] rounded-md text-base font-medium flex items-center gap-[7px] hover:bg-[var(--p-primary-hover-color)]">
           <i class="pi pi-save" style="font-size:15.75px"></i>{{ t('live_order.button.save') }}
         </button>
       </div>

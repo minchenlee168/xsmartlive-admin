@@ -215,7 +215,7 @@ function quickClassifyToIssue(): void {
         <!-- 標題列：標題 + (?) + 系統操作說明 link + 兩個 toggle -->
         <div class="flex items-center gap-6 px-5 pt-5 pb-3 flex-wrap">
           <div class="flex items-center gap-2">
-            <h1 class="text-[22px] font-bold text-[var(--p-text-color)]">發票作業</h1>
+            <h1 class="text-2xl font-bold text-[var(--p-text-color)]">發票作業</h1>
             <i
               v-tooltip.top="'本頁集中處理電子發票的開立、作廢與分類'"
               class="pi pi-info-circle text-[var(--p-text-muted-color)] cursor-help"
@@ -227,21 +227,21 @@ function quickClassifyToIssue(): void {
             href="https://docs.168money.com.tw/dian-zi-fa-piao-guan-li/fa-piao-zuo-ye"
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-1.5 text-[14px] font-medium text-[#2563EB] hover:underline cursor-pointer"
+            class="flex items-center gap-2 text-sm font-medium text-[#2563EB] hover:underline cursor-pointer"
           >
             <i class="pi pi-book" style="font-size: 14px"></i>
             系統操作說明
           </a>
 
           <div class="flex items-center gap-2">
-            <span class="text-[14px] text-[var(--p-text-color)]">發票明細：</span>
+            <span class="text-sm text-[var(--p-text-color)]">發票明細：</span>
             <span class="text-[13px] text-[var(--p-text-muted-color)]">不印</span>
             <ToggleSwitch v-model="printInvoiceDetail" />
             <span class="text-[13px] text-[var(--p-text-muted-color)]">印</span>
           </div>
 
           <div class="flex items-center gap-2">
-            <span class="text-[14px] text-[var(--p-text-color)]">前台發票顯示：</span>
+            <span class="text-sm text-[var(--p-text-color)]">前台發票顯示：</span>
             <span class="text-[13px] text-[var(--p-text-muted-color)]">關</span>
             <ToggleSwitch v-model="showFrontInvoice" />
             <span class="text-[13px] text-[var(--p-text-muted-color)]">開</span>
@@ -292,7 +292,7 @@ function quickClassifyToIssue(): void {
     >
       <template #content>
         <div class="p-5 flex flex-col gap-4">
-          <h2 class="text-[16px] font-semibold text-[var(--p-text-color)]">發票查詢</h2>
+          <h2 class="text-base font-semibold text-[var(--p-text-color)]">發票查詢</h2>
 
           <!-- Row 1：訂單欄位 / 關鍵字 / 訂單日期欄位 / DatePicker / 載具 -->
           <!-- 5 欄篩選：手機 stack 成 1 欄、≥ md 才回到 5 欄 -->
@@ -315,11 +315,11 @@ function quickClassifyToIssue(): void {
           <div class="grid gap-3 grid-cols-1 md:grid-cols-3">
             <Select v-model="filterPaymentLogistic" :options="paymentLogisticOptions" option-label="label" option-value="value" placeholder="不篩選金物流狀態" />
             <div class="flex items-center gap-2">
-              <span class="text-[14px] text-[var(--p-text-color)] shrink-0">賣方統編：</span>
+              <span class="text-sm text-[var(--p-text-color)] shrink-0">賣方統編：</span>
               <Select v-model="filterSeller" :options="sellerOptions" option-label="label" option-value="value" class="flex-1" />
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-[14px] text-[var(--p-text-color)] shrink-0">多購物車選項：</span>
+              <span class="text-sm text-[var(--p-text-color)] shrink-0">多購物車選項：</span>
               <Select v-model="filterMultiCart" :options="multiCartOptions" option-label="label" option-value="value" class="flex-1" />
             </div>
           </div>
@@ -342,18 +342,12 @@ function quickClassifyToIssue(): void {
       }"
     >
       <template #content>
-        <!-- 狀態頁籤（underline 樣式）-->
-        <div class="flex items-center gap-6 px-5 pt-4 border-b border-[var(--p-content-border-color)]">
-          <button
-            v-for="t in statusTabs"
-            :key="t.key"
-            class="pb-3 text-[14px] font-medium transition-colors relative -mb-px"
-            :class="statusTab === t.key
-              ? 'text-[var(--p-primary-color)] border-b-2 border-[var(--p-primary-color)]'
-              : 'text-[var(--p-text-muted-color)] hover:text-[var(--p-text-color)]'"
-            @click="statusTab = t.key"
-          >{{ t.label }}</button>
-        </div>
+        <!-- 狀態頁籤：用 PrimeVue Tabs（Design.md 7.0 先用 PrimeVue 元件；7.1 TabList 加 px-5 讓底線不貼齊 Card 邊） -->
+        <Tabs :value="statusTab" @update:value="(v) => statusTab = v as StatusTab">
+          <TabList :pt="{ root: { class: 'px-5' } }">
+            <Tab v-for="t in statusTabs" :key="t.key" :value="t.key">{{ t.label }}</Tab>
+          </TabList>
+        </Tabs>
 
         <!-- 批次動作列：左側欄位標題、右側 radio + 兩顆按鈕 -->
         <div class="flex items-start justify-between gap-3 px-5 py-3 flex-wrap">
@@ -365,7 +359,7 @@ function quickClassifyToIssue(): void {
               <label
                 v-for="opt in bulkTargetOptions"
                 :key="opt.value"
-                class="flex items-center gap-1.5 text-[13px] text-[var(--p-text-color)] cursor-pointer"
+                class="flex items-center gap-2 text-[13px] text-[var(--p-text-color)] cursor-pointer"
               >
                 <RadioButton v-model="bulkTargetStatus" :value="opt.value" :input-id="`bulk-${opt.value}`" />
                 <span>{{ opt.label }}</span>
@@ -420,7 +414,7 @@ function quickClassifyToIssue(): void {
             </Column>
             <Column header="支付方式、物流方式">
               <template #body="{ data }">
-                <div class="flex flex-col gap-0.5">
+                <div class="flex flex-col gap-1">
                   <span>支付方式：（{{ data.paymentMethod }}）</span>
                   <span>物流方式：（{{ data.shippingMethod }}）</span>
                 </div>
@@ -429,7 +423,7 @@ function quickClassifyToIssue(): void {
             <Column header="商品數量" body-class="text-right" header-class="text-right" field="itemCount" />
             <Column header="發票類別 / 狀態">
               <template #body="{ data }">
-                <div class="flex flex-col items-start gap-1.5">
+                <div class="flex flex-col items-start gap-2">
                   <!-- portal-vue 慣例：cell 內次要文字用 text-xs + 灰 -->
                   <span class="text-xs text-gray-500">{{ data.invoiceKind }}</span>
                   <div class="flex items-center gap-3">

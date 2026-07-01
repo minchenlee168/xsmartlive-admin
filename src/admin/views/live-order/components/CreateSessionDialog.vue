@@ -16,30 +16,30 @@
 
     <div class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+        <label class="text-sm font-medium text-[var(--p-text-color)]">
           <span class="text-[#dc2626]">{{ t('live_order.text.required') }}</span>{{ t('live_order.form.field.session_name') }}
         </label>
         <InputText v-model="name" :placeholder="t('live_order.form.placeholder.session_name_example')" class="w-full" :class="{ 'p-invalid': hasError && !name.trim() }" />
-        <span v-if="hasError && !name.trim()" class="text-[12px] text-[#dc2626]">{{ t('live_order.form.validation.session_name_required') }}</span>
+        <span v-if="hasError && !name.trim()" class="text-xs text-[#dc2626]">{{ t('live_order.form.validation.session_name_required') }}</span>
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-[14px] font-medium text-[var(--p-text-color)]">
+        <label class="text-sm font-medium text-[var(--p-text-color)]">
           <span class="text-[#dc2626]">{{ t('live_order.text.required') }}</span>{{ t('live_order.form.field.session_date') }}
         </label>
         <DatePicker v-model="date" date-format="yy/mm/dd" :placeholder="t('live_order.form.placeholder.session_date_format')" class="w-full" :class="{ 'p-invalid': hasError && !date }" />
-        <span v-if="hasError && !date" class="text-[12px] text-[#dc2626]">{{ t('live_order.form.validation.session_date_required') }}</span>
+        <span v-if="hasError && !date" class="text-xs text-[#dc2626]">{{ t('live_order.form.validation.session_date_required') }}</span>
       </div>
     </div>
 
     <template #footer>
       <div class="flex justify-end gap-[7px]">
         <button @click="close"
-          class="bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] px-[11.5px] py-[8px] rounded-[6px] text-[14px] font-medium text-[var(--p-text-color)] hover:bg-[var(--p-content-border-color)]">
+          class="bg-[var(--p-content-hover-background)] border border-[var(--p-content-border-color)] px-[11.5px] py-[8px] rounded-md text-sm font-medium text-[var(--p-text-color)] hover:bg-[var(--p-content-border-color)]">
           {{ t('live_order.button.cancel') }}
         </button>
         <button @click="onCreate"
-          class="bg-[var(--p-primary-color)] border border-[var(--p-primary-color)] px-[11.5px] py-[8px] rounded-[6px] text-[14px] font-medium text-white hover:bg-[var(--p-primary-hover-color)]">
+          class="bg-[var(--p-primary-color)] border border-[var(--p-primary-color)] px-[11.5px] py-[8px] rounded-md text-sm font-medium text-white hover:bg-[var(--p-primary-hover-color)]">
           {{ t('live_order.button.create') }}
         </button>
       </div>

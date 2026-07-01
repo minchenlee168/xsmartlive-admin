@@ -64,12 +64,11 @@ const giftDialogVisible = ref(false)
 const winnerDialogVisible = ref(false)
 const activeProduct = ref<LiveProduct | null>(null)
 
-function statusMeta(p: LiveProduct): { label: string; bg: string; color: string; icon?: string } {
-  const map: Record<string, { label: string; bg: string; color: string; icon?: string }> = {
-    ready: { label: t('live_order.label.ready'), bg: 'bg-[var(--p-content-hover-background)]', color: 'var(--p-text-muted-color)', icon: 'pi pi-history' },
-    live:  { label: t('live_order.label.live'),  bg: 'bg-[#fee2e2]', color: '#dc2626' },
-  }
-  return map[p.status ?? 'ready'] ?? map.ready
+/** 商品狀態 → PrimeVue Tag severity（Design.md 7.0 用元件 + 二 語意色） */
+type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'
+function statusMeta(p: LiveProduct): { label: string; severity: TagSeverity } {
+  if (p.status === 'live') return { label: t('live_order.label.live'), severity: 'danger' }
+  return { label: t('live_order.label.ready'), severity: 'secondary' }
 }
 
 function priceRange(p: LiveProduct): string {
@@ -177,8 +176,9 @@ const startBtnDisabled = computed(() => !props.orderingEnabled)
 </script>
 
 <template>
-  <!-- min-w-0 讓本容器在 flex 父層內可以縮到 0；overflow-x-auto 讓內部 DataTable 過寬時水平捲動，不再撐爆右側 panel -->
-  <div class="bg-[var(--p-content-background)] border border-[var(--p-content-border-color)] rounded-[8px] overflow-x-auto overflow-y-hidden min-w-0">
+  <!-- min-w-0 讓本容器在 flex 父層內可以縮到 0；overflow-x-auto 讓內部 DataTable 過寬時水平捲動，不再撐爆右側 panel
+       依 Design.md 6.5 巢狀容器原則：外層 Card 已在頁面提供視覺容器，這裡不再套 border/rounded 避免雙重外框 -->
+  <div class="overflow-x-auto overflow-y-hidden min-w-0">
     <DataTable
       :value="products"
       :striped-rows="true"
@@ -190,23 +190,18 @@ const startBtnDisabled = computed(() => !props.orderingEnabled)
       <Column field="name" :header="t('live_order.table.column.product')">
         <template #body="{ data }">
           <div class="flex items-center gap-3">
-            <div class="w-[40px] h-[40px] rounded-[6px] bg-[var(--p-primary-50)] flex items-center justify-center shrink-0">
+            <div class="size-10 rounded-md bg-[var(--p-primary-50)] flex items-center justify-center shrink-0">
               <FontAwesomeIcon
                 :icon="['far', data.isGift ? 'gift' : 'bag-shopping']"
                 :style="{ fontSize: '16px', color: 'var(--p-primary-color)' }"
               />
             </div>
             <div class="flex flex-col min-w-0">
-              <div class="flex items-center gap-1.5">
-                <span class="font-medium text-[14px] text-[var(--p-text-color)] truncate max-w-[280px]">{{ data.name }}</span>
-                <span
-                  v-if="data.keyword"
-                  class="text-[11px] font-bold text-[#0369a1] bg-[#e0f2fe] px-1.5 py-0.5 rounded-full leading-none shrink-0"
-                >
-                  {{ data.keyword }}
-                </span>
+              <div class="flex items-center gap-2">
+                <span class="text-[var(--p-text-color)] truncate max-w-[280px]">{{ data.name }}</span>
+                <Tag v-if="data.keyword" v-tooltip.top="'關鍵字'" :value="data.keyword" severity="info" class="shrink-0" />
               </div>
-              <span class="text-[12px] text-[var(--p-text-muted-color)]">{{ data.sku || `#${data.id}` }}</span>
+              <span class="text-xs text-[var(--p-text-muted-color)]">{{ data.sku || `#${data.id}` }}</span>
             </div>
           </div>
         </template>
@@ -214,19 +209,19 @@ const startBtnDisabled = computed(() => !props.orderingEnabled)
 
       <Column field="spec" :header="t('live_order.label.spec_name')">
         <template #body="{ data }">
-          <span class="text-[13px] text-[var(--p-text-color)]">{{ specSummary(data) }}</span>
+          <span class="text-[var(--p-text-color)]">{{ specSummary(data) }}</span>
         </template>
       </Column>
 
       <Column field="price" :header="t('live_order.label.price')">
         <template #body="{ data }">
-          <span class="text-[13px] font-bold text-[var(--p-primary-color)]">{{ priceRange(data) }}</span>
+          <span class="font-bold text-[var(--p-primary-color)]">{{ priceRange(data) }}</span>
         </template>
       </Column>
 
       <Column field="stock" :header="t('live_order.label.stock')">
         <template #body="{ data }">
-          <span class="text-[13px]" :class="(data.stock ?? 0) <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">
+          <span :class="(data.stock ?? 0) <= 10 ? 'text-[#ef4444]' : 'text-[var(--p-text-color)]'">
             {{ data.stock ?? 0 }}
           </span>
         </template>
@@ -234,85 +229,92 @@ const startBtnDisabled = computed(() => !props.orderingEnabled)
 
       <Column field="sold" :header="t('live_order.label.sold')">
         <template #body="{ data }">
-          <span class="text-[13px] font-bold text-[#f97316]">{{ data.sold ?? 0 }}</span>
+          <span class="font-bold text-[#f97316]">{{ data.sold ?? 0 }}</span>
         </template>
       </Column>
 
       <Column field="amount" :header="t('live_order.label.sales_total')">
         <template #body="{ data }">
-          <span class="text-[13px] text-[var(--p-text-color)]">${{ salesAmount(data).toLocaleString() }}</span>
+          <span class="text-[var(--p-text-color)]">${{ salesAmount(data).toLocaleString() }}</span>
         </template>
       </Column>
 
 
       <Column field="status" :header="t('live_order.table.column.checkout_status')">
         <template #body="{ data }">
-          <span
-            :class="['inline-flex items-center gap-1.5 px-[7px] py-[3.5px] rounded-[12px] font-bold text-[12.25px] leading-none', statusMeta(data).bg]"
-            :style="{ color: statusMeta(data).color }"
-          >
-            <span v-if="data.status === 'live'" class="w-1.5 h-1.5 rounded-full bg-[#dc2626] animate-pulse"></span>
-            <i v-else-if="statusMeta(data).icon" :class="statusMeta(data).icon" :style="{ fontSize: '11px', color: statusMeta(data).color }"></i>
-            {{ statusMeta(data).label }}
-          </span>
+          <Tag :value="statusMeta(data).label" :severity="statusMeta(data).severity" />
         </template>
       </Column>
 
       <Column :header="t('live_order.table.column.actions')">
         <template #body="{ data }">
+          <!-- Design.md 7.5：Table 操作欄用 PrimeVue Button icon-only + tooltip -->
           <div class="flex items-center gap-1">
-            <button
+            <Button
               v-tooltip.top="t('live_order.tooltip.winner_list')"
-              class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+              icon="pi pi-list"
+              severity="secondary"
+              variant="text"
+              size="small"
+              rounded
               @click="openWinnerList(data)"
-            >
-              <i class="pi pi-list" style="font-size:13px"></i>
-            </button>
-            <button
+            />
+            <Button
               v-tooltip.top="t('live_order.tab.order_setting')"
-              class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[var(--p-text-color)] hover:bg-[var(--p-content-hover-background)]"
+              severity="secondary"
+              variant="text"
+              size="small"
+              rounded
               @click="openEdit(data)"
             >
-              <FontAwesomeIcon :icon="['far', 'gear']" class="text-[13px]" />
-            </button>
-            <button
+              <template #icon>
+                <FontAwesomeIcon :icon="['far', 'gear']" />
+              </template>
+            </Button>
+            <Button
               v-if="data.status === 'live'"
               v-tooltip.top="t('live_order.tooltip.push')"
-              class="w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-[#ef4444] hover:bg-[#fee2e2] border border-[#ef4444]"
+              severity="danger"
+              variant="outlined"
+              size="small"
+              rounded
               @click="onPushClick(data)"
             >
-              <FontAwesomeIcon :icon="['far', 'bullhorn']" class="text-[12px]" />
-            </button>
-            <button
+              <template #icon>
+                <FontAwesomeIcon :icon="['far', 'bullhorn']" />
+              </template>
+            </Button>
+            <Button
               :disabled="startBtnDisabled && data.status !== 'live'"
               v-tooltip.top="data.status === 'live'
                 ? (data.isGift ? t('live_order.tooltip.end_sending') : t('live_order.tooltip.stop_ordering'))
                 : (data.isGift ? t('live_order.tooltip.start_sending') : t('live_order.tooltip.start_ordering'))"
-              :class="['w-[28px] h-[28px] rounded-[6px] flex items-center justify-center text-white',
-                data.status === 'live' ? 'bg-[#ef4444] hover:bg-[#dc2626]' : 'bg-[var(--p-primary-color)] hover:bg-[var(--p-primary-hover-color)]',
-                startBtnDisabled && data.status !== 'live' ? 'opacity-50 cursor-not-allowed' : '']"
+              :icon="data.status === 'live' ? 'pi pi-check' : 'pi pi-play'"
+              :severity="data.status === 'live' ? 'danger' : 'primary'"
+              size="small"
+              rounded
               @click="toggleStatus(data)"
-            >
-              <i :class="data.status === 'live' ? 'pi pi-check' : 'pi pi-play'" style="font-size:12px"></i>
-            </button>
+            />
             <!-- 收單中不可移除 → 必須先按「停止收單」回 ready 才開放 -->
-            <button
+            <Button
               v-tooltip.top="data.status === 'live' ? '請先停止收單再移除' : t('live_order.tooltip.delete')"
               :disabled="data.status === 'live'"
-              :class="['w-[28px] h-[28px] rounded-[6px] flex items-center justify-center',
-                data.status === 'live'
-                  ? 'text-[var(--p-text-muted-color)] opacity-50 cursor-not-allowed'
-                  : 'text-[#ef4444] hover:bg-[#fee2e2]']"
+              severity="danger"
+              variant="text"
+              size="small"
+              rounded
               @click="onDeleteClick(data, $event)"
             >
-              <FontAwesomeIcon :icon="['far', 'trash']" class="text-[13px]" />
-            </button>
+              <template #icon>
+                <FontAwesomeIcon :icon="['far', 'trash']" />
+              </template>
+            </Button>
           </div>
         </template>
       </Column>
 
       <template #empty>
-        <div class="py-8 text-center text-[14px] text-[var(--p-text-muted-color)]">
+        <div class="py-12 text-center text-sm text-[var(--p-text-muted-color)]">
           {{ t('live_order.empty.no_product_content') }}
         </div>
       </template>

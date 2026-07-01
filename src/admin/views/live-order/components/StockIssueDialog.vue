@@ -55,15 +55,15 @@ function onConfirm(): void {
     </template>
 
     <div class="flex flex-col gap-4 pt-1">
-      <p class="text-[14px] text-[var(--p-text-color)]">
+      <p class="text-sm text-[var(--p-text-color)]">
         商品或一部分規格的庫存數量不足，請選擇處理方式。
       </p>
       <div class="flex flex-col gap-3">
-        <label class="flex items-center gap-2 cursor-pointer text-[14px] text-[var(--p-text-color)]">
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-[var(--p-text-color)]">
           <RadioButton v-model="choice" input-id="stock-oversell" value="oversell" />
           <span>啟用超賣選項進行銷售</span>
         </label>
-        <label class="flex items-center gap-2 cursor-pointer text-[14px] text-[var(--p-text-color)]">
+        <label class="flex items-center gap-2 cursor-pointer text-sm text-[var(--p-text-color)]">
           <RadioButton v-model="choice" input-id="stock-skip-zero" value="skip-zero" />
           <span>庫存數量為 0 的規格不進行銷售</span>
         </label>

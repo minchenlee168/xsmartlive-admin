@@ -436,7 +436,7 @@ defineExpose({ onSave, onCancel })
       />
       <h2 class="cursor-default text-2xl font-bold text-neutral-700 dark:text-neutral-100">{{ pageTitle }}</h2>
 
-      <div class="ml-auto flex items-center gap-2 text-[14px]">
+      <div class="ml-auto flex items-center gap-2 text-sm">
         <button
           class="text-[var(--p-text-muted-color)] hover:text-[var(--p-text-color)]"
           @click="backToList"
@@ -457,7 +457,7 @@ defineExpose({ onSave, onCancel })
     >
       <!-- 商品資料 -->
       <section class="relative py-6 first:pt-0">
-        <h3 class="text-[18px] font-bold text-[var(--p-text-color)] mb-4">商品資料</h3>
+        <h3 class="text-lg font-bold text-[var(--p-text-color)] mb-4">商品資料</h3>
         <!-- AI 浮動按鈕（檢視模式隱藏） -->
         <button
           v-if="!readonly"
@@ -467,7 +467,7 @@ defineExpose({ onSave, onCancel })
         >AI</button>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">
               <span v-if="!readonly" class="text-red-600 mr-1">*</span>商品名稱
             </label>
@@ -475,7 +475,7 @@ defineExpose({ onSave, onCancel })
             <span v-else class="field-value">{{ form.name || '—' }}</span>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">商品類別</label>
             <Select
               v-if="!readonly"
@@ -489,13 +489,13 @@ defineExpose({ onSave, onCancel })
             <span v-else class="field-value">{{ form.category || '—' }}</span>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">直播關鍵字</label>
             <InputText v-if="!readonly" v-model="form.keyword" placeholder="可設定直播使用關鍵字加單" class="w-full" />
             <span v-else class="field-value">{{ form.keyword || '—' }}</span>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">標籤</label>
             <MultiSelect
               v-if="!readonly"
@@ -507,29 +507,29 @@ defineExpose({ onSave, onCancel })
               class="w-full"
               display="chip"
             />
-            <div v-else class="flex flex-wrap gap-1.5">
+            <div v-else class="flex flex-wrap gap-2">
               <span
                 v-for="t in form.tags"
                 :key="t"
-                class="inline-flex items-center px-2 py-0.5 rounded-[6px] text-[12.25px] font-medium bg-[var(--p-content-hover-background)] text-[var(--p-text-color)]"
+                class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-[var(--p-content-hover-background)] text-[var(--p-text-color)]"
               >{{ t }}</span>
               <span v-if="form.tags.length === 0" class="text-sm text-[var(--p-text-muted-color)]">—</span>
             </div>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">啟用優惠券</label>
             <ToggleSwitch v-if="!readonly" v-model="form.enableCoupon" />
             <span v-else class="field-value">{{ form.enableCoupon ? '啟用' : '未啟用' }}</span>
           </div>
 
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <label class="text-sm font-bold text-color">商品重量（公克）</label>
             <InputNumber v-if="!readonly" v-model="form.weight" :min="0" suffix=" g" class="w-full" />
             <span v-else class="field-value">{{ form.weight ?? 0 }} g</span>
           </div>
 
-          <div class="col-span-2 flex flex-col gap-1.5">
+          <div class="col-span-2 flex flex-col gap-2">
             <label class="text-sm font-bold text-color">商品介紹</label>
             <Editor v-if="!readonly" v-model="form.description" editor-style="height: 320px" />
             <!-- 純文字版：Editor 輸出為 HTML，直接 v-html 渲染 -->
@@ -545,7 +545,7 @@ defineExpose({ onSave, onCancel })
 
       <!-- 商品圖片 -->
       <section class="py-6">
-        <h3 class="text-[18px] font-bold text-[var(--p-text-color)] mb-4">商品圖片</h3>
+        <h3 class="text-lg font-bold text-[var(--p-text-color)] mb-4">商品圖片</h3>
         <MultiImageUploader
           v-if="!readonly"
           v-model:images="form.images"
@@ -567,24 +567,24 @@ defineExpose({ onSave, onCancel })
 
       <!-- 銷售設定（沒規格時） -->
       <section v-if="form.specs.length === 0" class="py-6">
-        <h3 class="text-[18px] font-bold text-[var(--p-text-color)] mb-4">銷售設定</h3>
+        <h3 class="text-lg font-bold text-[var(--p-text-color)] mb-4">銷售設定</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <label class="text-sm font-bold text-color">成本價</label>
             <InputNumber v-if="!readonly" v-model="form.noSpecVariant.cost" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
             <span v-else class="field-value">NT$ {{ form.noSpecVariant.cost.toLocaleString() }}</span>
           </div>
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <label class="text-sm font-bold text-color">原價</label>
             <InputNumber v-if="!readonly" v-model="form.noSpecVariant.originalPrice" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
             <span v-else class="field-value">NT$ {{ form.noSpecVariant.originalPrice.toLocaleString() }}</span>
           </div>
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <label class="text-sm font-bold text-color">售價</label>
             <InputNumber v-if="!readonly" v-model="form.noSpecVariant.salePrice" mode="currency" currency="TWD" locale="zh-TW" :min="0" class="w-full" />
             <span v-else class="field-value">NT$ {{ form.noSpecVariant.salePrice.toLocaleString() }}</span>
           </div>
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <label class="text-sm font-bold text-color">庫存</label>
             <InputNumber v-if="!readonly" v-model="form.noSpecVariant.stock" :min="0" class="w-full" />
             <span v-else class="field-value">{{ form.noSpecVariant.stock.toLocaleString() }}</span>
@@ -613,9 +613,9 @@ defineExpose({ onSave, onCancel })
 
       <!-- 商品詳情：商品備註 -->
       <section class="py-6">
-        <h3 class="text-[18px] font-bold text-[var(--p-text-color)] mb-4">商品詳情</h3>
+        <h3 class="text-lg font-bold text-[var(--p-text-color)] mb-4">商品詳情</h3>
         <div class="grid grid-cols-1 gap-4 max-w-2xl">
-          <div class="flex flex-col gap-1.5">
+          <div class="flex flex-col gap-2">
             <label class="text-sm font-bold text-color">商品備註</label>
             <Textarea v-if="!readonly" v-model="form.remark" rows="5" placeholder="僅內部可見的備註，前台不顯示" class="w-full" />
             <div v-else-if="form.remark" class="field-value whitespace-pre-wrap">{{ form.remark }}</div>
