@@ -226,6 +226,10 @@ function openAddMenu(event: Event): void { addMenuRef.value?.toggle(event) }
  * 拿到子商品的「商品名稱」、庫存與單價（有 specId → 走規格層；否則走總庫存 + 規格最小價）。
  */
 interface BundleRow { id: number | string; name: string; stock: number; price: number }
+/** 展開區共用 row：組合商品走 bundleRowsOf；一般商品直接吃 specs（shape 相同：id / name / stock / price） */
+function expandedRowsOf(p: ManagedProduct): BundleRow[] {
+  return p.kind === 'bundle' ? bundleRowsOf(p) : p.specs as BundleRow[]
+}
 function bundleRowsOf(p: ManagedProduct): BundleRow[] {
   if (p.kind !== 'bundle') return []
   return (p.bundleItems ?? []).map((it) => {
@@ -405,64 +409,55 @@ function onStockAdjustSave(payload: StockAdjustmentPayload): void {
             </div>
           </div>
 
-          <!-- 展開：一般商品 → 規格 table；組合商品 → 子商品 table -->
-          <div v-if="isExpanded(p.id)" class="px-4 py-3">
-            <!-- 表頭：bundle 走「商品名稱」+ 不顯示批量調整庫存 pencil -->
-            <div class="grid items-center gap-4 px-2 pb-2 border-b border-[var(--p-content-border-color)]"
-                 style="grid-template-columns: 1fr 100px 100px">
-              <span class="text-[13px] font-semibold text-[var(--p-text-color)]">
-                <!-- 一般商品：用 specGroupNames[0] 當欄位名（同編輯頁規格表「圖片」旁邊的欄位名稱）；
-                     沒設過 → 退回「規格名稱」字眼 -->
-                {{ p.kind === 'bundle' ? '商品名稱' : (p.specGroupNames?.[0] || '規格名稱') }}
-              </span>
-              <span class="text-[13px] font-semibold text-[var(--p-text-color)] text-right inline-flex items-center justify-end gap-2">
-                庫存
-                <button
-                  v-if="p.kind !== 'bundle'"
-                  v-tooltip.top="'批量調整庫存'"
-                  class="inline-flex items-center justify-center text-[var(--p-primary-color)] hover:bg-[var(--p-primary-50)] rounded-sm p-1"
-                  @click="openStockAdjust(p)"
-                >
-                  <i class="pi pi-pencil" style="font-size: 11px"></i>
-                </button>
-              </span>
-              <span class="text-[13px] font-semibold text-[var(--p-text-color)] text-right">價格</span>
-            </div>
-
-            <!-- 一般商品：列出規格 -->
-            <template v-if="p.kind !== 'bundle'">
-              <div
-                v-for="(s, i) in p.specs"
-                :key="s.id"
-                class="grid items-center gap-4 px-2 py-3"
-                :class="i < p.specs.length - 1 ? 'border-b border-[var(--p-content-border-color)]' : ''"
-                style="grid-template-columns: 1fr 100px 100px"
+          <!-- 展開：一般商品 → 規格 table；組合商品 → 子商品 table（統一走 PrimeVue DataTable） -->
+          <div v-if="isExpanded(p.id)" class="px-4 pb-4">
+            <DataTable
+              :value="expandedRowsOf(p)"
+              data-key="id"
+              size="small"
+            >
+              <Column
+                field="name"
+                :header="p.kind === 'bundle' ? '商品名稱' : (p.specGroupNames?.[0] || '規格名稱')"
+              />
+              <Column
+                field="stock"
+                style="width: 140px"
+                body-class="text-right"
+                header-class="text-right"
               >
-                <span class="text-[13px] text-[var(--p-text-color)]">{{ s.name }}</span>
-                <span class="text-[13px] text-[var(--p-text-color)] text-right">{{ s.stock }}</span>
-                <span class="text-[13px] text-[var(--p-text-color)] text-right">${{ s.price.toLocaleString() }}</span>
-              </div>
-            </template>
-
-            <!-- 組合商品：列出子商品（商品名稱 / 庫存 / 價格） -->
-            <template v-else>
-              <template v-if="bundleRowsOf(p).length">
-                <div
-                  v-for="(r, i) in bundleRowsOf(p)"
-                  :key="r.id"
-                  class="grid items-center gap-4 px-2 py-3"
-                  :class="i < bundleRowsOf(p).length - 1 ? 'border-b border-[var(--p-content-border-color)]' : ''"
-                  style="grid-template-columns: 1fr 100px 100px"
-                >
-                  <span class="text-[13px] text-[var(--p-text-color)]">{{ r.name }}</span>
-                  <span class="text-[13px] text-[var(--p-text-color)] text-right">{{ r.stock }}</span>
-                  <span class="text-[13px] text-[var(--p-text-color)] text-right">${{ r.price.toLocaleString() }}</span>
+                <template #header>
+                  <span class="inline-flex items-center gap-2">
+                    庫存
+                    <Button
+                      v-if="p.kind !== 'bundle'"
+                      v-tooltip.top="'批量調整庫存'"
+                      icon="pi pi-pencil"
+                      severity="secondary"
+                      variant="text"
+                      size="small"
+                      rounded
+                      @click="openStockAdjust(p)"
+                    />
+                  </span>
+                </template>
+                <template #body="{ data }">{{ data.stock }}</template>
+              </Column>
+              <Column
+                field="price"
+                header="價格"
+                style="width: 120px"
+                body-class="text-right"
+                header-class="text-right"
+              >
+                <template #body="{ data }">${{ data.price.toLocaleString() }}</template>
+              </Column>
+              <template #empty>
+                <div class="text-center text-sm text-[var(--p-text-muted-color)] py-3">
+                  {{ p.kind === 'bundle' ? '尚未設定子商品' : '尚未設定規格' }}
                 </div>
               </template>
-              <div v-else class="text-center text-[13px] text-[var(--p-text-muted-color)] py-3">
-                尚未設定子商品
-              </div>
-            </template>
+            </DataTable>
           </div>
         </template>
       </Card>
