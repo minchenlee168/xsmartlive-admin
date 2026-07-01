@@ -5,7 +5,7 @@
  * 欄位：貼文名稱 / 收單期間 / 留言數 / 已成單 / 結單時間 / 狀態 / 操作
  * 操作含「得標清單」開 WinnerListDialog 與「進入 / 結單」。
  * 點 row（非按鈕區）= 進入該檔；
- * 篩選 Tabs：收單中 / 已結束 / 全部；
+ * 篩選 Tabs：全部 / 準備中 / 收單中 / 已結束；
  * 排序：待處理最多 / 結單時間最近 / 最新留言。
  */
 import { ref, computed } from 'vue'
@@ -76,12 +76,12 @@ const readyCount = computed(() => props.posts.filter(p => p.status === 'ready').
 const ongoingCount = computed(() => props.posts.filter(p => p.status === 'ongoing').length)
 const closedTodayCount = computed(() => props.posts.filter(p => p.status === 'closed_today').length)
 const filterOptions = computed(() => [
+  { label: '全部',                               value: 'all' as FilterKey },
   { label: `準備中 (${readyCount.value})`,       value: 'ready' as FilterKey },
   { label: `收單中 (${ongoingCount.value})`,     value: 'ongoing' as FilterKey },
   { label: `已結束 (${closedTodayCount.value})`, value: 'closed_today' as FilterKey },
-  { label: '全部',                               value: 'all' as FilterKey },
 ])
-const activeFilter = ref<FilterKey>('ongoing')
+const activeFilter = ref<FilterKey>('all')
 
 const filteredPosts = computed(() => {
   const list = activeFilter.value === 'all'
