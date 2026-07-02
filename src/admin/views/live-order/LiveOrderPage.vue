@@ -481,13 +481,15 @@
       header="留言區"
       :style="{ width: 'min(420px, 100vw)' }"
     >
-      <div v-if="drawerComments.length" class="divide-y">
-        <LiveCommentCard
-          v-for="c in drawerComments"
-          :key="c.id"
-          :comment="c"
-          bare
-        />
+      <div v-if="drawerComments.length">
+        <template v-for="(c, i) in drawerComments" :key="c.id">
+          <Divider v-if="i > 0" class="!my-0" />
+          <LiveCommentCard
+            :comment="c"
+            :platform-meta="getPlatformMeta(c.platform)"
+            bare
+          />
+        </template>
       </div>
       <div v-else class="flex flex-col items-center justify-center gap-2 py-12 text-[var(--p-text-muted-color)]">
         <i class="pi pi-comments text-4xl"></i>
@@ -517,7 +519,7 @@ import EndOrderingSummaryDialog, { type EndOrderingPayload } from './components/
 import QuickAddProductForm from './components/QuickAddProductForm.vue'
 import LiveProductTable from './components/LiveProductTable.vue'
 import LiveCommentCard from './components/LiveCommentCard.vue'
-import { commentTemplates, applyTemplate, type LiveComment, type CommentProductLite } from './utils/liveComments'
+import { commentTemplates, applyTemplate, getPlatformMeta, type LiveComment, type CommentProductLite } from './utils/liveComments'
 import PostCollectionOverview, { type PostCollection } from './components/PostCollectionOverview.vue'
 import WinnerListDialog from './components/WinnerListDialog.vue'
 import CreatePostCollectionDialog, { type CreatePostCollectionPayload } from './components/CreatePostCollectionDialog.vue'
